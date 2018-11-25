@@ -17,17 +17,6 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
-/*app.use(function(req, res, next){
-	res.locals.connection = mysql.createConnection({
-		host     : 'cowpea.it.csiro.au',
-		user     : 'sails',
-		password : 'sailsDBpw',
-		database : 'annotQDB'
-	});
-	res.locals.connection.connect();
-	next();
-});*/
-
 var dbpool = mysql.createPool({
 	connectionLimit: 10,
 	host: "cowpea.it.csiro.au",
