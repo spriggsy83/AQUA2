@@ -1,38 +1,72 @@
 import React, { Component } from "react";
-import axios from "axios";
+//import axios from "axios";
+import API from '../API';
 import MuiDataTable from "mui-datatables";
 import { map, pick, values } from "lodash";
 
-const apiBaseUrl = "http://localhost:4000/api/v1";
-
 class ListSamples extends Component {
 	state = {
+		page: 0,
+		total: 0,
+		rowsPerPage: 5,
 		samples: []
 	};
 
 	componentDidMount() {
-		axios.get(`${apiBaseUrl}/samples`).then(res => {
+		this.getData();
+	}
+
+	// Get initial data
+	getData = () => {
+		const { page, rowsPerPage } = this.state;
+		const offset = page*rowsPerPage;
+		API.get(`samples?limit=${rowsPerPage}&offset=${offset}`).then(res => {
 			const samples = map(res.data.data, sample => {
-				return values(pick(sample, ["name", "species", "description"]));
+				return values(pick(sample, ["id", "name", "species", "description", "ingroups", "numseqs"]));
 			});
-			this.setState({ samples });
+			this.setState({ samples, total: res.data.total });
 		});
 	}
 
 	render() {
+		const { page, total, rowsPerPage, samples } = this.state;
 		const options = {
-			pagination: false,
-			rowsPerPage: 50,
+			pagination: true,
 			viewColumns: false,
 			selectableRows: false,
-			filter: false
+			filter: false,
+			rowsPerPageOptions: [ 10, 50, 100 ],
+			rowsPerPage: rowsPerPage,
+			page: page,
+			count: total,
+			serverSide: true,
+			onTableChange: (action, tableState) => {
+				this.setState({ page: tableState.page, rowsPerPage: tableState.rowsPerPage}, () => {
+					this.getData();
+				});
+			}
 		};
-		const columns = ["Sample Name", "Species", "Description"];
-		console.log(this.state.samples);
+		const columns = [
+			{ name:"dbID", options: {display: false} }, 
+			"Sample Name", 
+			"Species", 
+			"Description", 
+			{ name:"In groups/assemblies",  options: { 
+					customBodyRender: (value, tableMeta, updateValue) => {
+						return (value.toLocaleString())
+					} 
+				}
+			}, 
+			{ name:"Num. sequences", options: { 
+					customBodyRender: (value, tableMeta, updateValue) => {
+						return (value.toLocaleString())
+					} 
+				} 
+            }];
 		return (
 			<div>
 				<MuiDataTable
-					data={this.state.samples}
+					data={samples}
 					columns={columns}
 					options={options}
 					title={"Samples"}

@@ -30,7 +30,7 @@ LEFT JOIN (
   ON seq.isSample = samp.id
 `
 	if(id){
-		query.append(SQL` WHERE id = ${id}`)
+		query.append(SQL` WHERE samp.id = ${id}`)
 	}
 	query.append(SQL` LIMIT ${limit} OFFSET ${offset || 0}`)
 	return query;
@@ -56,18 +56,28 @@ router.get('/:id([0-9]{1,})', function(req, res){
 router.get("/", function(req, res, next) {
 
 	var limit = parseInt(req.query.limit, 10) || 50;
-	var offset = parseInt(req.query.skip, 10) || 0;
+	var offset = parseInt(req.query.offset, 10) || parseInt(req.query.skip, 10) || 0;
 
-    dbpool.query(sampleQuery( { limit: limit, offset: offset }
-		), function(error, results, fields) {
+	dbpool.query('SELECT count(*) AS total FROM sample', function(error, results, fields) {
 		if (error) {
-			res.json({ status: 500, error: error, data: null });
-		} else {
-			if(results && results.length){
-				res.json({ status: 200, error: null, data: results });
-			}else{
-				res.json({ status: 404, error: null, data: 'Not found' });
-			}
+			res.json({ status: 500, error: error, data: null, total: null });
+
+		}else if(results && results.length){
+			var total = results[0].total;
+
+			dbpool.query(sampleQuery( { limit: limit, offset: offset }
+				), function(error, results, fields) {
+				if (error) {
+					res.json({ status: 500, error: error, data: null, total: total });
+
+				} else if(results && results.length){
+					res.json({ status: 200, error: null, data: results, total: total });
+				}else{
+					res.json({ status: 404, error: null, data: 'Not found', total: total });
+				}
+			});
+		}else{
+			res.json({ status: 404, error: null, data: 'Not found', total: 0 });
 		}
 	});
 });
