@@ -7,6 +7,7 @@ var mysql = require("mysql");
 
 var indexRouter = require("./routes/index");
 var samplesRouter = require("./routes/samples");
+var sequencesRouter = require("./routes/sequences");
 
 var app = express();
 
@@ -28,5 +29,6 @@ global.dbpool = dbpool;
 
 app.use("/", indexRouter);
 app.use("/api/v1/samples", samplesRouter);
+app.use("/api/v1/sequences", sequencesRouter);
 
 module.exports = app;
