@@ -41,6 +41,7 @@ class ListSamples extends Component {
 			count: total,
 			serverSide: true,
 			onTableChange: (action, tableState) => {
+				console.log(tableState);
 				this.setState({ page: tableState.page, rowsPerPage: tableState.rowsPerPage}, () => {
 					this.getData();
 				});

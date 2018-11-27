@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import NavBar from "./components/NavBar";
 import ListSamples from "./components/Samples";
+import ListSequences from "./components/Sequences";
 import "./App.css";
 
 class App extends Component {
@@ -8,7 +9,7 @@ class App extends Component {
     return (
       <div>
         <NavBar />
-        <ListSamples />
+        <ListSequences />
       </div>
     );
   }
