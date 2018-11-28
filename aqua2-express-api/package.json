@@ -1,6 +1,6 @@
 {
   "name": "aqua2-express-api",
-  "version": "0.0.0",
+  "version": "2.0.0",
   "private": true,
   "scripts": {
     "start": "node ./bin/www"
@@ -14,6 +14,8 @@
     "express-async-handler": "^1.1.4",
     "morgan": "~1.9.0",
     "mysql": "^2.16.0",
-    "sql-template-strings": "^2.2.2"
+    "sql-template-strings": "^2.2.2",
+    "swagger-ui-express": "^4.0.1",
+    "yamljs": "^0.3.0"
   }
 }

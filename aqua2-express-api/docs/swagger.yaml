@@ -1,0 +1,186 @@
+swagger: "2.0"
+info:
+  description: "AQUA2 - Annotation query system db API"
+  version: "2.0.0"
+  title: "AQUA"
+  contact:
+    email: "andrew.spriggs@csiro.au"
+host: "localhost:4000"
+basePath: "/api/v2"
+schemes:
+- "http"
+tags:
+- name: "samples"
+- name: "sequences"
+paths:
+  
+  /sample:
+    get:
+      tags:
+      - "samples"
+      summary: "List samples"
+      description: "Returns a detailed list of samples"
+      operationId: "getSamples"
+      produces:
+      - "application/json"
+      parameters:
+      - $ref: "#/parameters/sort"
+      - $ref: "#/parameters/limit"
+      - $ref: "#/parameters/offset"
+      responses:
+        200:
+          description: "Success"
+          schema:
+            $ref: "#/definitions/Sample"
+        500:
+          description: "Error"
+        404:
+          description: "sampleId not found"
+          
+  /sample/{sampleId}:
+    get:
+      tags:
+      - "samples"
+      summary: "Find a sample by ID"
+      description: "Returns info on a single sample"
+      operationId: "getSampleById"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "sampleId"
+        in: "path"
+        description: "ID of sample to return"
+        required: true
+        type: "integer"
+      responses:
+        200:
+          description: "Success"
+          schema:
+            $ref: "#/definitions/Sample"
+        500:
+          description: "Error"
+        404:
+          description: "sampleId not found"
+
+  /sequence:
+    get:
+      tags:
+      - "sequences"
+      summary: "List sequences"
+      description: "Returns a detailed list of sequences"
+      operationId: "getSequences"
+      produces:
+      - "application/json"
+      parameters:
+      - $ref: "#/parameters/sort"
+      - $ref: "#/parameters/limit"
+      - $ref: "#/parameters/offset"
+      responses:
+        200:
+          description: "Success"
+          schema:
+            $ref: "#/definitions/Sequence"
+        500:
+          description: "Error"
+        404:
+          description: "sequenceId not found"
+          
+  /sequence/{sequenceId}:
+    get:
+      tags:
+      - "sequences"
+      summary: "Find a sequence by ID"
+      description: "Returns info on a single sequence"
+      operationId: "getSequenceById"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "sequenceId"
+        in: "path"
+        description: "ID of sequence to return"
+        required: true
+        type: "integer"
+      responses:
+        200:
+          description: "Success"
+          schema:
+            $ref: "#/definitions/Sequence"
+        500:
+          description: "Error"
+        404:
+          description: "sequenceId not found"
+
+definitions:
+  Sample:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      name:
+        type: "string"
+        description: "Sample name"
+      species:
+        type: "string"
+        description: "Sample species" 
+      description:
+        type: "string"
+        description: "Sample description" 
+      ingroups:
+        type: "integer" 
+        description: "Sample is in x groups/assemblies" 
+      numseqs:
+        type: "integer" 
+        description: "Sample has x sequences" 
+
+  Sequence:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      name:
+        type: "string"
+        description: "Sequence name"
+      length:
+        type: "integer"
+        description: "Sequence length (bp)"
+      groupId:
+        type: "integer"
+        description: "ID of seqgroup"
+      groupName:
+        type: "string"
+        description: "Seqgroup label"
+      sampleId:
+        type: "integer"
+        description: "ID of sample"
+      sampleName:
+        type: "string"
+        description: "Sample label"
+      typeId:
+        type: "integer"
+        description: "ID of seqtype"
+      typeName:
+        type: "string"
+        description: "Seqtype label"
+      annotNote:
+        type: "string"
+        description: "Annotation note"
+      extLink:
+        type: "string"
+        description: "Relevant external service link"
+        
+parameters:
+  sort:
+    name: sort
+    in: query
+    description: Order result by COLNAME (ASC|DESC)
+    type: string
+  limit:
+    name: limit
+    in: query
+    description: Number of entries returned
+    type: integer
+  offset:
+    name: offset
+    in: query
+    description: Number of entries to skip
+    type: integer
