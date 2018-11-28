@@ -8,7 +8,8 @@ class ListSamples extends Component {
 	state = {
 		page: 0,
 		total: 0,
-		rowsPerPage: 5,
+		rowsPerPage: 50,
+		orderby: null,
 		samples: []
 	};
 
@@ -35,35 +36,50 @@ class ListSamples extends Component {
 			viewColumns: false,
 			selectableRows: false,
 			filter: false,
-			rowsPerPageOptions: [ 10, 50, 100 ],
+			rowsPerPageOptions: [ 50, 100, 200 ],
 			rowsPerPage: rowsPerPage,
 			page: page,
 			count: total,
 			serverSide: true,
 			onTableChange: (action, tableState) => {
-				console.log(tableState);
-				this.setState({ page: tableState.page, rowsPerPage: tableState.rowsPerPage}, () => {
+				if(tableState.page !== page || tableState.rowsPerPage !== rowsPerPage){
+					this.setState({ page: tableState.page, 
+									rowsPerPage: tableState.rowsPerPage}, () => {
+						this.getData();
+					});
+				}
+			},
+			onColumnSortChange: (changedColumn, direction) => {
+				var col = changedColumn.replace("Sample Name", "name")
+										.replace("Species", "species")
+										.replace("In groups/assemblies", "ingroups")
+										.replace("Num. sequences", "numseqs");
+				var dir = direction.replace(/(asc|desc)ending/, "$1");
+				this.setState({ orderby: `${col} ${dir}`,
+								page: 0}, () => {
 					this.getData();
 				});
 			}
 		};
 		const columns = [
-			{ name:"dbID", options: {display: false} }, 
-			"Sample Name", 
-			"Species", 
-			"Description", 
+			{ name:"dbID", options: {display: 'excluded'} }, 
+			{ name:"Sample Name", options: {sort: true} },  
+			{ name:"Species", options: {sort: true} }, 
+			{ name:"Description", options: {sort: false} }, 
 			{ name:"In groups/assemblies",  options: { 
+					sort: true,
 					customBodyRender: (value, tableMeta, updateValue) => {
 						return (value.toLocaleString())
 					} 
 				}
 			}, 
 			{ name:"Num. sequences", options: { 
+					sort: true,
 					customBodyRender: (value, tableMeta, updateValue) => {
 						return (value.toLocaleString())
 					} 
 				} 
-            }];
+			}];
 		return (
 			<div>
 				<MuiDataTable
