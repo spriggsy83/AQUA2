@@ -1,8 +1,11 @@
 var express = require("express");
 var router = express.Router();
-const SQL = require('sql-template-strings')
+const SQL = require("sql-template-strings");
+const asyncHandler = require("express-async-handler");
 
-function sampleQuery({id, limit=50, offset=0} = {}) {
+var dbLink = require("../util/db-link.js");
+
+function sampleQuery({ id = null, limit = 50, offset = 0, sort = null } = {}) {
 	const query = SQL`
 SELECT 
   samp.id,
@@ -28,58 +31,57 @@ LEFT JOIN (
   GROUP BY isSample
 ) AS seq 
   ON seq.isSample = samp.id
-`
-	if(id){
-		query.append(SQL` WHERE samp.id = ${id}`)
+`;
+	if (id) {
+		query.append(SQL` WHERE samp.id = ${id}`);
 	}
-	query.append(SQL` LIMIT ${limit} OFFSET ${offset || 0}`)
+	if (sort) {
+		query.append(SQL` ORDER BY `).append(sort);
+	}
+	query.append(SQL` LIMIT ${limit} OFFSET ${offset || 0}`);
 	return query;
 }
 
 /* GET 1 sample listing. */
-router.get('/:id([0-9]{1,})', function(req, res){
-	dbpool.query(sampleQuery({id: req.params.id}), function(error, results, fields) {
-		if (error) {
-			res.json({ status: 500, error: error, data: null });
-		} else {
-			if(results && results.length){
-				res.json({ status: 200, error: null, data: results[0] });
-			}else{
-				res.json({ status: 404, error: null, data: 'Not found' });
-			}
-		}
-	});
-});
-
+router.get(
+	"/:id([0-9]{1,})",
+	asyncHandler(async (req, res, next) => {
+		const qRes = await dbLink.dbQueryAllToJRes(
+			sampleQuery({ id: req.params.id })
+		);
+		res.json(qRes);
+	})
+);
 
 /* GET samples listing. */
-router.get("/", function(req, res, next) {
-
-	var limit = parseInt(req.query.limit, 10) || 50;
-	var offset = parseInt(req.query.offset, 10) || parseInt(req.query.skip, 10) || 0;
-
-	dbpool.query('SELECT count(*) AS total FROM sample', function(error, results, fields) {
-		if (error) {
-			res.json({ status: 500, error: error, data: null, total: null });
-
-		}else if(results && results.length){
-			var total = results[0].total;
-
-			dbpool.query(sampleQuery( { limit: limit, offset: offset }
-				), function(error, results, fields) {
-				if (error) {
-					res.json({ status: 500, error: error, data: null, total: total });
-
-				} else if(results && results.length){
-					res.json({ status: 200, error: null, data: results, total: total });
-				}else{
-					res.json({ status: 404, error: null, data: 'Not found', total: total });
-				}
-			});
-		}else{
-			res.json({ status: 404, error: null, data: 'Not found', total: 0 });
+router.get(
+	"/",
+	asyncHandler(async (req, res, next) => {
+		var limit = parseInt(req.query.limit, 10) || 50;
+		var offset =
+			parseInt(req.query.offset, 10) || parseInt(req.query.skip, 10) || 0;
+		var sort = null;
+		if (req.query.sort) {
+			if (
+				/^(name|species|ingroups|numseqs)( (ASC|DESC))?$/i.test(
+					req.query.sort
+				)
+			) {
+				sort = req.query.sort;
+			}
 		}
-	});
-});
+		const [qTotal, qAll] = await Promise.all([
+			dbLink.dbCountAllToJRes("sample"),
+			dbLink.dbQueryAllToJRes(
+				sampleQuery({
+					limit: limit,
+					offset: offset,
+					sort: sort
+				})
+			)
+		]);
+		res.json(Object.assign(qTotal, qAll));
+	})
+);
 
 module.exports = router;
