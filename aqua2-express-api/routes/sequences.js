@@ -70,7 +70,13 @@ router.get(
 				sort = req.query.sort;
 			}
 		}
-		const [qTotal, qAll] = await Promise.all([
+		const [
+			qTotal,
+			qAll,
+			filterbySamps,
+			filterbyGroups,
+			filterbyType
+		] = await Promise.all([
 			dbLink.dbCountAllToJRes("sequence"),
 			dbLink.dbQueryAllToJRes(
 				sequenceQuery({
@@ -78,9 +84,21 @@ router.get(
 					offset: offset,
 					sort: sort
 				})
-			)
+			),
+			dbLink.dbFilterListToJRes("sample", "name"),
+			dbLink.dbFilterListToJRes("seqgroup", "name"),
+			dbLink.dbFilterListToJRes("seqtype", "type")
 		]);
-		res.json(Object.assign(qTotal, qAll));
+
+		res.json(
+			Object.assign(qTotal, qAll, {
+				filterby: Object.assign(
+					filterbySamps,
+					filterbyGroups,
+					filterbyType
+				)
+			})
+		);
 	})
 );
 

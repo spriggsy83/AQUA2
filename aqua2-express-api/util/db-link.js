@@ -11,14 +11,16 @@ const dbpool = mysql.createPool({
 
 async function dbCountAllToJRes(tableName) {
 	return new Promise(function(resolve, reject) {
-		const sqlTQuery = SQL`SELECT count(*) AS total FROM `.append(tableName);
+		const sqlTQuery = SQL`SELECT `
+			.append(tableName)
+			.append(SQL` AS total FROM totals`);
 		dbpool.query(sqlTQuery, function(error, results, fields) {
 			if (error) {
-				resolve({ error: error, total: null });
+				resolve({ total: null });
 			} else if (results && results.length) {
-				resolve({ error: null, total: results[0].total });
+				resolve({ total: results[0].total });
 			} else {
-				resolve({ error: null, total: 0 });
+				resolve({ total: 0 });
 			}
 		});
 	});
@@ -38,6 +40,25 @@ async function dbQueryAllToJRes(sqlTemplateQuery) {
 	});
 }
 
+async function dbFilterListToJRes(tableName, labelCol) {
+	return new Promise(function(resolve, reject) {
+		const sqlTQuery = SQL`SELECT id, `
+			.append(labelCol)
+			.append(SQL` FROM `)
+			.append(tableName);
+		dbpool.query(sqlTQuery, function(error, results, fields) {
+			if (error) {
+				resolve({});
+			} else if (results && results.length) {
+				resolve({ [tableName]: results });
+			} else {
+				resolve({});
+			}
+		});
+	});
+}
+
 module.exports.dbpool = dbpool;
 module.exports.dbCountAllToJRes = dbCountAllToJRes;
 module.exports.dbQueryAllToJRes = dbQueryAllToJRes;
+module.exports.dbFilterListToJRes = dbFilterListToJRes;
