@@ -1,21 +1,15 @@
 import React, { Component } from "react";
 import {BrowserRouter as Router, Route, Switch} from 'react-router-dom';
-import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+import { MuiThemeProvider } from '@material-ui/core/styles';
+import theme from './UI/theme';
 import NavBar from "./components/NavBar";
 import ListSamples from "./components/Samples";
 import ListSequences from "./components/Sequences";
 import "./App.css";
 
-const theme = createMuiTheme({
-	typography: {
-		useNextVariants: true,
-	},
-});
-
 class App extends Component {
 	render() {
 	return (
-		<React.Fragment>
 		<MuiThemeProvider theme={theme}>
 		<NavBar />
 		<Router>
@@ -25,7 +19,6 @@ class App extends Component {
 			</Switch>
 		</Router>
 		</MuiThemeProvider>
-		</React.Fragment>
 		);
 	}
 }

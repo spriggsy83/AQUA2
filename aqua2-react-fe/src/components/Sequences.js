@@ -1,14 +1,7 @@
 import React, { Component } from "react";
-import { createMuiTheme, MuiThemeProvider } from '@material-ui/core/styles';
 import MuiDataTable from "mui-datatables";
 import API from '../API';
 import { map, pick, values } from "lodash";
-
-const localtheme = createMuiTheme({
-	typography: {
-		useNextVariants: true,
-	},
-});	
 
 class ListSequences extends Component {
 
@@ -44,7 +37,7 @@ class ListSequences extends Component {
 			pagination: true,
 			viewColumns: false,
 			selectableRows: false,
-			filter: false,
+			filter: true,
 			rowsPerPageOptions: [ 20, 50, 100, 200 ],
 			rowsPerPage: rowsPerPage,
 			page: page,
@@ -99,14 +92,12 @@ class ListSequences extends Component {
 			];
 		return (
 			<div>
-				<MuiThemeProvider theme={localtheme}>
 				<MuiDataTable
 					data={sequences}
 					columns={columns}
 					options={options}
 					title={"Sequences"}
 				/>
-				</MuiThemeProvider>
 			</div>
 		);
 	}
