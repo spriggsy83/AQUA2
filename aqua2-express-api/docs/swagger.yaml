@@ -8,50 +8,58 @@ info:
 host: "localhost:4000"
 basePath: "/api/v2"
 schemes:
-- "http"
+  - "http"
 tags:
-- name: "samples"
-- name: "sequences"
+  - name: "samples"
+  - name: "sequences"
 paths:
-  
-  /sample:
+  /samples:
     get:
       tags:
-      - "samples"
+        - "samples"
       summary: "List samples"
       description: "Returns a detailed list of samples"
       operationId: "getSamples"
       produces:
-      - "application/json"
+        - "application/json"
       parameters:
-      - $ref: "#/parameters/sort"
-      - $ref: "#/parameters/limit"
-      - $ref: "#/parameters/offset"
+        - $ref: "#/parameters/sort"
+        - $ref: "#/parameters/limit"
+        - $ref: "#/parameters/offset"
       responses:
         200:
           description: "Success"
+          headers:
+            total:
+              type: "integer"
+              description: "Query total for pagination range"
           schema:
-            $ref: "#/definitions/Sample"
+            type: "object"
+            properties:
+              data:
+                type: "array"
+                items:
+                  $ref: "#/definitions/Sample"
         500:
           description: "Error"
         404:
           description: "sampleId not found"
-          
-  /sample/{sampleId}:
+
+  /samples/{sampleId}:
     get:
       tags:
-      - "samples"
+        - "samples"
       summary: "Find a sample by ID"
       description: "Returns info on a single sample"
       operationId: "getSampleById"
       produces:
-      - "application/json"
+        - "application/json"
       parameters:
-      - name: "sampleId"
-        in: "path"
-        description: "ID of sample to return"
-        required: true
-        type: "integer"
+        - name: "sampleId"
+          in: "path"
+          description: "ID of sample to return"
+          required: true
+          type: "integer"
       responses:
         200:
           description: "Success"
@@ -62,54 +70,68 @@ paths:
         404:
           description: "sampleId not found"
 
-  /sequence:
+  /sequences:
     get:
       tags:
-      - "sequences"
+        - "sequences"
       summary: "List sequences"
       description: "Returns a detailed list of sequences"
       operationId: "getSequences"
       produces:
-      - "application/json"
+        - "application/json"
       parameters:
-      - $ref: "#/parameters/sort"
-      - $ref: "#/parameters/limit"
-      - $ref: "#/parameters/offset"
+        - $ref: "#/parameters/sort"
+        - $ref: "#/parameters/limit"
+        - $ref: "#/parameters/offset"
       responses:
         200:
           description: "Success"
+          headers:
+            total:
+              description: "Query total for pagination range"
+              type: "integer"
           schema:
-            $ref: "#/definitions/Sequence"
-        500:
-          description: "Error"
-        404:
-          description: "sequenceId not found"
-          
-  /sequence/{sequenceId}:
-    get:
-      tags:
-      - "sequences"
-      summary: "Find a sequence by ID"
-      description: "Returns info on a single sequence"
-      operationId: "getSequenceById"
-      produces:
-      - "application/json"
-      parameters:
-      - name: "sequenceId"
-        in: "path"
-        description: "ID of sequence to return"
-        required: true
-        type: "integer"
-      responses:
-        200:
-          description: "Success"
-          schema:
-            $ref: "#/definitions/Sequence"
+            type: "object"
+            properties:
+              data:
+                description: "Sequence table data"
+                type: "array"
+                items:
+                  $ref: "#/definitions/Sequence"
+              filterby:
+                type: "array"
+                items:
+                  $ref: "#/definitions/Filterable"
+
         500:
           description: "Error"
         404:
           description: "sequenceId not found"
 
+  /sequences/{sequenceId}:
+    get:
+      tags:
+        - "sequences"
+      summary: "Find a sequence by ID"
+      description: "Returns info on a single sequence"
+      operationId: "getSequenceById"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "sequenceId"
+          in: "path"
+          description: "ID of sequence to return"
+          required: true
+          type: "integer"
+      responses:
+        200:
+          description: "Success"
+          schema:
+            $ref: "#/definitions/Sequence"
+        500:
+          description: "Error"
+        404:
+          description: "sequenceId not found"
 definitions:
   Sample:
     type: "object"
@@ -121,17 +143,16 @@ definitions:
         description: "Sample name"
       species:
         type: "string"
-        description: "Sample species" 
+        description: "Sample species"
       description:
         type: "string"
-        description: "Sample description" 
+        description: "Sample description"
       ingroups:
-        type: "integer" 
-        description: "Sample is in x groups/assemblies" 
+        type: "integer"
+        description: "Sample is in x groups/assemblies"
       numseqs:
-        type: "integer" 
-        description: "Sample has x sequences" 
-
+        type: "integer"
+        description: "Sample has x sequences"
   Sequence:
     type: "object"
     properties:
@@ -167,7 +188,18 @@ definitions:
       extLink:
         type: "string"
         description: "Relevant external service link"
-        
+  Filterable:
+    type: "object"
+    properties:
+      tablename:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            id:
+              type: "integer"
+            colname:
+              type: "string"
 parameters:
   sort:
     name: sort

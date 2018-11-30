@@ -92,11 +92,7 @@ router.get(
 
 		res.json(
 			Object.assign(qTotal, qAll, {
-				filterby: Object.assign(
-					filterbySamps,
-					filterbyGroups,
-					filterbyType
-				)
+				filterby: [filterbySamps, filterbyGroups, filterbyType]
 			})
 		);
 	})
