@@ -6,22 +6,12 @@ import { connect } from "react-redux";
 import { getSamples } from "../actions/samples_actions.js";
 
 class ListSamples extends Component {
-	constructor() {
-		super();
-		this.state = {
-			loaded: false,
-			samples: []
-		};
-	}
-
 	componentDidMount() {
-		this.getData();
+		if (!this.props.loaded) {
+			// Get initial data
+			this.props.getSamples();
+		}
 	}
-
-	// Get initial data
-	getData = () => {
-		this.props.getSamples();
-	};
 
 	render() {
 		const { samples, loaded } = this.props;
@@ -79,8 +69,6 @@ class ListSamples extends Component {
 		}
 	}
 }
-
-//export default ListSamples;
 
 /**
  * allows us to call our application state from props

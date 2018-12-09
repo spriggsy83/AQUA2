@@ -31,8 +31,8 @@ const styles = theme => ({
         flexGrow: 1,
         padding: theme.spacing.unit * 3
     },
-    toolbar: theme.mixins.toolbar,
-/*    listItem: {
+    toolbar: theme.mixins.toolbar
+    /*    listItem: {
         "&:hover": {
             backgroundColor: theme.palette.secondary.main + " !important"
         }
@@ -49,7 +49,16 @@ class SideMenu extends Component {
                 <AppBar position="fixed" className={classes.appBar}>
                     <Toolbar>
                         <Typography variant="h6" color="inherit" noWrap>
-                            AQUA2
+                            <Link
+                                className={classes.link}
+                                to="/"
+                                style={{ textDecoration: "none" }}
+                            >
+                                <span role="img" aria-labelledby="AQUA2">
+                                    💧
+                                </span>{" "}
+                                AQUA2
+                            </Link>
                         </Typography>
                     </Toolbar>
                 </AppBar>
@@ -65,20 +74,17 @@ class SideMenu extends Component {
                         {[
                             { label: "HOME", link: "/" },
                             { label: "SEQUENCE", link: "/Sequences" },
-                            { label: "BULK-ANNOT", link: "/BulkAnnot" },
                             { label: "SAMPLES", link: "/Samples" },
                             { label: "GROUPS", link: "/SeqGroups" },
-                            { label: "TYPES", link: "/SeqTypes" }
+                            { label: "TYPES", link: "/SeqTypes" },
+                            { label: "BULK-ANNOT", link: "/BulkAnnot" }
                         ].map((option, index) => (
                             <Link
                                 to={option.link}
                                 style={{ textDecoration: "none" }}
                                 key={option.label + "-link"}
                             >
-                                <ListItem
-                                    button
-                                    className={classes.listItem}
-                                >
+                                <ListItem button className={classes.listItem}>
                                     <ListItemText primary={option.label} />
                                 </ListItem>
                             </Link>
