@@ -7,7 +7,7 @@ var dbLink = require("../util/db-link.js");
 
 function sequenceQuery({
 	id = null,
-	limit = 50,
+	limit = 100,
 	offset = 0,
 	sort = null
 } = {}) {
@@ -57,7 +57,7 @@ router.get(
 router.get(
 	"/",
 	asyncHandler(async (req, res, next) => {
-		var limit = parseInt(req.query.limit, 10) || 50;
+		var limit = parseInt(req.query.limit, 10) || 100;
 		var offset =
 			parseInt(req.query.offset, 10) || parseInt(req.query.skip, 10) || 0;
 		var sort = null;

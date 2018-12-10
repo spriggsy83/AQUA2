@@ -5,35 +5,42 @@ const asyncHandler = require("express-async-handler");
 
 var dbLink = require("../util/db-link.js");
 
-function sampleQuery({ id = null, limit = 100, offset = 0, sort = null } = {}) {
+function seqgroupQuery({
+	id = null,
+	limit = 100,
+	offset = 0,
+	sort = null
+} = {}) {
 	const query = SQL`
-SELECT 
-  samp.id,
-  samp.name, 
-  samp.species, 
-  samp.description, 
-  IFNULL(groups.ingroups, 0) AS ingroups, 
-  IFNULL(seq.numseqs, 0) AS numseqs
-FROM sample AS samp
+SELECT
+  sgroup.id,
+  sgroup.name,
+  sgroup.description,
+  IFNULL(samps.fromsamps, 0) AS fromsamps,
+  IFNULL(seq.numseqs, 0) AS numseqs,
+  sgroup.avlength,
+  sgroup.n50length,
+  sgroup.maxlength
+FROM seqgroup AS sgroup
 LEFT JOIN (
   SELECT 
-    sample_inGroups, 
-    COUNT(DISTINCT seqgroup_fromSamples) AS ingroups
+    seqgroup_fromSamples, 
+    COUNT(DISTINCT sample_inGroups) AS fromsamps
   FROM sample_ingroups__seqgroup_fromsamples
-  GROUP BY sample_inGroups
-) AS groups 
-  ON groups.sample_inGroups = samp.id
+  GROUP BY seqgroup_fromSamples
+) AS samps 
+  ON samps.seqgroup_fromSamples = sgroup.id
 LEFT JOIN (
   SELECT 
-    isSample, 
+    belongsGroup, 
     COUNT(DISTINCT id) AS numseqs
   FROM sequence
-  GROUP BY isSample
+  GROUP BY belongsGroup
 ) AS seq 
-  ON seq.isSample = samp.id
+  ON seq.belongsGroup = sgroup.id
 `;
 	if (id) {
-		query.append(SQL` WHERE samp.id = ${id}`);
+		query.append(SQL` WHERE sgroup.id = ${id}`);
 	}
 	if (sort) {
 		query.append(SQL` ORDER BY `).append(sort);
@@ -42,18 +49,18 @@ LEFT JOIN (
 	return query;
 }
 
-/* GET 1 sample listing. */
+/* GET 1 seqgroup listing. */
 router.get(
 	"/:id([0-9]{1,})",
 	asyncHandler(async (req, res, next) => {
 		const qRes = await dbLink.dbQueryAllToJRes(
-			sampleQuery({ id: req.params.id })
+			seqgroupQuery({ id: req.params.id })
 		);
 		res.json(qRes);
 	})
 );
 
-/* GET samples listing. */
+/* GET seqgroups listing. */
 router.get(
 	"/",
 	asyncHandler(async (req, res, next) => {
@@ -63,7 +70,7 @@ router.get(
 		var sort = null;
 		if (req.query.sort) {
 			if (
-				/^(name|species|ingroups|numseqs)( (ASC|DESC))?$/i.test(
+				/^(name|fromsamps|numseqs|avlength|n50length|maxlength)( (ASC|DESC))?$/i.test(
 					req.query.sort
 				)
 			) {
@@ -71,9 +78,9 @@ router.get(
 			}
 		}
 		const [qTotal, qAll] = await Promise.all([
-			dbLink.dbCountAllToJRes("sample"),
+			dbLink.dbCountAllToJRes("seqgroup"),
 			dbLink.dbQueryAllToJRes(
-				sampleQuery({
+				seqgroupQuery({
 					limit: limit,
 					offset: offset,
 					sort: sort

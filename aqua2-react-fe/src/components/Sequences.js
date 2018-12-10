@@ -8,7 +8,7 @@ class ListSequences extends Component {
 	state = {
 		page: 0,
 		total: 0,
-		rowsPerPage: 20,
+		rowsPerPage: 100,
 		orderby: null,
 		sequences: []
 	};
@@ -49,10 +49,11 @@ class ListSequences extends Component {
 		const { page, total, rowsPerPage, sequences } = this.state;
 		const options = {
 			pagination: true,
-			viewColumns: false,
+			viewColumns: true,
 			selectableRows: false,
-			filter: true,
-			rowsPerPageOptions: [20, 50, 100, 200],
+			search: false,
+			filter: false,
+			rowsPerPageOptions: [50, 100, 200],
 			rowsPerPage: rowsPerPage,
 			page: page,
 			count: total,

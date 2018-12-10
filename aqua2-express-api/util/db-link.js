@@ -11,9 +11,18 @@ const dbpool = mysql.createPool({
 
 async function dbCountAllToJRes(tableName) {
 	return new Promise(function(resolve, reject) {
-		const sqlTQuery = SQL`SELECT `
-			.append(tableName)
-			.append(SQL` AS total FROM totals`);
+		var sqlTQuery;
+		if (
+			/^(sample|seqgroup|sequence|seqrelation|alignedannot|geneprediction)$/i.test(
+				tableName
+			)
+		) {
+			sqlTQuery = SQL`SELECT `
+				.append(tableName)
+				.append(SQL` AS total FROM totals`);
+		} else {
+			sqlTQuery = SQL`SELECT COUNT(id) AS total FROM `.append(tableName);
+		}
 		dbpool.query(sqlTQuery, function(error, results, fields) {
 			if (error) {
 				resolve({ total: null });

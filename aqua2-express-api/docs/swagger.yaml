@@ -10,9 +10,40 @@ basePath: "/api/v2"
 schemes:
   - "http"
 tags:
+  - name: "totals"
   - name: "samples"
+  - name: "seqtypes"
+  - name: "seqgroups"
   - name: "sequences"
 paths:
+  /totals:
+    get:
+      tags:
+        - "totals"
+      summary: "List table totals"
+      description: "Returns a pre-calculated count of table rows"
+      operationId: "getTotals"
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: "Success"
+          headers:
+            total:
+              type: "integer"
+              description: "Result size, always 1!"
+          schema:
+            type: "object"
+            properties:
+              data:
+                type: "array"
+                items:
+                  $ref: "#/definitions/Totals"
+        500:
+          description: "Error"
+        404:
+          description: "Not found"
+
   /samples:
     get:
       tags:
@@ -43,7 +74,7 @@ paths:
         500:
           description: "Error"
         404:
-          description: "sampleId not found"
+          description: "Not found"
 
   /samples/{sampleId}:
     get:
@@ -69,6 +100,116 @@ paths:
           description: "Error"
         404:
           description: "sampleId not found"
+
+  /seqtypes:
+    get:
+      tags:
+        - "seqtypes"
+      summary: "List all sequence types"
+      description: "Returns a detailed list of sequence types"
+      operationId: "getSeqType"
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: "Success"
+          headers:
+            total:
+              type: "integer"
+              description: "Query total for pagination range"
+          schema:
+            type: "object"
+            properties:
+              data:
+                type: "array"
+                items:
+                  $ref: "#/definitions/SeqType"
+        500:
+          description: "Error"
+        404:
+          description: "Not found"
+
+  /seqtypes/{seqtypeId}:
+    get:
+      tags:
+        - "seqtypes"
+      summary: "Find a sequence type by ID"
+      description: "Returns info on a single sequence type"
+      operationId: "getSeqTypeById"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "seqtypeId"
+          in: "path"
+          description: "ID of seqtype to return"
+          required: true
+          type: "integer"
+      responses:
+        200:
+          description: "Success"
+          schema:
+            $ref: "#/definitions/SeqType"
+        500:
+          description: "Error"
+        404:
+          description: "seqtypeId not found"
+
+  /seqgroups:
+    get:
+      tags:
+        - "seqgroups"
+      summary: "List sequence groups/assemblies"
+      description: "Returns a detailed list of sequence groups/assemblies"
+      operationId: "getSeqGroups"
+      produces:
+        - "application/json"
+      parameters:
+        - $ref: "#/parameters/sort"
+        - $ref: "#/parameters/limit"
+        - $ref: "#/parameters/offset"
+      responses:
+        200:
+          description: "Success"
+          headers:
+            total:
+              type: "integer"
+              description: "Query total for pagination range"
+          schema:
+            type: "object"
+            properties:
+              data:
+                type: "array"
+                items:
+                  $ref: "#/definitions/SeqGroup"
+        500:
+          description: "Error"
+        404:
+          description: "Not found"
+
+  /seqgroups/{seqgroupId}:
+    get:
+      tags:
+        - "seqgroups"
+      summary: "Find a sequence group/assembly by ID"
+      description: "Returns info on a single sequence group/assembly"
+      operationId: "getSeqGroupById"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "seqgroupId"
+          in: "path"
+          description: "ID of seq group to return"
+          required: true
+          type: "integer"
+      responses:
+        200:
+          description: "Success"
+          schema:
+            $ref: "#/definitions/SeqGroup"
+        500:
+          description: "Error"
+        404:
+          description: "seqgroupId not found"
 
   /sequences:
     get:
@@ -133,6 +274,27 @@ paths:
         404:
           description: "sequenceId not found"
 definitions:
+  Totals:
+    type: "object"
+    properties:
+      sample:
+        type: "integer"
+        description: "Count of total samples"
+      seqgroup:
+        type: "integer"
+        description: "Count of total seq groups"
+      sequence:
+        type: "integer"
+        description: "Count of total sequences"
+      seqrelation:
+        type: "integer"
+        description: "Count of total seq relations"
+      alignedannot:
+        type: "integer"
+        description: "Count of total alignment annotations"
+      geneprediction:
+        type: "integer"
+        description: "Count of total gene predictions"
   Sample:
     type: "object"
     properties:
@@ -153,6 +315,43 @@ definitions:
       numseqs:
         type: "integer"
         description: "Sample has x sequences"
+  SeqGroup:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      name:
+        type: "string"
+        description: "SeqGroup name"
+      description:
+        type: "string"
+        description: "SeqGroup description"
+      fromsamps:
+        type: "integer"
+        description: "SeqGroup made from x samples"
+      numseqs:
+        type: "integer"
+        description: "SeqGroup has x sequences"
+      avlength:
+        type: "integer"
+        description: "SeqGroup average sequence length"
+      n50length:
+        type: "integer"
+        description: "SeqGroup n50 sequence length"
+      maxlength:
+        type: "integer"
+        description: "SeqGroup longest sequence length"
+  SeqType:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+      type:
+        type: "string"
+        description: "Sequence type"
+      numseqs:
+        type: "integer"
+        description: "SeqType has x sequences"
   Sequence:
     type: "object"
     properties:
