@@ -3,21 +3,21 @@ import MuiDataTable from "mui-datatables";
 import LinearProgress from "@material-ui/core/LinearProgress";
 import { map, pick, values } from "lodash";
 import { connect } from "react-redux";
-import { getSamples } from "../actions/samples_actions.js";
+import { getSeqGroups } from "../actions/seqgroups_actions.js";
 
-class ListSamples extends Component {
+class ListSeqGroups extends Component {
 	componentDidMount() {
 		if (!this.props.loaded) {
 			// Get initial data
-			this.props.getSamples();
+			this.props.getSeqGroups();
 		}
 	}
 
 	render() {
-		const { samples, loaded } = this.props;
+		const { seqgroups, loaded } = this.props;
 		const options = {
 			pagination: false,
-			viewColumns: false,
+			viewColumns: true,
 			selectableRows: false,
 			search: false,
 			filter: false,
@@ -25,12 +25,12 @@ class ListSamples extends Component {
 		};
 		const columns = [
 			{ name: "dbID", options: { display: "excluded" } },
-			{ name: "Sample Name", options: { sort: true } },
-			{ name: "Species", options: { sort: true } },
+			{ name: "Group Name", options: { sort: true } },
 			{ name: "Description", options: { sort: false } },
 			{
-				name: "In groups/assemblies",
+				name: "From samples",
 				options: {
+					display: "hidden",
 					sort: true,
 					customBodyRender: (value, tableMeta, updateValue) => {
 						return value.toLocaleString();
@@ -45,6 +45,34 @@ class ListSamples extends Component {
 						return value.toLocaleString();
 					}
 				}
+			},
+			{
+				name: "Average seq length",
+				options: {
+					sort: true,
+					customBodyRender: (value, tableMeta, updateValue) => {
+						return value.toLocaleString();
+					}
+				}
+			},
+			{
+				name: "N50 seq length",
+				options: {
+					display: "hidden",
+					sort: true,
+					customBodyRender: (value, tableMeta, updateValue) => {
+						return value.toLocaleString();
+					}
+				}
+			},
+			{
+				name: "Longest seq length",
+				options: {
+					sort: true,
+					customBodyRender: (value, tableMeta, updateValue) => {
+						return value.toLocaleString();
+					}
+				}
 			}
 		];
 
@@ -52,10 +80,10 @@ class ListSamples extends Component {
 			return (
 				<div>
 					<MuiDataTable
-						data={samples}
+						data={seqgroups}
 						columns={columns}
 						options={options}
-						title={"Samples"}
+						title={"SeqGroups"}
 					/>
 				</div>
 			);
@@ -75,24 +103,26 @@ class ListSamples extends Component {
  * allows us to call our application state from props
  */
 function mapStateToProps(state) {
-	var samples = [];
-	if (state.samples.samples.length) {
-		samples = map(state.samples.samples, sample => {
+	var seqgroups = [];
+	if (state.seqgroups.seqgroups.length) {
+		seqgroups = map(state.seqgroups.seqgroups, seqgroup => {
 			return values(
-				pick(sample, [
+				pick(seqgroup, [
 					"id",
 					"name",
-					"species",
 					"description",
-					"ingroups",
-					"numseqs"
+					"fromsamps",
+					"numseqs",
+					"avlength",
+					"n50length",
+					"maxlength"
 				])
 			);
 		});
 	}
 	return {
-		loaded: state.samples.loaded,
-		samples: samples
+		loaded: state.seqgroups.loaded,
+		seqgroups: seqgroups
 	};
 }
 
@@ -101,5 +131,5 @@ function mapStateToProps(state) {
  */
 export default connect(
 	mapStateToProps,
-	{ getSamples }
-)(ListSamples);
+	{ getSeqGroups }
+)(ListSeqGroups);

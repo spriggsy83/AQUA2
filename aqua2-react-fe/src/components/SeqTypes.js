@@ -3,18 +3,26 @@ import MuiDataTable from "mui-datatables";
 import LinearProgress from "@material-ui/core/LinearProgress";
 import { map, pick, values } from "lodash";
 import { connect } from "react-redux";
-import { getSamples } from "../actions/samples_actions.js";
+import { getSeqTypes } from "../actions/seqtypes_actions.js";
+import compose from "recompose/compose";
+import { withStyles } from "@material-ui/core/styles";
 
-class ListSamples extends Component {
+const styles = theme => ({
+	narrowlist: {
+		width: 500
+	}
+});
+
+class ListSeqTypes extends Component {
 	componentDidMount() {
 		if (!this.props.loaded) {
 			// Get initial data
-			this.props.getSamples();
+			this.props.getSeqTypes();
 		}
 	}
 
 	render() {
-		const { samples, loaded } = this.props;
+		const { seqtypes, loaded, classes } = this.props;
 		const options = {
 			pagination: false,
 			viewColumns: false,
@@ -25,18 +33,7 @@ class ListSamples extends Component {
 		};
 		const columns = [
 			{ name: "dbID", options: { display: "excluded" } },
-			{ name: "Sample Name", options: { sort: true } },
-			{ name: "Species", options: { sort: true } },
-			{ name: "Description", options: { sort: false } },
-			{
-				name: "In groups/assemblies",
-				options: {
-					sort: true,
-					customBodyRender: (value, tableMeta, updateValue) => {
-						return value.toLocaleString();
-					}
-				}
-			},
+			{ name: "Seq Type", options: { sort: true } },
 			{
 				name: "Num. sequences",
 				options: {
@@ -50,12 +47,12 @@ class ListSamples extends Component {
 
 		if (loaded) {
 			return (
-				<div>
+				<div className={classes.narrowlist}>
 					<MuiDataTable
-						data={samples}
+						data={seqtypes}
 						columns={columns}
 						options={options}
-						title={"Samples"}
+						title={"SeqTypes"}
 					/>
 				</div>
 			);
@@ -75,31 +72,25 @@ class ListSamples extends Component {
  * allows us to call our application state from props
  */
 function mapStateToProps(state) {
-	var samples = [];
-	if (state.samples.samples.length) {
-		samples = map(state.samples.samples, sample => {
-			return values(
-				pick(sample, [
-					"id",
-					"name",
-					"species",
-					"description",
-					"ingroups",
-					"numseqs"
-				])
-			);
+	var seqtypes = [];
+	if (state.seqtypes.seqtypes.length) {
+		seqtypes = map(state.seqtypes.seqtypes, seqtype => {
+			return values(pick(seqtype, ["id", "type", "numseqs"]));
 		});
 	}
 	return {
-		loaded: state.samples.loaded,
-		samples: samples
+		loaded: state.seqtypes.loaded,
+		seqtypes: seqtypes
 	};
 }
 
 /**
  * exports our component and gives it access to the redux state
  */
-export default connect(
-	mapStateToProps,
-	{ getSamples }
-)(ListSamples);
+export default compose(
+	withStyles(styles),
+	connect(
+		mapStateToProps,
+		{ getSeqTypes }
+	)
+)(ListSeqTypes);
