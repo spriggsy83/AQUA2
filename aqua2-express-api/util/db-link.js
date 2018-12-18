@@ -9,6 +9,8 @@ const dbpool = mysql.createPool({
 	database: "annotQDB"
 });
 
+/** Turns a SELECT COUNT(*) into a {total: X}
+ Only a 'tableName' is provided **/
 async function dbCountAllToJRes(tableName) {
 	return new Promise(function(resolve, reject) {
 		var sqlTQuery;
@@ -35,7 +37,26 @@ async function dbCountAllToJRes(tableName) {
 	});
 }
 
-async function dbQueryAllToJRes(sqlTemplateQuery) {
+/** Turns a SELECT COUNT(*) AS total into a {total: X}
+ Whole sql query must be specified 
+ !!! COUNT must be aliased AS 'total' !!! **/
+async function dbCountQueryToJRes(sqlTemplateQuery) {
+	return new Promise(function(resolve, reject) {
+		dbpool.query(sqlTemplateQuery, function(error, results, fields) {
+			if (error) {
+				resolve({ total: null });
+			} else if (results && results.length) {
+				resolve({ total: results[0].total });
+			} else {
+				resolve({ total: 0 });
+			}
+		});
+	});
+}
+
+/** Returns a SQL query result as { data: result }
+ Whole sql query must be specified **/
+async function dbQueryToJRes(sqlTemplateQuery) {
 	return new Promise(function(resolve, reject) {
 		dbpool.query(sqlTemplateQuery, function(error, results, fields) {
 			if (error) {
@@ -49,6 +70,8 @@ async function dbQueryAllToJRes(sqlTemplateQuery) {
 	});
 }
 
+/** Returns a list of valid id/name pairs as { tableName: result }
+ Returned information intended for use in filtering a joined table **/
 async function dbFilterListToJRes(tableName, labelCol) {
 	return new Promise(function(resolve, reject) {
 		const sqlTQuery = SQL`SELECT id, `
@@ -69,5 +92,6 @@ async function dbFilterListToJRes(tableName, labelCol) {
 
 module.exports.dbpool = dbpool;
 module.exports.dbCountAllToJRes = dbCountAllToJRes;
-module.exports.dbQueryAllToJRes = dbQueryAllToJRes;
+module.exports.dbCountQueryToJRes = dbCountQueryToJRes;
+module.exports.dbQueryToJRes = dbQueryToJRes;
 module.exports.dbFilterListToJRes = dbFilterListToJRes;

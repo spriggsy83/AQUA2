@@ -46,7 +46,7 @@ LEFT JOIN (
 router.get(
 	"/:id([0-9]{1,})",
 	asyncHandler(async (req, res, next) => {
-		const qRes = await dbLink.dbQueryAllToJRes(
+		const qRes = await dbLink.dbQueryToJRes(
 			sampleQuery({ id: req.params.id })
 		);
 		res.json(qRes);
@@ -72,7 +72,7 @@ router.get(
 		}
 		const [qTotal, qAll] = await Promise.all([
 			dbLink.dbCountAllToJRes("sample"),
-			dbLink.dbQueryAllToJRes(
+			dbLink.dbQueryToJRes(
 				sampleQuery({
 					limit: limit,
 					offset: offset,
@@ -80,7 +80,7 @@ router.get(
 				})
 			)
 		]);
-		res.json(Object.assign(qTotal, qAll));
+		res.json({ ...qTotal, ...qAll });
 	})
 );
 

@@ -224,6 +224,7 @@ paths:
         - $ref: "#/parameters/sort"
         - $ref: "#/parameters/limit"
         - $ref: "#/parameters/offset"
+        - $ref: "#/parameters/filter"
       responses:
         200:
           description: "Success"
@@ -415,3 +416,8 @@ parameters:
     in: query
     description: Number of entries to skip
     type: integer
+  filter:
+    name: filter
+    in: query
+    description: Where filter={"sample":[1,5],"seqgroup":[3],"seqtype":[2,4]}
+    type: string

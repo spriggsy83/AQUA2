@@ -10,7 +10,8 @@ class ListSequences extends Component {
 		total: 0,
 		rowsPerPage: 100,
 		orderby: null,
-		sequences: []
+		sequences: [],
+		loading: true
 	};
 
 	componentDidMount() {
@@ -41,12 +42,12 @@ class ListSequences extends Component {
 					])
 				);
 			});
-			this.setState({ sequences, total: res.data.total });
+			this.setState({ sequences, total: res.data.total, loading: false });
 		});
 	};
 
 	render() {
-		const { page, total, rowsPerPage, sequences } = this.state;
+		const { page, total, rowsPerPage, sequences, loading } = this.state;
 		const options = {
 			pagination: true,
 			viewColumns: true,
@@ -65,6 +66,7 @@ class ListSequences extends Component {
 				) {
 					this.setState(
 						{
+							loading: true,
 							page: tableState.page,
 							rowsPerPage: tableState.rowsPerPage
 						},
@@ -84,6 +86,7 @@ class ListSequences extends Component {
 				var dir = direction.replace(/(asc|desc)ending/, "$1");
 				this.setState(
 					{
+						loading: true,
 						orderby: `${col} ${dir}`,
 						page: 0
 					},
@@ -133,8 +136,15 @@ class ListSequences extends Component {
 			}
 		];
 
-		if (sequences.length) {
-			return (
+		return (
+			<div>
+				{loading && (
+					<div>
+						<LinearProgress />
+						<br />
+						<LinearProgress color="secondary" />
+					</div>
+				)}
 				<div>
 					<MuiDataTable
 						data={sequences}
@@ -143,16 +153,8 @@ class ListSequences extends Component {
 						title={"Sequences"}
 					/>
 				</div>
-			);
-		} else {
-			return (
-				<div>
-					<LinearProgress />
-					<br />
-					<LinearProgress color="secondary" />
-				</div>
-			);
-		}
+			</div>
+		);
 	}
 }
 

@@ -9,7 +9,8 @@ function sequenceQuery({
 	id = null,
 	limit = 100,
 	offset = 0,
-	sort = null
+	sort = null,
+	filterSQL = null
 } = {}) {
 	const query = SQL`
 SELECT 
@@ -31,9 +32,12 @@ JOIN sample AS samp
   ON samp.id=seq.isSample
 JOIN seqtype AS stype
   ON stype.id=seq.isType
+WHERE 1 = 1
 `;
 	if (id) {
-		query.append(SQL` WHERE seq.id = ${id}`);
+		query.append(SQL` AND seq.id = ${id}`);
+	} else if (filterSQL) {
+		query.append(filterSQL);
 	}
 	if (sort) {
 		query.append(SQL` ORDER BY `).append(sort);
@@ -42,11 +46,77 @@ JOIN seqtype AS stype
 	return query;
 }
 
+function sequenceCountQuery({ filterSQL = null } = {}) {
+	const countQuery = SQL`
+SELECT 
+  count(seq.id) AS total
+FROM sequence AS seq
+JOIN seqgroup AS grp
+  ON grp.id=seq.belongsGroup
+JOIN sample AS samp
+  ON samp.id=seq.isSample
+JOIN seqtype AS stype
+  ON stype.id=seq.isType
+WHERE 1 = 1
+`;
+	if (filterSQL) {
+		countQuery.append(filterSQL);
+	}
+	return countQuery;
+}
+
+/* Parse 'filter=' param for valid entry.
+ Returns SQL WHERE clause component string "AND key IN ( values )"
+ Or null/error */
+function filterParamJsonToSql({ filterParamStr = null } = {}) {
+	var filterableTables = ["sample", "seqgroup", "seqtype"];
+	var queryAliases = ["samp.id", "grp.id", "stype.id"];
+	var doFilter = false;
+	var filterSQL = "";
+	if (filterParamStr) {
+		try {
+			let filterParam = JSON.parse(filterParamStr);
+			for (let i = 0; i < 3; i++) {
+				let tablename = filterableTables[i];
+				let queryAlias = queryAliases[i];
+				if (filterParam[tablename]) {
+					let IDs = [];
+					for (let j = 0; j < filterParam[tablename].length; j++) {
+						if (Number.isInteger(filterParam[tablename][j])) {
+							IDs.push(filterParam[tablename][j]);
+						}
+					}
+					if (IDs.length > 0) {
+						filterSQL += ` AND ${queryAlias} IN ( `;
+						for (let j = 0; j < IDs.length; j++) {
+							if (j === 0) {
+								filterSQL += `${IDs[j]}`;
+							} else {
+								filterSQL += `, ${IDs[j]}`;
+							}
+						}
+						filterSQL += ` )`;
+						doFilter = true;
+					}
+				}
+			}
+		} catch (error) {
+			/* Filter Param not valid JSON.*/
+			throw error;
+		}
+	}
+	if (doFilter) {
+		return filterSQL;
+	} else {
+		return null;
+	}
+}
+
 /* GET 1 sequence listing. */
 router.get(
 	"/:id([0-9]{1,})",
 	asyncHandler(async (req, res, next) => {
-		const qRes = await dbLink.dbQueryAllToJRes(
+		const qRes = await dbLink.dbQueryToJRes(
 			sequenceQuery({ id: req.params.id })
 		);
 		res.json(qRes);
@@ -70,6 +140,23 @@ router.get(
 				sort = req.query.sort;
 			}
 		}
+		try {
+			var filterSQL = filterParamJsonToSql({
+				filterParamStr: req.query.filter
+			});
+		} catch (error) {
+			/* Filter Param not valid JSON.*/
+			res.json({
+				status: 400,
+				error: "Invalid JSON in 'filter=' query.  " + error,
+				data: null
+			});
+			return;
+		}
+
+		/* Submit series of async queries */
+		/* qTotal from either a fast total-lookup
+		  or a slow WHERE query, depending on 'filterSQL' */
 		const [
 			qTotal,
 			qAll,
@@ -77,12 +164,17 @@ router.get(
 			filterbyGroups,
 			filterbyType
 		] = await Promise.all([
-			dbLink.dbCountAllToJRes("sequence"),
-			dbLink.dbQueryAllToJRes(
+			filterSQL
+				? dbLink.dbCountQueryToJRes(
+						sequenceCountQuery({ filterSQL: filterSQL })
+				  )
+				: dbLink.dbCountAllToJRes("sequence"),
+			dbLink.dbQueryToJRes(
 				sequenceQuery({
 					limit: limit,
 					offset: offset,
-					sort: sort
+					sort: sort,
+					filterSQL: filterSQL
 				})
 			),
 			dbLink.dbFilterListToJRes("sample", "name"),
@@ -90,11 +182,11 @@ router.get(
 			dbLink.dbFilterListToJRes("seqtype", "type")
 		]);
 
-		res.json(
-			Object.assign(qTotal, qAll, {
-				filterby: [filterbySamps, filterbyGroups, filterbyType]
-			})
-		);
+		res.json({
+			...qTotal,
+			...qAll,
+			filterby: { ...filterbySamps, ...filterbyGroups, ...filterbyType }
+		});
 	})
 );
 

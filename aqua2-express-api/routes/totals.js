@@ -24,8 +24,8 @@ LIMIT 1
 router.get(
 	"/",
 	asyncHandler(async (req, res, next) => {
-		const qAll = await dbLink.dbQueryAllToJRes(totalsQuery());
-		res.json(Object.assign({ total: 1 }, qAll));
+		const qAll = await dbLink.dbQueryToJRes(totalsQuery());
+		res.json({ total: 1, ...qAll });
 	})
 );
 
