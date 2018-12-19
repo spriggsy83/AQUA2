@@ -2,17 +2,23 @@ import React, { Component } from "react";
 import MuiDataTable from "mui-datatables";
 import LinearProgress from "@material-ui/core/LinearProgress";
 import API from "../API";
+import SeqFilterBar from "./Sequences/SeqFilterBar";
 import { map, pick, values } from "lodash";
 
 class ListSequences extends Component {
-	state = {
-		page: 0,
-		total: 0,
-		rowsPerPage: 100,
-		orderby: null,
-		sequences: [],
-		loading: true
-	};
+	constructor(props) {
+		super(props);
+		this.onFilterChange = this.onFilterChange.bind(this);
+		this.state = {
+			page: 0,
+			total: 0,
+			rowsPerPage: 100,
+			orderby: null,
+			sequences: [],
+			loading: true,
+			filterBy: {}
+		};
+	}
 
 	componentDidMount() {
 		this.getData();
@@ -42,12 +48,29 @@ class ListSequences extends Component {
 					])
 				);
 			});
-			this.setState({ sequences, total: res.data.total, loading: false });
+			this.setState({
+				sequences,
+				total: res.data.total,
+				loading: false,
+				filterBy: res.data.filterby
+			});
 		});
 	};
 
+	// Get initial data
+	onFilterChange = filterQ => {
+		console.log(filterQ);
+	};
+
 	render() {
-		const { page, total, rowsPerPage, sequences, loading } = this.state;
+		const {
+			page,
+			total,
+			rowsPerPage,
+			sequences,
+			loading,
+			filterBy
+		} = this.state;
 		const options = {
 			pagination: true,
 			viewColumns: true,
@@ -145,6 +168,14 @@ class ListSequences extends Component {
 						<LinearProgress color="secondary" />
 					</div>
 				)}
+				{filterBy && (
+					<div>
+						<SeqFilterBar
+							filterBy={filterBy}
+							onFilterChange={this.onFilterChange}
+						/>
+					</div>
+				)}
 				<div>
 					<MuiDataTable
 						data={sequences}
@@ -153,6 +184,13 @@ class ListSequences extends Component {
 						title={"Sequences"}
 					/>
 				</div>
+				{loading && (
+					<div>
+						<LinearProgress />
+						<br />
+						<LinearProgress color="secondary" />
+					</div>
+				)}
 			</div>
 		);
 	}

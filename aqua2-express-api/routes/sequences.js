@@ -49,14 +49,8 @@ WHERE 1 = 1
 function sequenceCountQuery({ filterSQL = null } = {}) {
 	const countQuery = SQL`
 SELECT 
-  count(seq.id) AS total
-FROM sequence AS seq
-JOIN seqgroup AS grp
-  ON grp.id=seq.belongsGroup
-JOIN sample AS samp
-  ON samp.id=seq.isSample
-JOIN seqtype AS stype
-  ON stype.id=seq.isType
+  count(id) AS total
+FROM sequence
 WHERE 1 = 1
 `;
 	if (filterSQL) {
@@ -70,7 +64,7 @@ WHERE 1 = 1
  Or null/error */
 function filterParamJsonToSql({ filterParamStr = null } = {}) {
 	var filterableTables = ["sample", "seqgroup", "seqtype"];
-	var queryAliases = ["samp.id", "grp.id", "stype.id"];
+	var queryAliases = ["isSample", "belongsGroup", "isType"];
 	var doFilter = false;
 	var filterSQL = "";
 	if (filterParamStr) {
@@ -106,6 +100,7 @@ function filterParamJsonToSql({ filterParamStr = null } = {}) {
 		}
 	}
 	if (doFilter) {
+		console.log(filterSQL);
 		return filterSQL;
 	} else {
 		return null;

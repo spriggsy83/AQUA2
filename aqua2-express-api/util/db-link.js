@@ -76,7 +76,7 @@ async function dbFilterListToJRes(tableName, labelCol) {
 	return new Promise(function(resolve, reject) {
 		const sqlTQuery = SQL`SELECT id, `
 			.append(labelCol)
-			.append(SQL` FROM `)
+			.append(SQL` AS label FROM `)
 			.append(tableName);
 		dbpool.query(sqlTQuery, function(error, results, fields) {
 			if (error) {

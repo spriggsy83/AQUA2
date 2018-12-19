@@ -398,7 +398,7 @@ definitions:
           properties:
             id:
               type: "integer"
-            colname:
+            label:
               type: "string"
 parameters:
   sort:
