@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import MuiDataTable from "mui-datatables";
 import LinearProgress from "@material-ui/core/LinearProgress";
+import NumberFormat from "react-number-format";
 import { map, pick, values } from "lodash";
 import { connect } from "react-redux";
 import { getSeqGroups } from "../actions/seqgroups_actions.js";
@@ -33,7 +34,14 @@ class ListSeqGroups extends Component {
 					display: "hidden",
 					sort: true,
 					customBodyRender: (value, tableMeta, updateValue) => {
-						return value.toLocaleString();
+						return (
+							<NumberFormat
+								value={value}
+								displayType={"text"}
+								thousandSeparator={true}
+								style={{ float: "right" }}
+							/>
+						);
 					}
 				}
 			},
@@ -42,7 +50,14 @@ class ListSeqGroups extends Component {
 				options: {
 					sort: true,
 					customBodyRender: (value, tableMeta, updateValue) => {
-						return value.toLocaleString();
+						return (
+							<NumberFormat
+								value={value}
+								displayType={"text"}
+								thousandSeparator={true}
+								style={{ float: "right" }}
+							/>
+						);
 					}
 				}
 			},
@@ -51,7 +66,14 @@ class ListSeqGroups extends Component {
 				options: {
 					sort: true,
 					customBodyRender: (value, tableMeta, updateValue) => {
-						return value.toLocaleString();
+						return (
+							<NumberFormat
+								value={value}
+								displayType={"text"}
+								thousandSeparator={true}
+								style={{ float: "right" }}
+							/>
+						);
 					}
 				}
 			},
@@ -61,7 +83,14 @@ class ListSeqGroups extends Component {
 					display: "hidden",
 					sort: true,
 					customBodyRender: (value, tableMeta, updateValue) => {
-						return value.toLocaleString();
+						return (
+							<NumberFormat
+								value={value}
+								displayType={"text"}
+								thousandSeparator={true}
+								style={{ float: "right" }}
+							/>
+						);
 					}
 				}
 			},
@@ -70,7 +99,14 @@ class ListSeqGroups extends Component {
 				options: {
 					sort: true,
 					customBodyRender: (value, tableMeta, updateValue) => {
-						return value.toLocaleString();
+						return (
+							<NumberFormat
+								value={value}
+								displayType={"text"}
+								thousandSeparator={true}
+								style={{ float: "right" }}
+							/>
+						);
 					}
 				}
 			}

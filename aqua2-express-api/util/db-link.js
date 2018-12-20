@@ -1,4 +1,5 @@
 const mysql = require("mysql");
+const map = require("lodash");
 const SQL = require("sql-template-strings");
 
 const dbpool = mysql.createPool({
@@ -82,7 +83,11 @@ async function dbFilterListToJRes(tableName, labelCol) {
 			if (error) {
 				resolve({});
 			} else if (results && results.length) {
-				resolve({ [tableName]: results });
+				var idMap = {};
+				results.map(function(row) {
+					idMap[row.label] = row.id;
+				});
+				resolve({ [tableName]: idMap });
 			} else {
 				resolve({});
 			}

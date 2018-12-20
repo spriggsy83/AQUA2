@@ -4,6 +4,7 @@ import LinearProgress from "@material-ui/core/LinearProgress";
 import API from "../API";
 import SeqFilterBar from "./Sequences/SeqFilterBar";
 import { map, pick, values } from "lodash";
+import NumberFormat from "react-number-format";
 
 class ListSequences extends Component {
 	constructor(props) {
@@ -16,7 +17,9 @@ class ListSequences extends Component {
 			orderby: null,
 			sequences: [],
 			loading: true,
-			filterBy: {}
+			filterOpts: {},
+			filtersSet: {},
+			filtersChecked: {}
 		};
 	}
 
@@ -52,7 +55,7 @@ class ListSequences extends Component {
 				sequences,
 				total: res.data.total,
 				loading: false,
-				filterBy: res.data.filterby
+				filterOpts: res.data.filterby
 			});
 		});
 	};
@@ -69,7 +72,7 @@ class ListSequences extends Component {
 			rowsPerPage,
 			sequences,
 			loading,
-			filterBy
+			filterOpts
 		} = this.state;
 		const options = {
 			pagination: true,
@@ -117,6 +120,18 @@ class ListSequences extends Component {
 						this.getData();
 					}
 				);
+			},
+			customToolbar: () => {
+				if (filterOpts) {
+					return (
+						<>
+							<SeqFilterBar
+								filterOpts={filterOpts}
+								onFilterChange={this.onFilterChange}
+							/>
+						</>
+					);
+				}
 			}
 		};
 		const columns = [
@@ -127,7 +142,14 @@ class ListSequences extends Component {
 				options: {
 					sort: true,
 					customBodyRender: (value, tableMeta, updateValue) => {
-						return value.toLocaleString();
+						return (
+							<NumberFormat
+								value={value}
+								displayType={"text"}
+								thousandSeparator={true}
+								style={{ float: "right" }}
+							/>
+						);
 					}
 				}
 			},
@@ -160,38 +182,30 @@ class ListSequences extends Component {
 		];
 
 		return (
-			<div>
+			<>
 				{loading && (
-					<div>
+					<>
 						<LinearProgress />
 						<br />
 						<LinearProgress color="secondary" />
-					</div>
+					</>
 				)}
-				{filterBy && (
-					<div>
-						<SeqFilterBar
-							filterBy={filterBy}
-							onFilterChange={this.onFilterChange}
-						/>
-					</div>
-				)}
-				<div>
+				<>
 					<MuiDataTable
 						data={sequences}
 						columns={columns}
 						options={options}
 						title={"Sequences"}
 					/>
-				</div>
+				</>
 				{loading && (
-					<div>
+					<>
 						<LinearProgress />
 						<br />
 						<LinearProgress color="secondary" />
-					</div>
+					</>
 				)}
-			</div>
+			</>
 		);
 	}
 }

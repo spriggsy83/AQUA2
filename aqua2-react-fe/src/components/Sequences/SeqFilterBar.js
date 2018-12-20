@@ -9,20 +9,27 @@ import FormControl from "@material-ui/core/FormControl";
 import ListItemText from "@material-ui/core/ListItemText";
 import Select from "@material-ui/core/Select";
 import Checkbox from "@material-ui/core/Checkbox";
-import { map, forEach, find } from "lodash";
+import { map, forEach } from "lodash";
 
 const styles = theme => ({
 	root: {
-		display: "flex",
-		flexWrap: "wrap"
+		display: "inline-flex",
+		flexWrap: "wrap",
+		justifyContent: "flex-end",
+		borderWidth: "1px",
+		borderStyle: "solid",
+		borderColor: "rgb(224, 224, 224)"
 	},
 	formControl: {
 		margin: theme.spacing.unit,
-		minWidth: 120,
-		maxWidth: 300
+		minWidth: 90,
+		maxWidth: 200
 	},
 	margin: {
 		margin: theme.spacing.unit
+	},
+	smallText: {
+		fontSize: 10
 	}
 });
 
@@ -43,21 +50,21 @@ class SeqFilterBar extends Component {
 		this.state = { checked: {} };
 		this.handleChange = this.handleChange.bind(this);
 		this.handleClick = this.handleClick.bind(this);
-		if (props.filterBy) {
-			map(Object.keys(props.filterBy), table => {
+		if (props.filterOpts) {
+			Object.keys(props.filterOpts).forEach(table => {
 				this.state.checked[table] = [];
 			});
 		}
 	}
 
 	static getDerivedStateFromProps(props, state) {
-		if (props.filterBy) {
+		if (props.filterOpts) {
 			if (
-				Object.keys(props.filterBy).length !==
+				Object.keys(props.filterOpts).length !==
 				Object.keys(state.checked).length
 			) {
 				let newState = { checked: {} };
-				map(Object.keys(props.filterBy), table => {
+				Object.keys(props.filterOpts).forEach(table => {
 					newState.checked[table] = [];
 				});
 				return newState;
@@ -78,80 +85,85 @@ class SeqFilterBar extends Component {
 
 	handleClick = event => {
 		var filterQ = {};
-		forEach(this.state.checked, (list, table) => {
-			if (list.length) {
-				filterQ[table] = [];
-				forEach(list, label => {
-					filterQ[table].push(
-						find(this.props.filterBy[table], x => {
-							return x.label === label;
-						}).id
-					);
+		forEach(this.state.checked, (flist, table) => {
+			if (flist.length) {
+				filterQ[table] = map(flist, label => {
+					return this.props.filterOpts[table][label];
 				});
 			}
 		});
 		this.props.onFilterChange(filterQ);
 	};
 
+	renderFilterLists = () => {
+		const { classes, filterOpts } = this.props;
+		return map(Object.keys(filterOpts), tablename => {
+			return (
+				<FormControl
+					className={classes.formControl}
+					key={`filtermenu-${tablename}`}
+				>
+					<InputLabel
+						htmlFor={`select-${tablename}-checkbox`}
+						className={classes.smallText}
+					>
+						{tablename}
+					</InputLabel>
+					<Select
+						multiple
+						value={this.state.checked[tablename]}
+						onChange={this.handleChange(tablename)}
+						input={
+							<Input
+								id={`select-${tablename}-checkbox`}
+								className={classes.smallText}
+							/>
+						}
+						renderValue={selected => selected.join(", ")}
+						MenuProps={MenuProps}
+					>
+						{this.renderFListRows(tablename)}
+					</Select>
+				</FormControl>
+			);
+		});
+	};
+
+	renderFListRows = tablename => {
+		const { filterOpts } = this.props;
+		const fList = filterOpts[tablename];
+		return map(Object.keys(fList), rowlabel => {
+			return (
+				<MenuItem
+					key={`filtercheck-${tablename}-${rowlabel}`}
+					value={rowlabel}
+				>
+					<Checkbox
+						checked={
+							this.state.checked[tablename].indexOf(rowlabel) > -1
+						}
+					/>
+					<ListItemText primary={rowlabel} />
+				</MenuItem>
+			);
+		});
+	};
+
 	render() {
-		const { classes, filterBy } = this.props;
-		if (filterBy) {
-			if (Object.keys(filterBy).length > 0) {
+		const { classes, filterOpts } = this.props;
+		if (filterOpts) {
+			if (Object.keys(filterOpts).length > 0) {
 				return (
 					<div className={classes.root}>
-						{map(Object.keys(filterBy), table => (
-							<FormControl
-								className={classes.formControl}
-								key={`filtermenu-${table}`}
-							>
-								<InputLabel
-									htmlFor={`select-${table}-checkbox`}
-								>
-									{table}
-								</InputLabel>
-								<Select
-									multiple
-									value={this.state.checked[table]}
-									onChange={this.handleChange(table)}
-									input={
-										<Input
-											id={`select-${table}-checkbox`}
-										/>
-									}
-									renderValue={selected =>
-										selected.join(", ")
-									}
-									MenuProps={MenuProps}
-								>
-									{map(filterBy[table], row => (
-										<MenuItem
-											key={`filtercheck-${table}-${
-												row.id
-											}`}
-											value={row.label}
-										>
-											<Checkbox
-												checked={
-													this.state.checked[
-														table
-													].indexOf(row.label) > -1
-												}
-											/>
-											<ListItemText primary={row.label} />
-										</MenuItem>
-									))}
-								</Select>
-							</FormControl>
-						))}
 						<Button
-							variant="contained"
+							variant="outlined"
 							size="small"
-							color="secondary"
-							className={classes.margin}
+							className={classes.margin + " " + classes.smallText}
 							onClick={this.handleClick}
 						>
-							Filter
+							Filter:
 						</Button>
+						{this.renderFilterLists()}
 					</div>
 				);
 			} else {
@@ -164,8 +176,9 @@ class SeqFilterBar extends Component {
 }
 
 SeqFilterBar.propTypes = {
-	filterBy: PropTypes.object.isRequired,
-	onFilterChange: PropTypes.func.isRequired
+	filterOpts: PropTypes.object.isRequired,
+	onFilterChange: PropTypes.func.isRequired,
+	classes: PropTypes.object.isRequired
 };
 
 export default withStyles(styles, { withTheme: true })(SeqFilterBar);

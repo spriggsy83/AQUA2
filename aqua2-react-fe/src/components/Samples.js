@@ -3,6 +3,7 @@ import MuiDataTable from "mui-datatables";
 import LinearProgress from "@material-ui/core/LinearProgress";
 import { map, pick, values } from "lodash";
 import { connect } from "react-redux";
+import NumberFormat from "react-number-format";
 import { getSamples } from "../actions/samples_actions.js";
 
 class ListSamples extends Component {
@@ -33,7 +34,14 @@ class ListSamples extends Component {
 				options: {
 					sort: true,
 					customBodyRender: (value, tableMeta, updateValue) => {
-						return value.toLocaleString();
+						return (
+							<NumberFormat
+								value={value}
+								displayType={"text"}
+								thousandSeparator={true}
+								style={{ float: "right" }}
+							/>
+						);
 					}
 				}
 			},
@@ -42,7 +50,14 @@ class ListSamples extends Component {
 				options: {
 					sort: true,
 					customBodyRender: (value, tableMeta, updateValue) => {
-						return value.toLocaleString();
+						return (
+							<NumberFormat
+								value={value}
+								displayType={"text"}
+								thousandSeparator={true}
+								style={{ float: "right" }}
+							/>
+						);
 					}
 				}
 			}

@@ -23,6 +23,13 @@ export const theme = createMuiTheme({
 					backgroundColor: green["A100"] + " !important"
 				}
 			}
+		},
+		MuiButtonBase: {
+			root: {
+				"&:hover": {
+					backgroundColor: green["A100"] + " !important"
+				}
+			}
 		}
 	}
 });
