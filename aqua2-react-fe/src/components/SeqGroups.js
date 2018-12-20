@@ -119,7 +119,7 @@ class ListSeqGroups extends Component {
 						data={seqgroups}
 						columns={columns}
 						options={options}
-						title={"SeqGroups"}
+						title={"Groups/Assemblies"}
 					/>
 				</div>
 			);

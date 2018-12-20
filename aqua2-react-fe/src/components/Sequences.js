@@ -3,13 +3,18 @@ import MuiDataTable from "mui-datatables";
 import LinearProgress from "@material-ui/core/LinearProgress";
 import API from "../API";
 import SeqFilterBar from "./Sequences/SeqFilterBar";
-import { map, pick, values } from "lodash";
+import { map, pick, values, isEqual, isEmpty, reduce } from "lodash";
 import NumberFormat from "react-number-format";
+import IconButton from "@material-ui/core/IconButton";
+import FilterListIcon from "@material-ui/icons/FilterList";
+import Tooltip from "@material-ui/core/Tooltip";
 
 class ListSequences extends Component {
 	constructor(props) {
 		super(props);
 		this.onFilterChange = this.onFilterChange.bind(this);
+		this.onFilterSubmit = this.onFilterSubmit.bind(this);
+		this.onFilterHiderClick = this.onFilterHiderClick.bind(this);
 		this.state = {
 			page: 0,
 			total: 0,
@@ -19,7 +24,8 @@ class ListSequences extends Component {
 			loading: true,
 			filterOpts: {},
 			filtersSet: {},
-			filtersChecked: {}
+			filtersChecked: {},
+			isFilterShowing: false
 		};
 	}
 
@@ -29,11 +35,27 @@ class ListSequences extends Component {
 
 	// Get initial data
 	getData = () => {
-		const { page, rowsPerPage, orderby } = this.state;
+		const {
+			page,
+			rowsPerPage,
+			orderby,
+			filtersSet,
+			filterOpts
+		} = this.state;
 		const offset = page * rowsPerPage;
-		API.get(
-			`sequences?limit=${rowsPerPage}&offset=${offset}&sort=${orderby}`
-		).then(res => {
+		var qParams = {
+			limit: rowsPerPage,
+			offset: offset
+		};
+		if (orderby) {
+			qParams["sort"] = orderby;
+		}
+		if (!isEmpty(filtersSet)) {
+			qParams["filter"] = filtersSet;
+		}
+		API.get(`sequences`, {
+			params: qParams
+		}).then(res => {
 			const sequences = map(res.data.data, sequence => {
 				return values(
 					pick(sequence, [
@@ -51,18 +73,76 @@ class ListSequences extends Component {
 					])
 				);
 			});
-			this.setState({
-				sequences,
-				total: res.data.total,
-				loading: false,
-				filterOpts: res.data.filterby
-			});
+			if (isEqual(filterOpts, res.data.filterby)) {
+				this.setState({
+					sequences,
+					total: res.data.total,
+					isFilterShowing: false,
+					loading: false
+				});
+			} else {
+				this.setState({
+					sequences,
+					total: res.data.total,
+					loading: false,
+					isFilterShowing: false,
+					filterOpts: res.data.filterby,
+					filtersChecked: reduce(
+						res.data.filterby,
+						function(result, value, key) {
+							result[key] = [];
+							return result;
+						},
+						{}
+					)
+				});
+			}
 		});
 	};
 
-	// Get initial data
-	onFilterChange = filterQ => {
-		console.log(filterQ);
+	// SeqFilterBar checkbox ticked/unticked
+	onFilterChange = (tablename, checkList) => {
+		this.setState(prevState => ({
+			filtersChecked: {
+				...prevState.filtersChecked,
+				[tablename]: checkList
+			}
+		}));
+	};
+
+	// SeqFilterBar submitting new filter list
+	onFilterSubmit = () => {
+		const { filtersChecked, filterOpts, filtersSet } = this.state;
+		var newFiltersSet = reduce(
+			filtersChecked,
+			function(result, flist, tablename) {
+				if (flist.length) {
+					result[tablename] = map(flist, label => {
+						return filterOpts[tablename][label];
+					});
+				}
+				return result;
+			},
+			{}
+		);
+		if (!isEqual(newFiltersSet, filtersSet)) {
+			this.setState(
+				{
+					loading: true,
+					page: 0,
+					filtersSet: newFiltersSet
+				},
+				() => {
+					this.getData();
+				}
+			);
+		}
+	};
+
+	onFilterHiderClick = () => {
+		this.setState(prevState => ({
+			isFilterShowing: !prevState.isFilterShowing
+		}));
 	};
 
 	render() {
@@ -72,7 +152,9 @@ class ListSequences extends Component {
 			rowsPerPage,
 			sequences,
 			loading,
-			filterOpts
+			filterOpts,
+			filtersChecked,
+			isFilterShowing
 		} = this.state;
 		const options = {
 			pagination: true,
@@ -125,10 +207,22 @@ class ListSequences extends Component {
 				if (filterOpts) {
 					return (
 						<>
-							<SeqFilterBar
-								filterOpts={filterOpts}
-								onFilterChange={this.onFilterChange}
-							/>
+							<Tooltip id="filter-button" title="Filter">
+								<IconButton
+									aria-label="Filter"
+									onClick={this.onFilterHiderClick}
+								>
+									<FilterListIcon />
+								</IconButton>
+							</Tooltip>
+							{isFilterShowing && (
+								<SeqFilterBar
+									checked={filtersChecked}
+									filterOpts={filterOpts}
+									onFilterChange={this.onFilterChange}
+									onFilterSubmit={this.onFilterSubmit}
+								/>
+							)}
 						</>
 					);
 				}

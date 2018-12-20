@@ -100,7 +100,6 @@ function filterParamJsonToSql({ filterParamStr = null } = {}) {
 		}
 	}
 	if (doFilter) {
-		console.log(filterSQL);
 		return filterSQL;
 	} else {
 		return null;

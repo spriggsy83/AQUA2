@@ -9,12 +9,12 @@ import FormControl from "@material-ui/core/FormControl";
 import ListItemText from "@material-ui/core/ListItemText";
 import Select from "@material-ui/core/Select";
 import Checkbox from "@material-ui/core/Checkbox";
-import { map, forEach } from "lodash";
+import { map } from "lodash";
 
 const styles = theme => ({
 	root: {
 		display: "inline-flex",
-		flexWrap: "wrap",
+		flexWrap: "nowrap",
 		justifyContent: "flex-end",
 		borderWidth: "1px",
 		borderStyle: "solid",
@@ -23,7 +23,7 @@ const styles = theme => ({
 	formControl: {
 		margin: theme.spacing.unit,
 		minWidth: 90,
-		maxWidth: 200
+		maxWidth: 150
 	},
 	margin: {
 		margin: theme.spacing.unit
@@ -47,56 +47,20 @@ const MenuProps = {
 class SeqFilterBar extends Component {
 	constructor(props) {
 		super(props);
-		this.state = { checked: {} };
 		this.handleChange = this.handleChange.bind(this);
 		this.handleClick = this.handleClick.bind(this);
-		if (props.filterOpts) {
-			Object.keys(props.filterOpts).forEach(table => {
-				this.state.checked[table] = [];
-			});
-		}
-	}
-
-	static getDerivedStateFromProps(props, state) {
-		if (props.filterOpts) {
-			if (
-				Object.keys(props.filterOpts).length !==
-				Object.keys(state.checked).length
-			) {
-				let newState = { checked: {} };
-				Object.keys(props.filterOpts).forEach(table => {
-					newState.checked[table] = [];
-				});
-				return newState;
-			}
-		}
-		return null;
 	}
 
 	handleChange = source => event => {
-		this.setState(prevState => ({
-			...this.state,
-			checked: {
-				...this.state.checked,
-				[source]: event.target.value
-			}
-		}));
+		this.props.onFilterChange(source, event.target.value);
 	};
 
 	handleClick = event => {
-		var filterQ = {};
-		forEach(this.state.checked, (flist, table) => {
-			if (flist.length) {
-				filterQ[table] = map(flist, label => {
-					return this.props.filterOpts[table][label];
-				});
-			}
-		});
-		this.props.onFilterChange(filterQ);
+		this.props.onFilterSubmit();
 	};
 
 	renderFilterLists = () => {
-		const { classes, filterOpts } = this.props;
+		const { classes, filterOpts, checked } = this.props;
 		return map(Object.keys(filterOpts), tablename => {
 			return (
 				<FormControl
@@ -111,7 +75,7 @@ class SeqFilterBar extends Component {
 					</InputLabel>
 					<Select
 						multiple
-						value={this.state.checked[tablename]}
+						value={checked[tablename]}
 						onChange={this.handleChange(tablename)}
 						input={
 							<Input
@@ -130,7 +94,7 @@ class SeqFilterBar extends Component {
 	};
 
 	renderFListRows = tablename => {
-		const { filterOpts } = this.props;
+		const { filterOpts, checked } = this.props;
 		const fList = filterOpts[tablename];
 		return map(Object.keys(fList), rowlabel => {
 			return (
@@ -139,9 +103,7 @@ class SeqFilterBar extends Component {
 					value={rowlabel}
 				>
 					<Checkbox
-						checked={
-							this.state.checked[tablename].indexOf(rowlabel) > -1
-						}
+						checked={checked[tablename].indexOf(rowlabel) > -1}
 					/>
 					<ListItemText primary={rowlabel} />
 				</MenuItem>
@@ -176,8 +138,10 @@ class SeqFilterBar extends Component {
 }
 
 SeqFilterBar.propTypes = {
+	checked: PropTypes.object.isRequired,
 	filterOpts: PropTypes.object.isRequired,
 	onFilterChange: PropTypes.func.isRequired,
+	onFilterSubmit: PropTypes.func.isRequired,
 	classes: PropTypes.object.isRequired
 };
 
