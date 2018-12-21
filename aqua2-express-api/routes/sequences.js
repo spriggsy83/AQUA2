@@ -24,7 +24,8 @@ SELECT
   seq.isType AS typeId,
   stype.type AS typeName,
   seq.annotNote,
-  seq.extLink
+  seq.extLink,
+  seq.extLinkLabel
 FROM sequence AS seq
 JOIN seqgroup AS grp
   ON grp.id=seq.belongsGroup

@@ -2,38 +2,52 @@ import React, { Component } from "react";
 import MuiDataTable from "mui-datatables";
 import LinearProgress from "@material-ui/core/LinearProgress";
 import API from "../API";
+import { renderNumber } from "../UI/renderHelpers";
 import SeqFilterBar from "./Sequences/SeqFilterBar";
-import { map, pick, values, isEqual, isEmpty, reduce } from "lodash";
-import NumberFormat from "react-number-format";
+import { map, at, isEqual, isEmpty, reduce } from "lodash";
 import IconButton from "@material-ui/core/IconButton";
 import FilterListIcon from "@material-ui/icons/FilterList";
 import Tooltip from "@material-ui/core/Tooltip";
 
+const columns = [
+	{ name: "dbID", options: { display: "excluded" } },
+	{ name: "Name", options: { sort: true } },
+	{
+		name: "Length (bp)",
+		options: {
+			sort: true,
+			customBodyRender: renderNumber
+		}
+	},
+	{ name: "groupId", options: { display: "excluded" } },
+	{ name: "Group", options: { sort: true } },
+	{ name: "sampleId", options: { display: "excluded" } },
+	{ name: "Sample", options: { sort: true } },
+	{ name: "typeId", options: { display: "excluded" } },
+	{ name: "Type", options: { sort: true } },
+	{ name: "Annotation note", options: { sort: false } },
+	{ name: "External link", options: { sort: false } }
+];
+
 class ListSequences extends Component {
-	constructor(props) {
-		super(props);
-		this.onFilterChange = this.onFilterChange.bind(this);
-		this.onFilterSubmit = this.onFilterSubmit.bind(this);
-		this.onFilterHiderClick = this.onFilterHiderClick.bind(this);
-		this.state = {
-			page: 0,
-			total: 0,
-			rowsPerPage: 100,
-			orderby: null,
-			sequences: [],
-			loading: true,
-			filterOpts: {},
-			filtersSet: {},
-			filtersChecked: {},
-			isFilterShowing: false
-		};
-	}
+	state = {
+		page: 0,
+		total: 0,
+		rowsPerPage: 100,
+		orderby: null,
+		sequences: [],
+		loading: true,
+		filterOpts: {},
+		filtersSet: {},
+		filtersChecked: {},
+		isFilterShowing: false
+	};
 
 	componentDidMount() {
 		this.getData();
 	}
 
-	// Get initial data
+	/** Get initial data **/
 	getData = () => {
 		const {
 			page,
@@ -57,21 +71,28 @@ class ListSequences extends Component {
 			params: qParams
 		}).then(res => {
 			const sequences = map(res.data.data, sequence => {
-				return values(
-					pick(sequence, [
-						"id",
-						"name",
-						"length",
-						"groupId",
-						"groupName",
-						"sampleId",
-						"sampleName",
-						"typeId",
-						"typeName",
-						"annotNote",
-						"extLink"
-					])
+				var seqRow = at(sequence, [
+					"id",
+					"name",
+					"length",
+					"groupId",
+					"groupName",
+					"sampleId",
+					"sampleName",
+					"typeId",
+					"typeName",
+					"annotNote"
+				]);
+				seqRow.push(
+					<a
+						href={sequence.extLink}
+						target="_blank"
+						rel="noopener noreferrer"
+					>
+						{sequence.extLinkLabel}
+					</a>
 				);
+				return seqRow;
 			});
 			if (isEqual(filterOpts, res.data.filterby)) {
 				this.setState({
@@ -100,7 +121,7 @@ class ListSequences extends Component {
 		});
 	};
 
-	// SeqFilterBar checkbox ticked/unticked
+	/** SeqFilterBar checkbox ticked/unticked **/
 	onFilterChange = (tablename, checkList) => {
 		this.setState(prevState => ({
 			filtersChecked: {
@@ -110,7 +131,7 @@ class ListSequences extends Component {
 		}));
 	};
 
-	// SeqFilterBar submitting new filter list
+	/** SeqFilterBar submitting new filter list **/
 	onFilterSubmit = () => {
 		const { filtersChecked, filterOpts, filtersSet } = this.state;
 		var newFiltersSet = reduce(
@@ -139,24 +160,85 @@ class ListSequences extends Component {
 		}
 	};
 
+	/** Show/hide SeqFilterBar **/
 	onFilterHiderClick = () => {
 		this.setState(prevState => ({
 			isFilterShowing: !prevState.isFilterShowing
 		}));
 	};
 
-	render() {
-		const {
-			page,
-			total,
-			rowsPerPage,
-			sequences,
-			loading,
-			filterOpts,
-			filtersChecked,
-			isFilterShowing
-		} = this.state;
-		const options = {
+	/** SeqFilterBar contains checkbox filter controls **/
+	renderFilterToolbar = () => {
+		const { filterOpts, filtersChecked, isFilterShowing } = this.state;
+		if (filterOpts) {
+			return (
+				<>
+					<Tooltip id="filter-button" title="Filter">
+						<IconButton
+							aria-label="Filter"
+							onClick={this.onFilterHiderClick}
+						>
+							<FilterListIcon />
+						</IconButton>
+					</Tooltip>
+					{isFilterShowing && (
+						<SeqFilterBar
+							checked={filtersChecked}
+							filterOpts={filterOpts}
+							onFilterChange={this.onFilterChange}
+							onFilterSubmit={this.onFilterSubmit}
+						/>
+					)}
+				</>
+			);
+		}
+	};
+
+	/** Table sort changed **/
+	onColumnSortChange = (changedColumn, direction) => {
+		var col = changedColumn
+			.replace("Name", "name")
+			.replace("Length (bp)", "length")
+			.replace("Group", "groupName")
+			.replace("Sample", "sampleName")
+			.replace("Type", "typeName");
+		var dir = direction.replace(/(asc|desc)ending/, "$1");
+		this.setState(
+			{
+				loading: true,
+				orderby: `${col} ${dir}`,
+				page: 0
+			},
+			() => {
+				this.getData();
+			}
+		);
+	};
+
+	/** Table page changed **/
+	onTableChange = (action, tableState) => {
+		const { page, rowsPerPage } = this.state;
+		if (
+			tableState.page !== page ||
+			tableState.rowsPerPage !== rowsPerPage
+		) {
+			this.setState(
+				{
+					loading: true,
+					page: tableState.page,
+					rowsPerPage: tableState.rowsPerPage
+				},
+				() => {
+					this.getData();
+				}
+			);
+		}
+	};
+
+	/** options Object required by mui-datatable **/
+	getTableOptions = () => {
+		const { page, total, rowsPerPage } = this.state;
+		return {
 			pagination: true,
 			viewColumns: true,
 			selectableRows: false,
@@ -167,114 +249,14 @@ class ListSequences extends Component {
 			page: page,
 			count: total,
 			serverSide: true,
-			onTableChange: (action, tableState) => {
-				if (
-					tableState.page !== page ||
-					tableState.rowsPerPage !== rowsPerPage
-				) {
-					this.setState(
-						{
-							loading: true,
-							page: tableState.page,
-							rowsPerPage: tableState.rowsPerPage
-						},
-						() => {
-							this.getData();
-						}
-					);
-				}
-			},
-			onColumnSortChange: (changedColumn, direction) => {
-				var col = changedColumn
-					.replace("Name", "name")
-					.replace("Length (bp)", "length")
-					.replace("Group", "groupName")
-					.replace("Sample", "sampleName")
-					.replace("Type", "typeName");
-				var dir = direction.replace(/(asc|desc)ending/, "$1");
-				this.setState(
-					{
-						loading: true,
-						orderby: `${col} ${dir}`,
-						page: 0
-					},
-					() => {
-						this.getData();
-					}
-				);
-			},
-			customToolbar: () => {
-				if (filterOpts) {
-					return (
-						<>
-							<Tooltip id="filter-button" title="Filter">
-								<IconButton
-									aria-label="Filter"
-									onClick={this.onFilterHiderClick}
-								>
-									<FilterListIcon />
-								</IconButton>
-							</Tooltip>
-							{isFilterShowing && (
-								<SeqFilterBar
-									checked={filtersChecked}
-									filterOpts={filterOpts}
-									onFilterChange={this.onFilterChange}
-									onFilterSubmit={this.onFilterSubmit}
-								/>
-							)}
-						</>
-					);
-				}
-			}
+			onTableChange: this.onTableChange,
+			onColumnSortChange: this.onColumnSortChange,
+			customToolbar: this.renderFilterToolbar
 		};
-		const columns = [
-			{ name: "dbID", options: { display: "excluded" } },
-			{ name: "Name", options: { sort: true } },
-			{
-				name: "Length (bp)",
-				options: {
-					sort: true,
-					customBodyRender: (value, tableMeta, updateValue) => {
-						return (
-							<NumberFormat
-								value={value}
-								displayType={"text"}
-								thousandSeparator={true}
-								style={{ float: "right" }}
-							/>
-						);
-					}
-				}
-			},
-			{ name: "groupId", options: { display: "excluded" } },
-			{ name: "Group", options: { sort: true } },
-			{ name: "sampleId", options: { display: "excluded" } },
-			{ name: "Sample", options: { sort: true } },
-			{ name: "typeId", options: { display: "excluded" } },
-			{ name: "Type", options: { sort: true } },
-			{ name: "Annotation note", options: { sort: false } },
-			{
-				name: "External link",
-				options: {
-					sort: false,
-					customBodyRender: (value, tableMeta, updateValue) => {
-						if (value)
-							return (
-								<a
-									href={value}
-									target="_blank"
-									rel="noopener noreferrer"
-								>
-									link
-								</a>
-							);
-						else return;
-					}
-				}
-			}
-		];
+	};
 
+	render() {
+		const { sequences, loading } = this.state;
 		return (
 			<>
 				{loading && (
@@ -288,7 +270,7 @@ class ListSequences extends Component {
 					<MuiDataTable
 						data={sequences}
 						columns={columns}
-						options={options}
+						options={this.getTableOptions()}
 						title={"Sequences"}
 					/>
 				</>

@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import MuiDataTable from "mui-datatables";
 import LinearProgress from "@material-ui/core/LinearProgress";
-import NumberFormat from "react-number-format";
+import { renderNumber } from "../UI/renderHelpers";
 import { map, pick, values } from "lodash";
 import { connect } from "react-redux";
 import { getSeqGroups } from "../actions/seqgroups_actions.js";
@@ -33,48 +33,21 @@ class ListSeqGroups extends Component {
 				options: {
 					display: "hidden",
 					sort: true,
-					customBodyRender: (value, tableMeta, updateValue) => {
-						return (
-							<NumberFormat
-								value={value}
-								displayType={"text"}
-								thousandSeparator={true}
-								style={{ float: "right" }}
-							/>
-						);
-					}
+					customBodyRender: renderNumber
 				}
 			},
 			{
 				name: "Num. sequences",
 				options: {
 					sort: true,
-					customBodyRender: (value, tableMeta, updateValue) => {
-						return (
-							<NumberFormat
-								value={value}
-								displayType={"text"}
-								thousandSeparator={true}
-								style={{ float: "right" }}
-							/>
-						);
-					}
+					customBodyRender: renderNumber
 				}
 			},
 			{
 				name: "Average seq length",
 				options: {
 					sort: true,
-					customBodyRender: (value, tableMeta, updateValue) => {
-						return (
-							<NumberFormat
-								value={value}
-								displayType={"text"}
-								thousandSeparator={true}
-								style={{ float: "right" }}
-							/>
-						);
-					}
+					customBodyRender: renderNumber
 				}
 			},
 			{
@@ -82,32 +55,14 @@ class ListSeqGroups extends Component {
 				options: {
 					display: "hidden",
 					sort: true,
-					customBodyRender: (value, tableMeta, updateValue) => {
-						return (
-							<NumberFormat
-								value={value}
-								displayType={"text"}
-								thousandSeparator={true}
-								style={{ float: "right" }}
-							/>
-						);
-					}
+					customBodyRender: renderNumber
 				}
 			},
 			{
 				name: "Longest seq length",
 				options: {
 					sort: true,
-					customBodyRender: (value, tableMeta, updateValue) => {
-						return (
-							<NumberFormat
-								value={value}
-								displayType={"text"}
-								thousandSeparator={true}
-								style={{ float: "right" }}
-							/>
-						);
-					}
+					customBodyRender: renderNumber
 				}
 			}
 		];

@@ -45,16 +45,12 @@ const MenuProps = {
 };
 
 class SeqFilterBar extends Component {
-	constructor(props) {
-		super(props);
-		this.handleChange = this.handleChange.bind(this);
-		this.handleClick = this.handleClick.bind(this);
-	}
-
+	/** Check boxes checked/unchecked **/
 	handleChange = source => event => {
 		this.props.onFilterChange(source, event.target.value);
 	};
 
+	/** Submit/Filter button clicked **/
 	handleClick = event => {
 		this.props.onFilterSubmit();
 	};

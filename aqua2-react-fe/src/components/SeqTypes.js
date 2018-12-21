@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import MuiDataTable from "mui-datatables";
 import LinearProgress from "@material-ui/core/LinearProgress";
-import NumberFormat from "react-number-format";
+import { renderNumber } from "../UI/renderHelpers";
 import { map, pick, values } from "lodash";
 import { connect } from "react-redux";
 import { getSeqTypes } from "../actions/seqtypes_actions.js";
@@ -39,16 +39,7 @@ class ListSeqTypes extends Component {
 				name: "Num. sequences",
 				options: {
 					sort: true,
-					customBodyRender: (value, tableMeta, updateValue) => {
-						return (
-							<NumberFormat
-								value={value}
-								displayType={"text"}
-								thousandSeparator={true}
-								style={{ float: "right" }}
-							/>
-						);
-					}
+					customBodyRender: renderNumber
 				}
 			}
 		];
