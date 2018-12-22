@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import LinearProgress from "@material-ui/core/LinearProgress";
+import { renderNumber, renderLoadingBars } from "../UI/renderHelpers";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
@@ -30,46 +30,45 @@ class ListTotals extends Component {
 		}
 	}
 
-	render() {
+	renderTotalsList = () => {
 		const { totals, loaded, classes } = this.props;
+		return (
+			<List>
+				{totals.map(function(total, index) {
+					return (
+						<Link
+							to={total[2]}
+							style={{ textDecoration: "none" }}
+							key={index + "-totlink"}
+						>
+							<ListItem button>
+								<ListItemText primary={total[0]} />
+								<ListItemText
+									className={classes.rightjust}
+									primary={total[1]}
+								/>
+							</ListItem>
+						</Link>
+					);
+				})}
+			</List>
+		);
+	};
+
+	render() {
+		const { loaded, classes } = this.props;
 
 		if (loaded) {
 			return (
-				<div>
-					<Paper className={classes.narrowlist} elevation={1}>
-						<Typography variant="h6">
-							Sequence/Annotation data loaded:
-						</Typography>
-						<List>
-							{totals.map(function(total, index) {
-								return (
-									<Link
-										to={total[2]}
-										style={{ textDecoration: "none" }}
-										key={index + "-totlink"}
-									>
-										<ListItem button>
-											<ListItemText primary={total[0]} />
-											<ListItemText
-												className={classes.rightjust}
-												primary={total[1]}
-											/>
-										</ListItem>
-									</Link>
-								);
-							})}
-						</List>
-					</Paper>
-				</div>
+				<Paper className={classes.narrowlist} elevation={1}>
+					<Typography variant="h6">
+						Sequence/Annotation data loaded:
+					</Typography>
+					{this.renderTotalsList()}
+				</Paper>
 			);
 		} else {
-			return (
-				<div>
-					<LinearProgress />
-					<br />
-					<LinearProgress color="secondary" />
-				</div>
-			);
+			return renderLoadingBars();
 		}
 	}
 }

@@ -68,14 +68,14 @@ class ListSeqGroups extends Component {
 		};
 		if (loaded) {
 			return (
-				<div>
+				<>
 					<MuiDataTable
 						data={seqgroups}
 						columns={columns}
 						options={options}
 						title={"Groups/Assemblies"}
 					/>
-				</div>
+				</>
 			);
 		} else {
 			return renderLoadingBars();

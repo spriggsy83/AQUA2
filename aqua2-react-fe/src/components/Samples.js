@@ -47,14 +47,14 @@ class ListSamples extends Component {
 
 		if (loaded) {
 			return (
-				<div>
+				<>
 					<MuiDataTable
 						data={samples}
 						columns={columns}
 						options={options}
 						title={"Samples"}
 					/>
-				</div>
+				</>
 			);
 		} else {
 			return renderLoadingBars();
