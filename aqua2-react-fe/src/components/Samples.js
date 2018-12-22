@@ -1,10 +1,30 @@
 import React, { Component } from "react";
 import MuiDataTable from "mui-datatables";
-import LinearProgress from "@material-ui/core/LinearProgress";
-import { map, pick, values } from "lodash";
+import { map, at } from "lodash";
 import { connect } from "react-redux";
-import { renderNumber } from "../UI/renderHelpers";
+import { renderNumber, renderLoadingBars } from "../UI/renderHelpers";
 import { getSamples } from "../actions/samples_actions.js";
+
+const columns = [
+	{ name: "dbID", options: { display: "excluded" } },
+	{ name: "Sample Name", options: { sort: true } },
+	{ name: "Species", options: { sort: true } },
+	{ name: "Description", options: { sort: false } },
+	{
+		name: "In groups/assemblies",
+		options: {
+			sort: true,
+			customBodyRender: renderNumber
+		}
+	},
+	{
+		name: "Num. sequences",
+		options: {
+			sort: true,
+			customBodyRender: renderNumber
+		}
+	}
+];
 
 class ListSamples extends Component {
 	componentDidMount() {
@@ -24,26 +44,6 @@ class ListSamples extends Component {
 			filter: false,
 			rowsPerPage: 999
 		};
-		const columns = [
-			{ name: "dbID", options: { display: "excluded" } },
-			{ name: "Sample Name", options: { sort: true } },
-			{ name: "Species", options: { sort: true } },
-			{ name: "Description", options: { sort: false } },
-			{
-				name: "In groups/assemblies",
-				options: {
-					sort: true,
-					customBodyRender: renderNumber
-				}
-			},
-			{
-				name: "Num. sequences",
-				options: {
-					sort: true,
-					customBodyRender: renderNumber
-				}
-			}
-		];
 
 		if (loaded) {
 			return (
@@ -57,13 +57,7 @@ class ListSamples extends Component {
 				</div>
 			);
 		} else {
-			return (
-				<div>
-					<LinearProgress />
-					<br />
-					<LinearProgress color="secondary" />
-				</div>
-			);
+			return renderLoadingBars();
 		}
 	}
 }
@@ -75,16 +69,14 @@ function mapStateToProps(state) {
 	var samples = [];
 	if (state.samples.samples.length) {
 		samples = map(state.samples.samples, sample => {
-			return values(
-				pick(sample, [
-					"id",
-					"name",
-					"species",
-					"description",
-					"ingroups",
-					"numseqs"
-				])
-			);
+			return at(sample, [
+				"id",
+				"name",
+				"species",
+				"description",
+				"ingroups",
+				"numseqs"
+			]);
 		});
 	}
 	return {

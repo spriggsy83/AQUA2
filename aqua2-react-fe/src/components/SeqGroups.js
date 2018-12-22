@@ -1,10 +1,52 @@
 import React, { Component } from "react";
 import MuiDataTable from "mui-datatables";
-import LinearProgress from "@material-ui/core/LinearProgress";
-import { renderNumber } from "../UI/renderHelpers";
-import { map, pick, values } from "lodash";
+import { renderNumber, renderLoadingBars } from "../UI/renderHelpers";
+import { map, at } from "lodash";
 import { connect } from "react-redux";
 import { getSeqGroups } from "../actions/seqgroups_actions.js";
+
+const columns = [
+	{ name: "dbID", options: { display: "excluded" } },
+	{ name: "Group Name", options: { sort: true } },
+	{ name: "Description", options: { sort: false } },
+	{
+		name: "From samples",
+		options: {
+			display: "hidden",
+			sort: true,
+			customBodyRender: renderNumber
+		}
+	},
+	{
+		name: "Num. sequences",
+		options: {
+			sort: true,
+			customBodyRender: renderNumber
+		}
+	},
+	{
+		name: "Average seq length",
+		options: {
+			sort: true,
+			customBodyRender: renderNumber
+		}
+	},
+	{
+		name: "N50 seq length",
+		options: {
+			display: "hidden",
+			sort: true,
+			customBodyRender: renderNumber
+		}
+	},
+	{
+		name: "Longest seq length",
+		options: {
+			sort: true,
+			customBodyRender: renderNumber
+		}
+	}
+];
 
 class ListSeqGroups extends Component {
 	componentDidMount() {
@@ -24,49 +66,6 @@ class ListSeqGroups extends Component {
 			filter: false,
 			rowsPerPage: 999
 		};
-		const columns = [
-			{ name: "dbID", options: { display: "excluded" } },
-			{ name: "Group Name", options: { sort: true } },
-			{ name: "Description", options: { sort: false } },
-			{
-				name: "From samples",
-				options: {
-					display: "hidden",
-					sort: true,
-					customBodyRender: renderNumber
-				}
-			},
-			{
-				name: "Num. sequences",
-				options: {
-					sort: true,
-					customBodyRender: renderNumber
-				}
-			},
-			{
-				name: "Average seq length",
-				options: {
-					sort: true,
-					customBodyRender: renderNumber
-				}
-			},
-			{
-				name: "N50 seq length",
-				options: {
-					display: "hidden",
-					sort: true,
-					customBodyRender: renderNumber
-				}
-			},
-			{
-				name: "Longest seq length",
-				options: {
-					sort: true,
-					customBodyRender: renderNumber
-				}
-			}
-		];
-
 		if (loaded) {
 			return (
 				<div>
@@ -79,13 +78,7 @@ class ListSeqGroups extends Component {
 				</div>
 			);
 		} else {
-			return (
-				<div>
-					<LinearProgress />
-					<br />
-					<LinearProgress color="secondary" />
-				</div>
-			);
+			return renderLoadingBars();
 		}
 	}
 }
@@ -97,18 +90,16 @@ function mapStateToProps(state) {
 	var seqgroups = [];
 	if (state.seqgroups.seqgroups.length) {
 		seqgroups = map(state.seqgroups.seqgroups, seqgroup => {
-			return values(
-				pick(seqgroup, [
-					"id",
-					"name",
-					"description",
-					"fromsamps",
-					"numseqs",
-					"avlength",
-					"n50length",
-					"maxlength"
-				])
-			);
+			return at(seqgroup, [
+				"id",
+				"name",
+				"description",
+				"fromsamps",
+				"numseqs",
+				"avlength",
+				"n50length",
+				"maxlength"
+			]);
 		});
 	}
 	return {

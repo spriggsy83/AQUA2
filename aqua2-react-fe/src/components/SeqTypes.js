@@ -1,8 +1,7 @@
 import React, { Component } from "react";
 import MuiDataTable from "mui-datatables";
-import LinearProgress from "@material-ui/core/LinearProgress";
-import { renderNumber } from "../UI/renderHelpers";
-import { map, pick, values } from "lodash";
+import { renderNumber, renderLoadingBars } from "../UI/renderHelpers";
+import { map, at } from "lodash";
 import { connect } from "react-redux";
 import { getSeqTypes } from "../actions/seqtypes_actions.js";
 import compose from "recompose/compose";
@@ -13,6 +12,18 @@ const styles = theme => ({
 		width: 500
 	}
 });
+
+const columns = [
+	{ name: "dbID", options: { display: "excluded" } },
+	{ name: "Seq Type", options: { sort: true } },
+	{
+		name: "Num. sequences",
+		options: {
+			sort: true,
+			customBodyRender: renderNumber
+		}
+	}
+];
 
 class ListSeqTypes extends Component {
 	componentDidMount() {
@@ -32,17 +43,6 @@ class ListSeqTypes extends Component {
 			filter: false,
 			rowsPerPage: 999
 		};
-		const columns = [
-			{ name: "dbID", options: { display: "excluded" } },
-			{ name: "Seq Type", options: { sort: true } },
-			{
-				name: "Num. sequences",
-				options: {
-					sort: true,
-					customBodyRender: renderNumber
-				}
-			}
-		];
 
 		if (loaded) {
 			return (
@@ -56,13 +56,7 @@ class ListSeqTypes extends Component {
 				</div>
 			);
 		} else {
-			return (
-				<div>
-					<LinearProgress />
-					<br />
-					<LinearProgress color="secondary" />
-				</div>
-			);
+			return renderLoadingBars();
 		}
 	}
 }
@@ -74,7 +68,7 @@ function mapStateToProps(state) {
 	var seqtypes = [];
 	if (state.seqtypes.seqtypes.length) {
 		seqtypes = map(state.seqtypes.seqtypes, seqtype => {
-			return values(pick(seqtype, ["id", "type", "numseqs"]));
+			return at(seqtype, ["id", "type", "numseqs"]);
 		});
 	}
 	return {

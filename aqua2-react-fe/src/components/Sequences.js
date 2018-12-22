@@ -1,8 +1,7 @@
 import React, { Component } from "react";
 import MuiDataTable from "mui-datatables";
-import LinearProgress from "@material-ui/core/LinearProgress";
 import API from "../API";
-import { renderNumber } from "../UI/renderHelpers";
+import { renderNumber, renderLoadingBars } from "../UI/renderHelpers";
 import SeqFilterBar from "./Sequences/SeqFilterBar";
 import { map, at, isEqual, isEmpty, reduce } from "lodash";
 import IconButton from "@material-ui/core/IconButton";
@@ -98,7 +97,6 @@ class ListSequences extends Component {
 				this.setState({
 					sequences,
 					total: res.data.total,
-					isFilterShowing: false,
 					loading: false
 				});
 			} else {
@@ -106,7 +104,6 @@ class ListSequences extends Component {
 					sequences,
 					total: res.data.total,
 					loading: false,
-					isFilterShowing: false,
 					filterOpts: res.data.filterby,
 					filtersChecked: reduce(
 						res.data.filterby,
@@ -259,13 +256,7 @@ class ListSequences extends Component {
 		const { sequences, loading } = this.state;
 		return (
 			<>
-				{loading && (
-					<>
-						<LinearProgress />
-						<br />
-						<LinearProgress color="secondary" />
-					</>
-				)}
+				{loading && renderLoadingBars()}
 				<>
 					<MuiDataTable
 						data={sequences}
@@ -274,13 +265,7 @@ class ListSequences extends Component {
 						title={"Sequences"}
 					/>
 				</>
-				{loading && (
-					<>
-						<LinearProgress />
-						<br />
-						<LinearProgress color="secondary" />
-					</>
-				)}
+				{loading && renderLoadingBars()}
 			</>
 		);
 	}
