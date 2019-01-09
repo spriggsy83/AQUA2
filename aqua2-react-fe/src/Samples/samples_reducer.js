@@ -1,7 +1,7 @@
 /**
  * import our action type
  */
-import { SAMPLES_LOADING, SAMPLES_LOADED } from "../actions/samples_actions";
+import { SAMPLES_LOADING, SAMPLES_LOADED } from "./samples_actions.js";
 
 /**
  * define the initial state of our reducer

@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { renderLoadingBars } from "../UI/renderHelpers";
+import { renderLoadingBars } from "common/renderHelpers";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
@@ -7,7 +7,7 @@ import Paper from "@material-ui/core/Paper";
 import Typography from "@material-ui/core/Typography";
 import { Link } from "react-router-dom";
 import { connect } from "react-redux";
-import { getTotals } from "../actions/totals_actions.js";
+import { getTotals } from "./totals_actions.js";
 import compose from "recompose/compose";
 import { withStyles } from "@material-ui/core/styles";
 

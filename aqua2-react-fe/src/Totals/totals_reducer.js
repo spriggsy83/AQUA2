@@ -1,7 +1,7 @@
 /**
  * import our action type
  */
-import { TOTALS_LOADING, TOTALS_LOADED } from "../actions/totals_actions";
+import { TOTALS_LOADING, TOTALS_LOADED } from "./totals_actions";
 
 /**
  * define the initial state of our reducer

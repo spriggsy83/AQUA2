@@ -2,8 +2,8 @@ import React, { Component } from "react";
 import MuiDataTable from "mui-datatables";
 import { map, at } from "lodash";
 import { connect } from "react-redux";
-import { renderNumber, renderLoadingBars } from "../UI/renderHelpers";
-import { getSamples } from "../actions/samples_actions.js";
+import { renderNumber, renderLoadingBars } from "common/renderHelpers";
+import { getSamples } from "./samples_actions.js";
 
 const columns = [
 	{ name: "dbID", options: { display: "excluded" } },

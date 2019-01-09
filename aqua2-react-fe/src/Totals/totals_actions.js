@@ -1,5 +1,5 @@
 "use-strict";
-import API from "../API";
+import API from "common/API";
 
 export const TOTALS_LOADING = "TOTALS_LOADING";
 export const TOTALS_LOADED = "TOTALS_LOADED";
@@ -24,3 +24,8 @@ export function getTotals() {
 			});
 	};
 }
+
+export default {
+	getTotals
+};
+

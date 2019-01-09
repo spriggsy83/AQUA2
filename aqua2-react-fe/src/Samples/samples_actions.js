@@ -1,5 +1,5 @@
 "use-strict";
-import API from "../API";
+import API from "common/API";
 
 export const SAMPLES_LOADING = "SAMPLES_LOADING";
 export const SAMPLES_LOADED = "SAMPLES_LOADED";
@@ -25,3 +25,7 @@ export function getSamples() {
 			});
 	};
 }
+
+export default {
+	getSamples
+};
