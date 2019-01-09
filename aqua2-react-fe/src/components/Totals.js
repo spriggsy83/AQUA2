@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { renderNumber, renderLoadingBars } from "../UI/renderHelpers";
+import { renderLoadingBars } from "../UI/renderHelpers";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
@@ -31,7 +31,7 @@ class ListTotals extends Component {
 	}
 
 	renderTotalsList = () => {
-		const { totals, loaded, classes } = this.props;
+		const { totals, classes } = this.props;
 		return (
 			<List>
 				{totals.map(function(total, index) {
