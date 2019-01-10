@@ -7,9 +7,11 @@ import Paper from "@material-ui/core/Paper";
 import Typography from "@material-ui/core/Typography";
 import { Link } from "react-router-dom";
 import { connect } from "react-redux";
-import { requestTotals } from "./totals_actions.js";
 import compose from "recompose/compose";
 import { withStyles } from "@material-ui/core/styles";
+import { createStructuredSelector } from "reselect";
+import { requestTotals } from "./totals_actions";
+import { getTotalsTable, getStatus } from "./totals_selectors";
 
 const styles = theme => ({
 	narrowlist: {
@@ -76,47 +78,10 @@ class ListTotals extends Component {
 /**
  * allows us to call our application state from props
  */
-function mapStateToProps(state) {
-	if (state.totals.loaded) {
-		const totalObj = state.totals.totals;
-		return {
-			loaded: state.totals.loaded,
-			totals: [
-				["Samples", totalObj["sample"].toLocaleString(), "/Samples"],
-				[
-					"Groups/Assemblies",
-					totalObj["seqgroup"].toLocaleString(),
-					"/SeqGroups"
-				],
-				[
-					"Sequences",
-					totalObj["sequence"].toLocaleString(),
-					"/Sequences"
-				],
-				[
-					"Sequence interrelations",
-					totalObj["seqrelation"].toLocaleString(),
-					"/"
-				],
-				[
-					"Alignment-based annotations",
-					totalObj["alignedannot"].toLocaleString(),
-					"/"
-				],
-				[
-					"Gene predictions",
-					totalObj["geneprediction"].toLocaleString(),
-					"/"
-				]
-			]
-		};
-	} else {
-		return {
-			loaded: state.totals.loaded,
-			totals: []
-		};
-	}
-}
+const mapStateToProps = createStructuredSelector({
+	loaded: getStatus,
+	totals: getTotalsTable
+});
 
 /**
  * exports our component and gives it access to the redux state
