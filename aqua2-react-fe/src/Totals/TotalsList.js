@@ -7,7 +7,7 @@ import Paper from "@material-ui/core/Paper";
 import Typography from "@material-ui/core/Typography";
 import { Link } from "react-router-dom";
 import { connect } from "react-redux";
-import { getTotals } from "./totals_actions.js";
+import { requestTotals } from "./totals_actions.js";
 import compose from "recompose/compose";
 import { withStyles } from "@material-ui/core/styles";
 
@@ -26,7 +26,7 @@ class ListTotals extends Component {
 	componentDidMount() {
 		if (!this.props.loaded) {
 			// Get initial data
-			this.props.getTotals();
+			this.props.requestTotals();
 		}
 	}
 
@@ -125,6 +125,6 @@ export default compose(
 	withStyles(styles),
 	connect(
 		mapStateToProps,
-		{ getTotals }
+		{ requestTotals }
 	)
 )(ListTotals);
