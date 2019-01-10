@@ -1,7 +1,5 @@
-/**
- * import our action type
- */
-import { TOTALS_LOADING, TOTALS_LOADED } from "./totals_actions";
+"use-strict";
+import * as acts from "./totals_action_list";
 
 /**
  * define the initial state of our reducer
@@ -14,12 +12,12 @@ const INITIAL_STATE = { loaded: false, totals: [] };
  */
 export default function(state = INITIAL_STATE, action) {
 	switch (action.type) {
-		case TOTALS_LOADING:
+		case acts.LOADING:
 			return {
 				...state,
 				loaded: false
 			};
-		case TOTALS_LOADED:
+		case acts.LOADED:
 			return {
 				...state,
 				loaded: true,

@@ -1,31 +1,23 @@
 "use-strict";
-import API from "common/API";
+import * as acts from "./totals_action_list";
+import API from "../common/API";
 
-export const TOTALS_LOADING = "TOTALS_LOADING";
-export const TOTALS_LOADED = "TOTALS_LOADED";
-
-export function getTotals() {
+export function requestTotals() {
 	return function(dispatch) {
 		dispatch({
-			type: "TOTALS_LOADING"
+			type: acts.LOADING
 		});
 		API.get(`totals`)
 			.then(response => {
 				dispatch({
-					type: "TOTALS_LOADED",
+					type: acts.LOADED,
 					payload: {
 						totals: response.data.data[0]
 					}
 				});
-				//return response;
 			})
 			.catch(error => {
 				console.log(error);
 			});
 	};
 }
-
-export default {
-	getTotals
-};
-
