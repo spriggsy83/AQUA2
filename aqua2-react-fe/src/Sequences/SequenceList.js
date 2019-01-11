@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { withRouter } from "react-router-dom";
+import { connect } from "react-redux";
 import compose from "recompose/compose";
 import { map, at, isEqual, isEmpty, reduce } from "lodash";
 import IconButton from "@material-ui/core/IconButton";
@@ -9,6 +10,9 @@ import MuiDataTable from "mui-datatables";
 import API from "../common/API";
 import { renderNumber, renderLoadingBars } from "../common/renderHelpers";
 import SeqFilterBar from "./components/SeqFilterBar";
+import { createStructuredSelector } from "reselect";
+import { requestSequences } from "./sequences_actions";
+import { getSequencesTable, getStatus } from "./sequences_selectors";
 
 const columns = [
 	{ name: "dbID", options: { display: "excluded" } },
@@ -57,6 +61,13 @@ class ListSequences extends Component {
 			filtersSet,
 			filterOpts
 		} = this.state;
+		this.props.requestSequences({
+			page: page,
+			rowsPerPage: rowsPerPage,
+			orderby: orderby,
+			filtersSet: filtersSet,
+			filterOpts: filterOpts
+		});
 		const offset = page * rowsPerPage;
 		var qParams = {
 			limit: rowsPerPage,
@@ -270,6 +281,7 @@ class ListSequences extends Component {
 
 	render() {
 		const { sequences, loading } = this.state;
+		console.log(this.props.sequences);
 		return (
 			<>
 				{loading && renderLoadingBars()}
@@ -287,4 +299,21 @@ class ListSequences extends Component {
 	}
 }
 
-export default compose(withRouter)(ListSequences);
+/**
+ * allows us to call our application state from props
+ */
+const mapStateToProps = createStructuredSelector({
+	loaded: getStatus,
+	sequences: getSequencesTable
+});
+
+/**
+ * exports our component and gives it access to the redux state
+ */
+export default compose(
+	withRouter,
+	connect(
+		mapStateToProps,
+		{ requestSequences }
+	)
+)(ListSequences);
