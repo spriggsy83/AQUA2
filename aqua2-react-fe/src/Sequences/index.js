@@ -1,1 +1,3 @@
-export { default as MainMenu } from "./MainMenu";
+import { default as ListSequences } from "./SequenceList";
+
+export { ListSequences };

@@ -1,8 +1,8 @@
 import React, { Component } from "react";
 import MuiDataTable from "mui-datatables";
-import API from "../API";
-import { renderNumber, renderLoadingBars } from "../UI/renderHelpers";
-import SeqFilterBar from "./Sequences/SeqFilterBar";
+import API from "../common/API";
+import { renderNumber, renderLoadingBars } from "../common/renderHelpers";
+import SeqFilterBar from "./components/SeqFilterBar";
 import { map, at, isEqual, isEmpty, reduce } from "lodash";
 import IconButton from "@material-ui/core/IconButton";
 import FilterListIcon from "@material-ui/icons/FilterList";

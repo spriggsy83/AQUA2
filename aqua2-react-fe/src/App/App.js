@@ -6,8 +6,8 @@ import { MainMenu } from "../MainMenu";
 import { ListTotals } from "../Totals";
 import { ListSamples } from "../Samples";
 /*import { ListSeqTypes } from "../SeqTypes";
-import { ListSeqGroups } from "../SeqGroups";
-import { ListSequences } from "../Sequences";*/
+import { ListSeqGroups } from "../SeqGroups";*/
+import { ListSequences } from "../Sequences";
 import "./App.css";
 
 class App extends Component {
@@ -23,11 +23,11 @@ class App extends Component {
 							<Route
 								path="/SeqGroups"
 								component={ListSeqGroups}
-							/>
+							/>*/}
 							<Route
 								path="/Sequences"
 								component={ListSequences}
-							/>*/}
+							/>
 						</Switch>
 					</MainMenu>
 				</Router>
