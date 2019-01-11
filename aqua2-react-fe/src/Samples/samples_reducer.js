@@ -1,7 +1,5 @@
-/**
- * import our action type
- */
-import { SAMPLES_LOADING, SAMPLES_LOADED } from "./samples_actions.js";
+"use-strict";
+import * as acts from "./samples_action_list";
 
 /**
  * define the initial state of our reducer
@@ -14,12 +12,12 @@ const INITIAL_STATE = { loaded: false, total: 0, samples: [] };
  */
 export default function(state = INITIAL_STATE, action) {
 	switch (action.type) {
-		case SAMPLES_LOADING:
+		case acts.LOADING:
 			return {
 				...state,
 				loaded: false
 			};
-		case SAMPLES_LOADED:
+		case acts.LOADED:
 			return {
 				...state,
 				loaded: true,
