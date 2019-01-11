@@ -1,12 +1,10 @@
-/**
- * import our action type
- */
-import { SAMPLES_LOADING, SAMPLES_LOADED } from "../actions/samples_actions";
+"use-strict";
+import * as acts from "./totals_action_list";
 
 /**
  * define the initial state of our reducer
  */
-const INITIAL_STATE = { loaded: false, total: 0, samples: [] };
+const INITIAL_STATE = { loaded: false, totals: [] };
 
 /**
  * switch statement checks to see if the dispatched action requires any work from
@@ -14,17 +12,16 @@ const INITIAL_STATE = { loaded: false, total: 0, samples: [] };
  */
 export default function(state = INITIAL_STATE, action) {
 	switch (action.type) {
-		case SAMPLES_LOADING:
+		case acts.LOADING:
 			return {
 				...state,
 				loaded: false
 			};
-		case SAMPLES_LOADED:
+		case acts.LOADED:
 			return {
 				...state,
 				loaded: true,
-				total: action.payload.total,
-				samples: action.payload.samples
+				totals: action.payload.totals
 			};
 		default:
 			return state;

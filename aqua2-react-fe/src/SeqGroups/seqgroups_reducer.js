@@ -1,12 +1,10 @@
-/**
- * import our action type
- */
-import { TOTALS_LOADING, TOTALS_LOADED } from "../actions/totals_actions";
+"use-strict";
+import * as acts from "./seqgroups_action_list";
 
 /**
  * define the initial state of our reducer
  */
-const INITIAL_STATE = { loaded: false, totals: [] };
+const INITIAL_STATE = { loaded: false, total: 0, seqgroups: [] };
 
 /**
  * switch statement checks to see if the dispatched action requires any work from
@@ -14,16 +12,17 @@ const INITIAL_STATE = { loaded: false, totals: [] };
  */
 export default function(state = INITIAL_STATE, action) {
 	switch (action.type) {
-		case TOTALS_LOADING:
+		case acts.LOADING:
 			return {
 				...state,
 				loaded: false
 			};
-		case TOTALS_LOADED:
+		case acts.LOADED:
 			return {
 				...state,
 				loaded: true,
-				totals: action.payload.totals
+				total: action.payload.total,
+				seqgroups: action.payload.seqgroups
 			};
 		default:
 			return state;

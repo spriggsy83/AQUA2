@@ -1,11 +1,12 @@
 import React, { Component } from "react";
 import MuiDataTable from "mui-datatables";
-import { renderNumber, renderLoadingBars } from "../UI/renderHelpers";
-import { map, at } from "lodash";
 import { connect } from "react-redux";
-import { getSeqTypes } from "../actions/seqtypes_actions.js";
 import compose from "recompose/compose";
 import { withStyles } from "@material-ui/core/styles";
+import { renderNumber, renderLoadingBars } from "../common/renderHelpers";
+import { createStructuredSelector } from "reselect";
+import { requestSeqTypes } from "./seqtypes_actions";
+import { getSeqTypesTable, getStatus } from "./seqtypes_selectors";
 
 const styles = theme => ({
 	narrowlist: {
@@ -29,7 +30,7 @@ class ListSeqTypes extends Component {
 	componentDidMount() {
 		if (!this.props.loaded) {
 			// Get initial data
-			this.props.getSeqTypes();
+			this.props.requestSeqTypes();
 		}
 	}
 
@@ -64,18 +65,10 @@ class ListSeqTypes extends Component {
 /**
  * allows us to call our application state from props
  */
-function mapStateToProps(state) {
-	var seqtypes = [];
-	if (state.seqtypes.seqtypes.length) {
-		seqtypes = map(state.seqtypes.seqtypes, seqtype => {
-			return at(seqtype, ["id", "type", "numseqs"]);
-		});
-	}
-	return {
-		loaded: state.seqtypes.loaded,
-		seqtypes: seqtypes
-	};
-}
+const mapStateToProps = createStructuredSelector({
+	loaded: getStatus,
+	seqtypes: getSeqTypesTable
+});
 
 /**
  * exports our component and gives it access to the redux state
@@ -84,6 +77,6 @@ export default compose(
 	withStyles(styles),
 	connect(
 		mapStateToProps,
-		{ getSeqTypes }
+		{ requestSeqTypes }
 	)
 )(ListSeqTypes);

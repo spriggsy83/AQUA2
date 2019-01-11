@@ -1,24 +1,21 @@
 "use-strict";
-import API from "../API";
+import * as acts from "./samples_action_list";
+import API from "../common/API";
 
-export const SAMPLES_LOADING = "SAMPLES_LOADING";
-export const SAMPLES_LOADED = "SAMPLES_LOADED";
-
-export function getSamples() {
+export function requestSamples() {
 	return function(dispatch) {
 		dispatch({
-			type: "SAMPLES_LOADING"
+			type: acts.LOADING
 		});
 		API.get(`samples`)
 			.then(response => {
 				dispatch({
-					type: "SAMPLES_LOADED",
+					type: acts.LOADED,
 					payload: {
 						total: response.data.total,
 						samples: response.data.data
 					}
 				});
-				//return response;
 			})
 			.catch(error => {
 				console.log(error);

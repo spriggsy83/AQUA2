@@ -3,10 +3,10 @@ import { combineReducers } from "redux";
 /**
  * import our reducers here
  */
-import TotalsReducer from "./totals_reducer";
-import SamplesReducer from "./samples_reducer";
-import SeqTypesReducer from "./seqtypes_reducer";
-import SeqGroupsReducer from "./seqgroups_reducer";
+import { reducer as TotalsReducer } from "./Totals";
+import { reducer as SamplesReducer } from "./Samples";
+import { reducer as SeqTypesReducer } from "./SeqTypes";
+import { reducer as SeqGroupsReducer } from "./SeqGroups";
 
 /**
  * combine the reducers

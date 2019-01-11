@@ -1,9 +1,10 @@
 import React, { Component } from "react";
 import MuiDataTable from "mui-datatables";
-import { renderNumber, renderLoadingBars } from "../UI/renderHelpers";
-import { map, at } from "lodash";
 import { connect } from "react-redux";
-import { getSeqGroups } from "../actions/seqgroups_actions.js";
+import { renderNumber, renderLoadingBars } from "../common/renderHelpers";
+import { createStructuredSelector } from "reselect";
+import { requestSeqGroups } from "./seqgroups_actions";
+import { getSeqGroupsTable, getStatus } from "./seqgroups_selectors";
 
 const columns = [
 	{ name: "dbID", options: { display: "excluded" } },
@@ -52,7 +53,7 @@ class ListSeqGroups extends Component {
 	componentDidMount() {
 		if (!this.props.loaded) {
 			// Get initial data
-			this.props.getSeqGroups();
+			this.props.requestSeqGroups();
 		}
 	}
 
@@ -86,32 +87,15 @@ class ListSeqGroups extends Component {
 /**
  * allows us to call our application state from props
  */
-function mapStateToProps(state) {
-	var seqgroups = [];
-	if (state.seqgroups.seqgroups.length) {
-		seqgroups = map(state.seqgroups.seqgroups, seqgroup => {
-			return at(seqgroup, [
-				"id",
-				"name",
-				"description",
-				"fromsamps",
-				"numseqs",
-				"avlength",
-				"n50length",
-				"maxlength"
-			]);
-		});
-	}
-	return {
-		loaded: state.seqgroups.loaded,
-		seqgroups: seqgroups
-	};
-}
+const mapStateToProps = createStructuredSelector({
+	loaded: getStatus,
+	seqgroups: getSeqGroupsTable
+});
 
 /**
  * exports our component and gives it access to the redux state
  */
 export default connect(
 	mapStateToProps,
-	{ getSeqGroups }
+	{ requestSeqGroups }
 )(ListSeqGroups);

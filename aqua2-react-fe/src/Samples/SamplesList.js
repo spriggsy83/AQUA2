@@ -1,9 +1,10 @@
 import React, { Component } from "react";
 import MuiDataTable from "mui-datatables";
-import { map, at } from "lodash";
 import { connect } from "react-redux";
-import { renderNumber, renderLoadingBars } from "../UI/renderHelpers";
-import { getSamples } from "../actions/samples_actions.js";
+import { renderNumber, renderLoadingBars } from "../common/renderHelpers";
+import { createStructuredSelector } from "reselect";
+import { requestSamples } from "./samples_actions";
+import { getSamplesTable, getStatus } from "./samples_selectors";
 
 const columns = [
 	{ name: "dbID", options: { display: "excluded" } },
@@ -30,7 +31,7 @@ class ListSamples extends Component {
 	componentDidMount() {
 		if (!this.props.loaded) {
 			// Get initial data
-			this.props.getSamples();
+			this.props.requestSamples();
 		}
 	}
 
@@ -65,30 +66,15 @@ class ListSamples extends Component {
 /**
  * allows us to call our application state from props
  */
-function mapStateToProps(state) {
-	var samples = [];
-	if (state.samples.samples.length) {
-		samples = map(state.samples.samples, sample => {
-			return at(sample, [
-				"id",
-				"name",
-				"species",
-				"description",
-				"ingroups",
-				"numseqs"
-			]);
-		});
-	}
-	return {
-		loaded: state.samples.loaded,
-		samples: samples
-	};
-}
+const mapStateToProps = createStructuredSelector({
+	loaded: getStatus,
+	samples: getSamplesTable
+});
 
 /**
  * exports our component and gives it access to the redux state
  */
 export default connect(
 	mapStateToProps,
-	{ getSamples }
+	{ requestSamples }
 )(ListSamples);
