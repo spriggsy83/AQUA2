@@ -5,17 +5,17 @@ import { combineReducers } from "redux";
  */
 import { reducer as TotalsReducer } from "./Totals";
 import { reducer as SamplesReducer } from "./Samples";
-/*import SeqTypesReducer from "SeqTypes";
-import SeqGroupsReducer from "SeqGroups";*/
+import { reducer as SeqTypesReducer } from "./SeqTypes";
+import { reducer as SeqGroupsReducer } from "./SeqGroups";
 
 /**
  * combine the reducers
  */
 const rootReducer = combineReducers({
 	totals: TotalsReducer,
-	samples: SamplesReducer
-	/*seqtypes: SeqTypesReducer,
-	seqgroups: SeqGroupsReducer*/
+	samples: SamplesReducer,
+	seqtypes: SeqTypesReducer,
+	seqgroups: SeqGroupsReducer
 });
 
 export default rootReducer;

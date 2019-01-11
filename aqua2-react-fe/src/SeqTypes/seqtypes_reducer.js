@@ -1,7 +1,5 @@
-/**
- * import our action type
- */
-import { SEQTYPES_LOADING, SEQTYPES_LOADED } from "../actions/seqtypes_actions";
+"use-strict";
+import * as acts from "./seqtypes_action_list";
 
 /**
  * define the initial state of our reducer
@@ -14,12 +12,12 @@ const INITIAL_STATE = { loaded: false, total: 0, seqtypes: [] };
  */
 export default function(state = INITIAL_STATE, action) {
 	switch (action.type) {
-		case SEQTYPES_LOADING:
+		case acts.LOADING:
 			return {
 				...state,
 				loaded: false
 			};
-		case SEQTYPES_LOADED:
+		case acts.LOADED:
 			return {
 				...state,
 				loaded: true,

@@ -1,24 +1,21 @@
 "use-strict";
-import API from "../API";
+import * as acts from "./seqgroups_action_list";
+import API from "../common/API";
 
-export const SEQGROUPS_LOADING = "SEQGROUPS_LOADING";
-export const SEQGROUPS_LOADED = "SEQGROUPS_LOADED";
-
-export function getSeqGroups() {
+export function requestSeqGroups() {
 	return function(dispatch) {
 		dispatch({
-			type: "SEQGROUPS_LOADING"
+			type: acts.LOADING
 		});
 		API.get(`seqgroups`)
 			.then(response => {
 				dispatch({
-					type: "SEQGROUPS_LOADED",
+					type: acts.LOADED,
 					payload: {
 						total: response.data.total,
 						seqgroups: response.data.data
 					}
 				});
-				//return response;
 			})
 			.catch(error => {
 				console.log(error);

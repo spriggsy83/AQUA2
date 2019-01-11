@@ -1,24 +1,21 @@
 "use-strict";
-import API from "../API";
+import * as acts from "./seqtypes_action_list";
+import API from "../common/API";
 
-export const SEQTYPES_LOADING = "SEQTYPES_LOADING";
-export const SEQTYPES_LOADED = "SEQTYPES_LOADED";
-
-export function getSeqTypes() {
+export function requestSeqTypes() {
 	return function(dispatch) {
 		dispatch({
-			type: "SEQTYPES_LOADING"
+			type: acts.LOADING
 		});
 		API.get(`seqtypes`)
 			.then(response => {
 				dispatch({
-					type: "SEQTYPES_LOADED",
+					type: acts.LOADED,
 					payload: {
 						total: response.data.total,
 						seqtypes: response.data.data
 					}
 				});
-				//return response;
 			})
 			.catch(error => {
 				console.log(error);
