@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { withRouter } from "react-router-dom";
 import MuiDataTable from "mui-datatables";
 import { connect } from "react-redux";
 import compose from "recompose/compose";
@@ -34,6 +35,12 @@ class ListSeqTypes extends Component {
 		}
 	}
 
+	onRowClick = (rowData, rowMeta) => {
+		this.props.history.push(
+			this.props.location.pathname + "/" + encodeURIComponent(rowData[1])
+		);
+	};
+
 	render() {
 		const { seqtypes, loaded, classes } = this.props;
 		const options = {
@@ -42,7 +49,8 @@ class ListSeqTypes extends Component {
 			selectableRows: false,
 			search: false,
 			filter: false,
-			rowsPerPage: 999
+			rowsPerPage: 999,
+			onRowClick: this.onRowClick
 		};
 
 		if (loaded) {
@@ -75,6 +83,7 @@ const mapStateToProps = createStructuredSelector({
  */
 export default compose(
 	withStyles(styles),
+	withRouter,
 	connect(
 		mapStateToProps,
 		{ requestSeqTypes }

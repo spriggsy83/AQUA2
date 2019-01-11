@@ -1,12 +1,14 @@
 import React, { Component } from "react";
-import MuiDataTable from "mui-datatables";
-import API from "../common/API";
-import { renderNumber, renderLoadingBars } from "../common/renderHelpers";
-import SeqFilterBar from "./components/SeqFilterBar";
+import { withRouter } from "react-router-dom";
+import compose from "recompose/compose";
 import { map, at, isEqual, isEmpty, reduce } from "lodash";
 import IconButton from "@material-ui/core/IconButton";
 import FilterListIcon from "@material-ui/icons/FilterList";
 import Tooltip from "@material-ui/core/Tooltip";
+import MuiDataTable from "mui-datatables";
+import API from "../common/API";
+import { renderNumber, renderLoadingBars } from "../common/renderHelpers";
+import SeqFilterBar from "./components/SeqFilterBar";
 
 const columns = [
 	{ name: "dbID", options: { display: "excluded" } },
@@ -232,6 +234,19 @@ class ListSequences extends Component {
 		}
 	};
 
+	onCellClick = (colData, cellMeta) => {
+		/* If NOT ExtLink column clicked */
+		if (cellMeta.colIndex !== 10) {
+			/* Then go to sequence/:name page */
+			const clickedSeq = this.state.sequences[cellMeta.rowIndex];
+			this.props.history.push(
+				this.props.location.pathname +
+					"/" +
+					encodeURIComponent(clickedSeq[1])
+			);
+		}
+	};
+
 	/** options Object required by mui-datatable **/
 	getTableOptions = () => {
 		const { page, total, rowsPerPage } = this.state;
@@ -248,7 +263,8 @@ class ListSequences extends Component {
 			serverSide: true,
 			onTableChange: this.onTableChange,
 			onColumnSortChange: this.onColumnSortChange,
-			customToolbar: this.renderFilterToolbar
+			customToolbar: this.renderFilterToolbar,
+			onCellClick: this.onCellClick
 		};
 	};
 
@@ -271,4 +287,4 @@ class ListSequences extends Component {
 	}
 }
 
-export default ListSequences;
+export default compose(withRouter)(ListSequences);

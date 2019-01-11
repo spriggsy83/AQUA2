@@ -1,6 +1,8 @@
 import React, { Component } from "react";
-import MuiDataTable from "mui-datatables";
+import { withRouter } from "react-router-dom";
 import { connect } from "react-redux";
+import compose from "recompose/compose";
+import MuiDataTable from "mui-datatables";
 import { renderNumber, renderLoadingBars } from "../common/renderHelpers";
 import { createStructuredSelector } from "reselect";
 import { requestSeqGroups } from "./seqgroups_actions";
@@ -57,6 +59,12 @@ class ListSeqGroups extends Component {
 		}
 	}
 
+	onRowClick = (rowData, rowMeta) => {
+		this.props.history.push(
+			this.props.location.pathname + "/" + encodeURIComponent(rowData[1])
+		);
+	};
+
 	render() {
 		const { seqgroups, loaded } = this.props;
 		const options = {
@@ -65,7 +73,8 @@ class ListSeqGroups extends Component {
 			selectableRows: false,
 			search: false,
 			filter: false,
-			rowsPerPage: 999
+			rowsPerPage: 999,
+			onRowClick: this.onRowClick
 		};
 		if (loaded) {
 			return (
@@ -95,7 +104,10 @@ const mapStateToProps = createStructuredSelector({
 /**
  * exports our component and gives it access to the redux state
  */
-export default connect(
-	mapStateToProps,
-	{ requestSeqGroups }
+export default compose(
+	withRouter,
+	connect(
+		mapStateToProps,
+		{ requestSeqGroups }
+	)
 )(ListSeqGroups);
