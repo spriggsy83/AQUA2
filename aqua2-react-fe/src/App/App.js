@@ -13,29 +13,41 @@ import "./App.css";
 import { UnderConstruction } from "../common/renderHelpers";
 
 class App extends Component {
+	routeList = () => {
+		return (
+			<Switch>
+				<Route exact path="/" component={ListTotals} />
+				<Route
+					path="/Samples/:sample_id"
+					component={UnderConstruction}
+				/>
+				<Route path="/Samples" component={ListSamples} />
+				<Route
+					path="/SeqTypes/:seqtype_id"
+					component={UnderConstruction}
+				/>
+				<Route path="/SeqTypes" component={ListSeqTypes} />
+				<Route
+					path="/SeqGroups/:seqgroup_id"
+					component={UnderConstruction}
+				/>
+				<Route path="/SeqGroups" component={ListSeqGroups} />
+				<Route
+					path="/Sequences/:sequence_id"
+					component={UnderConstruction}
+				/>
+				<Route path="/Sequences" component={ListSequences} />
+				<Route path="/BulkAnnot" component={UnderConstruction} />
+				<Route path="/Search" component={UnderConstruction} />
+			</Switch>
+		);
+	};
+
 	render() {
 		return (
 			<MuiThemeProvider theme={theme}>
 				<Router>
-					<MainMenu>
-						<Switch>
-							<Route exact path="/" component={ListTotals} />
-							<Route path="/Samples" component={ListSamples} />
-							<Route path="/SeqTypes" component={ListSeqTypes} />
-							<Route
-								path="/SeqGroups"
-								component={ListSeqGroups}
-							/>
-							<Route
-								path="/Sequences"
-								component={ListSequences}
-							/>
-							<Route
-								path="/BulkAnnot"
-								component={UnderConstruction}
-							/>
-						</Switch>
-					</MainMenu>
+					<MainMenu>{this.routeList()}</MainMenu>
 				</Router>
 			</MuiThemeProvider>
 		);
