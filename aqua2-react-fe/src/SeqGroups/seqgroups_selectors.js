@@ -3,10 +3,10 @@ import { map, at } from "lodash";
 
 export const getStateSlice = state => state.seqgroups;
 
-export const getStatus = state => state.seqgroups.loaded;
-
+export const getHasLoaded = state => state.seqgroups.loaded;
+export const getIsLoading = state => state.seqgroups.loading;
+export const getError = state => state.seqgroups.error;
 export const getCount = state => state.seqgroups.total;
-
 export const getSeqGroupsObj = state => state.seqgroups.seqgroups;
 
 export const getSeqGroupsTable = createSelector(

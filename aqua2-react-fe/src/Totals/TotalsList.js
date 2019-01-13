@@ -11,7 +11,7 @@ import compose from "recompose/compose";
 import { withStyles } from "@material-ui/core/styles";
 import { createStructuredSelector } from "reselect";
 import { requestTotals } from "./totals_actions";
-import { getTotalsTable, getStatus } from "./totals_selectors";
+import { getTotalsTable, getHasLoaded } from "./totals_selectors";
 
 const styles = theme => ({
 	narrowlist: {
@@ -79,7 +79,7 @@ class ListTotals extends Component {
  * allows us to call our application state from props
  */
 const mapStateToProps = createStructuredSelector({
-	loaded: getStatus,
+	loaded: getHasLoaded,
 	totals: getTotalsTable
 });
 

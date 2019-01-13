@@ -1,6 +1,7 @@
 "use-strict";
 import { isEmpty } from "lodash";
 import * as acts from "./sequences_action_list";
+import { getIsLoading } from "./sequences_selectors";
 import API from "../common/API";
 
 export const requestSequences = ({
@@ -21,24 +22,32 @@ export const requestSequences = ({
 	if (!isEmpty(filtersSet)) {
 		qParams["filter"] = filtersSet;
 	}
-	return function(dispatch) {
-		dispatch({
-			type: acts.LOADING
-		});
-		API.get(`sequences`, {
-			params: qParams
-		})
-			.then(response => {
-				dispatch({
-					type: acts.LOADED,
-					payload: {
-						total: response.data.total,
-						sequences: response.data.data
-					}
-				});
-			})
-			.catch(error => {
-				console.log(error);
+	return function(dispatch, getState) {
+		if (!getIsLoading(getState())) {
+			dispatch({
+				type: acts.LOADING
 			});
+			API.get(`sequences`, {
+				params: qParams
+			})
+				.then(response => {
+					dispatch({
+						type: acts.LOADED,
+						payload: {
+							total: response.data.total,
+							sequences: response.data.data
+						}
+					});
+				})
+				.catch(error => {
+					dispatch({
+						type: acts.ERRORED,
+						payload: {
+							error: error
+						}
+					});
+					console.log(error);
+				});
+		}
 	};
 };

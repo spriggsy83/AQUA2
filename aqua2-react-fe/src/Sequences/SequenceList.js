@@ -12,7 +12,9 @@ import { renderNumber, renderLoadingBars } from "../common/renderHelpers";
 import SeqFilterBar from "./components/SeqFilterBar";
 import { createStructuredSelector } from "reselect";
 import { requestSequences } from "./sequences_actions";
-import { getSequencesTable, getStatus } from "./sequences_selectors";
+import { getSequencesTable, getHasLoaded } from "./sequences_selectors";
+import { actions as SampleActions } from "../Samples";
+const requestSamples = SampleActions.requestSamples;
 
 const columns = [
 	{ name: "dbID", options: { display: "excluded" } },
@@ -49,6 +51,7 @@ class ListSequences extends Component {
 	};
 
 	componentDidMount() {
+		this.props.requestSamples();
 		this.getData();
 	}
 
@@ -281,7 +284,6 @@ class ListSequences extends Component {
 
 	render() {
 		const { sequences, loading } = this.state;
-		console.log(this.props.sequences);
 		return (
 			<>
 				{loading && renderLoadingBars()}
@@ -303,7 +305,7 @@ class ListSequences extends Component {
  * allows us to call our application state from props
  */
 const mapStateToProps = createStructuredSelector({
-	loaded: getStatus,
+	loaded: getHasLoaded,
 	sequences: getSequencesTable
 });
 
@@ -314,6 +316,6 @@ export default compose(
 	withRouter,
 	connect(
 		mapStateToProps,
-		{ requestSequences }
+		{ requestSequences, requestSamples }
 	)
 )(ListSequences);

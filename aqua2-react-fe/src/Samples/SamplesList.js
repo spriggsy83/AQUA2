@@ -6,7 +6,7 @@ import MuiDataTable from "mui-datatables";
 import { renderNumber, renderLoadingBars } from "../common/renderHelpers";
 import { createStructuredSelector } from "reselect";
 import { requestSamples } from "./samples_actions";
-import { getSamplesTable, getStatus } from "./samples_selectors";
+import { getSamplesTable, getHasLoaded } from "./samples_selectors";
 
 const columns = [
 	{ name: "dbID", options: { display: "excluded" } },
@@ -76,7 +76,7 @@ class ListSamples extends Component {
  * allows us to call our application state from props
  */
 const mapStateToProps = createStructuredSelector({
-	loaded: getStatus,
+	loaded: getHasLoaded,
 	samples: getSamplesTable
 });
 

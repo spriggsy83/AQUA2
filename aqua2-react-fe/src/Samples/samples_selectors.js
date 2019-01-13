@@ -3,10 +3,10 @@ import { map, at } from "lodash";
 
 export const getStateSlice = state => state.samples;
 
-export const getStatus = state => state.samples.loaded;
-
+export const getHasLoaded = state => state.samples.loaded;
+export const getIsLoading = state => state.samples.loading;
+export const getError = state => state.samples.error;
 export const getCount = state => state.samples.total;
-
 export const getSamplesObj = state => state.samples.samples;
 
 export const getSamplesTable = createSelector(getSamplesObj, samplesObj => {

@@ -4,10 +4,10 @@ import { map, at } from "lodash";
 
 export const getStateSlice = state => state.sequences;
 
-export const getStatus = state => state.sequences.loaded;
-
+export const getHasLoaded = state => state.sequences.loaded;
+export const getIsLoading = state => state.sequences.loading;
+export const getError = state => state.sequences.error;
 export const getCount = state => state.sequences.total;
-
 export const getSequencesObj = state => state.sequences.sequences;
 
 export const getSequencesTable = createSelector(

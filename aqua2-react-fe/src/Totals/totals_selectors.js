@@ -2,12 +2,13 @@ import { createSelector } from "reselect";
 
 export const getStateSlice = state => state.totals;
 
-export const getStatus = state => state.totals.loaded;
-
+export const getHasLoaded = state => state.totals.loaded;
+export const getIsLoading = state => state.totals.loading;
+export const getError = state => state.totals.error;
 export const getTotalsObj = state => state.totals.totals;
 
 export const getTotalsTable = createSelector(
-	getStatus,
+	getHasLoaded,
 	getTotalsObj,
 	(loaded, totalObj) => {
 		if (loaded) {
