@@ -13,8 +13,21 @@ import SeqFilterBar from "./components/SeqFilterBar";
 import { createStructuredSelector } from "reselect";
 import { requestSequences } from "./sequences_actions";
 import { getSequencesTable, getHasLoaded } from "./sequences_selectors";
-import { actions as SampleActions } from "../Samples";
+import {
+	actions as SampleActions,
+	selectors as SampleSelectors
+} from "../Samples";
+import {
+	actions as SeqGroupActions,
+	selectors as SeqGroupSelectors
+} from "../SeqGroups";
+import {
+	actions as SeqTypeActions,
+	selectors as SeqTypeSelectors
+} from "../SeqTypes";
 const requestSamples = SampleActions.requestSamples;
+const requestSeqGroups = SeqGroupActions.requestSeqGroups;
+const requestSeqTypes = SeqTypeActions.requestSeqTypes;
 
 const columns = [
 	{ name: "dbID", options: { display: "excluded" } },
@@ -51,7 +64,15 @@ class ListSequences extends Component {
 	};
 
 	componentDidMount() {
-		this.props.requestSamples();
+		if (!this.props.samplesLoaded) {
+			this.props.requestSamples();
+		}
+		if (!this.props.seqtypesLoaded) {
+			this.props.requestSeqTypes();
+		}
+		if (!this.props.seqgroupsLoaded) {
+			this.props.requestSeqGroups();
+		}
 		this.getData();
 	}
 
@@ -262,6 +283,7 @@ class ListSequences extends Component {
 
 	/** options Object required by mui-datatable **/
 	getTableOptions = () => {
+		console.log(this.props.filterOpts);
 		const { page, total, rowsPerPage } = this.state;
 		return {
 			pagination: true,
@@ -305,7 +327,15 @@ class ListSequences extends Component {
  */
 const mapStateToProps = createStructuredSelector({
 	loaded: getHasLoaded,
-	sequences: getSequencesTable
+	sequences: getSequencesTable,
+	samplesLoaded: SampleSelectors.getHasLoaded,
+	seqtypesLoaded: SeqTypeSelectors.getHasLoaded,
+	seqgroupsLoaded: SeqGroupSelectors.getHasLoaded,
+	filterOpts: createStructuredSelector({
+		sample: SampleSelectors.getNamesIDsList,
+		seqgroup: SeqGroupSelectors.getNamesIDsList,
+		seqtype: SeqTypeSelectors.getNamesIDsList
+	})
 });
 
 /**
@@ -315,6 +345,6 @@ export default compose(
 	withRouter,
 	connect(
 		mapStateToProps,
-		{ requestSequences, requestSamples }
+		{ requestSequences, requestSamples, requestSeqGroups, requestSeqTypes }
 	)
 )(ListSequences);

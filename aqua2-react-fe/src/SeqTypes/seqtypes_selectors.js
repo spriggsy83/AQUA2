@@ -1,5 +1,5 @@
 import { createSelector } from "reselect";
-import { map, at } from "lodash";
+import { map, at, forEach } from "lodash";
 
 export const getStateSlice = state => state.seqtypes;
 
@@ -16,5 +16,17 @@ export const getSeqTypesTable = createSelector(getSeqTypesObj, seqtypesObj => {
 		});
 	} else {
 		return [];
+	}
+});
+
+export const getNamesIDsList = createSelector(getSeqTypesObj, seqtypesObj => {
+	if (seqtypesObj.length) {
+		var seqtypesList = {};
+		forEach(seqtypesObj, sampleRow => {
+			seqtypesList[sampleRow.type] = sampleRow.id;
+		});
+		return seqtypesList;
+	} else {
+		return {};
 	}
 });
