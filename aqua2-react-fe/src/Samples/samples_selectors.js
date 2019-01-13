@@ -1,5 +1,5 @@
 import { createSelector } from "reselect";
-import { map, at, forEach } from "lodash";
+import { map, at, reduce } from "lodash";
 
 export const getStateSlice = state => state.samples;
 
@@ -26,13 +26,17 @@ export const getSamplesTable = createSelector(getSamplesObj, samplesObj => {
 	}
 });
 
+/* Return Object with keys == SampleNames and values == idNums */
 export const getNamesIDsList = createSelector(getSamplesObj, samplesObj => {
 	if (samplesObj.length) {
-		var samplesList = {};
-		forEach(samplesObj, sampleRow => {
-			samplesList[sampleRow.name] = sampleRow.id;
-		});
-		return samplesList;
+		return reduce(
+			samplesObj,
+			function(samplesList, sampleRow) {
+				samplesList[sampleRow.name] = sampleRow.id;
+				return samplesList;
+			},
+			{}
+		);
 	} else {
 		return {};
 	}

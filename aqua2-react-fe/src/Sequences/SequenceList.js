@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import { withRouter } from "react-router-dom";
 import { connect } from "react-redux";
 import compose from "recompose/compose";
-import { map, at, isEqual, isEmpty, reduce } from "lodash";
+import { map, at, isEmpty } from "lodash";
 import IconButton from "@material-ui/core/IconButton";
 import FilterListIcon from "@material-ui/icons/FilterList";
 import Tooltip from "@material-ui/core/Tooltip";
@@ -13,21 +13,6 @@ import SeqFilterBar from "./components/SeqFilterBar";
 import { createStructuredSelector } from "reselect";
 import { requestSequences } from "./sequences_actions";
 import { getSequencesTable, getHasLoaded } from "./sequences_selectors";
-import {
-	actions as SampleActions,
-	selectors as SampleSelectors
-} from "../Samples";
-import {
-	actions as SeqGroupActions,
-	selectors as SeqGroupSelectors
-} from "../SeqGroups";
-import {
-	actions as SeqTypeActions,
-	selectors as SeqTypeSelectors
-} from "../SeqTypes";
-const requestSamples = SampleActions.requestSamples;
-const requestSeqGroups = SeqGroupActions.requestSeqGroups;
-const requestSeqTypes = SeqTypeActions.requestSeqTypes;
 
 const columns = [
 	{ name: "dbID", options: { display: "excluded" } },
@@ -57,40 +42,23 @@ class ListSequences extends Component {
 		orderby: null,
 		sequences: [],
 		loading: true,
-		filterOpts: {},
 		filtersSet: {},
-		filtersChecked: {},
 		isFilterShowing: false
 	};
 
 	componentDidMount() {
-		if (!this.props.samplesLoaded) {
-			this.props.requestSamples();
-		}
-		if (!this.props.seqtypesLoaded) {
-			this.props.requestSeqTypes();
-		}
-		if (!this.props.seqgroupsLoaded) {
-			this.props.requestSeqGroups();
-		}
 		this.getData();
 	}
 
 	/** Get initial data **/
 	getData = () => {
-		const {
-			page,
-			rowsPerPage,
-			orderby,
-			filtersSet,
-			filterOpts
-		} = this.state;
-		this.props.requestSequences({
+		const { page, rowsPerPage, orderby, filtersSet } = this.state;
+		/*this.props.requestSequences({
 			page: page,
 			rowsPerPage: rowsPerPage,
 			orderby: orderby,
 			filtersSet: filtersSet
-		});
+		});*/
 		const offset = page * rowsPerPage;
 		var qParams = {
 			limit: rowsPerPage,
@@ -129,68 +97,26 @@ class ListSequences extends Component {
 				);
 				return seqRow;
 			});
-			if (isEqual(filterOpts, res.data.filterby)) {
-				this.setState({
-					sequences,
-					total: res.data.total,
-					loading: false
-				});
-			} else {
-				this.setState({
-					sequences,
-					total: res.data.total,
-					loading: false,
-					filterOpts: res.data.filterby,
-					filtersChecked: reduce(
-						res.data.filterby,
-						function(result, value, key) {
-							result[key] = [];
-							return result;
-						},
-						{}
-					)
-				});
-			}
+			this.setState({
+				sequences,
+				total: res.data.total,
+				loading: false
+			});
 		});
 	};
 
-	/** SeqFilterBar checkbox ticked/unticked **/
-	onFilterChange = (tablename, checkList) => {
-		this.setState(prevState => ({
-			filtersChecked: {
-				...prevState.filtersChecked,
-				[tablename]: checkList
-			}
-		}));
-	};
-
 	/** SeqFilterBar submitting new filter list **/
-	onFilterSubmit = () => {
-		const { filtersChecked, filterOpts, filtersSet } = this.state;
-		var newFiltersSet = reduce(
-			filtersChecked,
-			function(result, flist, tablename) {
-				if (flist.length) {
-					result[tablename] = map(flist, label => {
-						return filterOpts[tablename][label];
-					});
-				}
-				return result;
+	onFilterSubmit = newFiltersSet => {
+		this.setState(
+			{
+				loading: true,
+				page: 0,
+				filtersSet: newFiltersSet
 			},
-			{}
+			() => {
+				this.getData();
+			}
 		);
-		if (!isEqual(newFiltersSet, filtersSet)) {
-			this.setState(
-				{
-					loading: true,
-					page: 0,
-					filtersSet: newFiltersSet
-				},
-				() => {
-					this.getData();
-				}
-			);
-		}
 	};
 
 	/** Show/hide SeqFilterBar **/
@@ -202,29 +128,25 @@ class ListSequences extends Component {
 
 	/** SeqFilterBar contains checkbox filter controls **/
 	renderFilterToolbar = () => {
-		const { filterOpts, filtersChecked, isFilterShowing } = this.state;
-		if (filterOpts) {
-			return (
-				<>
-					<Tooltip id="filter-button" title="Filter">
-						<IconButton
-							aria-label="Filter"
-							onClick={this.onFilterHiderClick}
-						>
-							<FilterListIcon />
-						</IconButton>
-					</Tooltip>
-					{isFilterShowing && (
-						<SeqFilterBar
-							checked={filtersChecked}
-							filterOpts={filterOpts}
-							onFilterChange={this.onFilterChange}
-							onFilterSubmit={this.onFilterSubmit}
-						/>
-					)}
-				</>
-			);
-		}
+		const { isFilterShowing } = this.state;
+		return (
+			<>
+				<Tooltip id="filter-button" title="Filter">
+					<IconButton
+						aria-label="Filter"
+						onClick={this.onFilterHiderClick}
+					>
+						<FilterListIcon />
+					</IconButton>
+				</Tooltip>
+				{isFilterShowing && (
+					<SeqFilterBar
+						filtersSet={this.filtersSet}
+						onFilterSubmit={this.onFilterSubmit}
+					/>
+				)}
+			</>
+		);
 	};
 
 	/** Table sort changed **/
@@ -283,7 +205,6 @@ class ListSequences extends Component {
 
 	/** options Object required by mui-datatable **/
 	getTableOptions = () => {
-		console.log(this.props.filterOpts);
 		const { page, total, rowsPerPage } = this.state;
 		return {
 			pagination: true,
@@ -327,15 +248,7 @@ class ListSequences extends Component {
  */
 const mapStateToProps = createStructuredSelector({
 	loaded: getHasLoaded,
-	sequences: getSequencesTable,
-	samplesLoaded: SampleSelectors.getHasLoaded,
-	seqtypesLoaded: SeqTypeSelectors.getHasLoaded,
-	seqgroupsLoaded: SeqGroupSelectors.getHasLoaded,
-	filterOpts: createStructuredSelector({
-		sample: SampleSelectors.getNamesIDsList,
-		seqgroup: SeqGroupSelectors.getNamesIDsList,
-		seqtype: SeqTypeSelectors.getNamesIDsList
-	})
+	sequences: getSequencesTable
 });
 
 /**
@@ -345,6 +258,6 @@ export default compose(
 	withRouter,
 	connect(
 		mapStateToProps,
-		{ requestSequences, requestSamples, requestSeqGroups, requestSeqTypes }
+		{ requestSequences }
 	)
 )(ListSequences);

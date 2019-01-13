@@ -1,5 +1,5 @@
 import { createSelector } from "reselect";
-import { map, at, forEach } from "lodash";
+import { map, at, reduce } from "lodash";
 
 export const getStateSlice = state => state.seqgroups;
 
@@ -31,13 +31,17 @@ export const getSeqGroupsTable = createSelector(
 	}
 );
 
+/* Return Object with keys == GroupNames and values == idNums */
 export const getNamesIDsList = createSelector(getSeqGroupsObj, seqgroupsObj => {
 	if (seqgroupsObj.length) {
-		var seqgroupsList = {};
-		forEach(seqgroupsObj, sampleRow => {
-			seqgroupsList[sampleRow.name] = sampleRow.id;
-		});
-		return seqgroupsList;
+		return reduce(
+			seqgroupsObj,
+			function(seqgroupsList, seqgroupRow) {
+				seqgroupsList[seqgroupRow.name] = seqgroupRow.id;
+				return seqgroupsList;
+			},
+			{}
+		);
 	} else {
 		return {};
 	}
