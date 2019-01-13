@@ -8,8 +8,7 @@ export const requestSequences = ({
 	page = 0,
 	rowsPerPage = 50,
 	orderby = null,
-	filtersSet = {},
-	filterOpts = {}
+	filtersSet = {}
 } = {}) => {
 	const offset = page * rowsPerPage;
 	var qParams = {
@@ -35,7 +34,11 @@ export const requestSequences = ({
 						type: acts.LOADED,
 						payload: {
 							total: response.data.total,
-							sequences: response.data.data
+							sequences: response.data.data,
+							page: page,
+							rowsPerPage: rowsPerPage,
+							orderby: orderby,
+							filtersSet: filtersSet
 						}
 					});
 				})

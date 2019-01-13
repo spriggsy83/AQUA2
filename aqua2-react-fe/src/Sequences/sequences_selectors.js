@@ -10,6 +10,12 @@ export const getError = state => state.sequences.error;
 export const getCount = state => state.sequences.total;
 export const getSequencesObj = state => state.sequences.sequences;
 
+/* Sequence table params */
+export const getTablePage = state => state.sequences.page;
+export const getTableRows = state => state.sequences.rowsPerPage;
+export const getTableSort = state => state.sequences.orderby;
+export const getFilters = state => state.sequences.filtersSet;
+
 export const getSequencesTable = createSelector(
 	getSequencesObj,
 	sequencesObj => {

@@ -68,8 +68,7 @@ class ListSequences extends Component {
 			page: page,
 			rowsPerPage: rowsPerPage,
 			orderby: orderby,
-			filtersSet: filtersSet,
-			filterOpts: filterOpts
+			filtersSet: filtersSet
 		});
 		const offset = page * rowsPerPage;
 		var qParams = {

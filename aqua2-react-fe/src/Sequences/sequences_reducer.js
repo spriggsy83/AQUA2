@@ -9,7 +9,11 @@ const INITIAL_STATE = {
 	loading: false,
 	error: null,
 	total: 0,
-	sequences: []
+	sequences: [],
+	page: 0,
+	rowsPerPage: 100,
+	orderby: null,
+	filtersSet: {}
 };
 
 /**
@@ -30,7 +34,11 @@ export default function(state = INITIAL_STATE, action) {
 				loading: false,
 				error: null,
 				total: action.payload.total,
-				sequences: action.payload.sequences
+				sequences: action.payload.sequences,
+				page: action.payload.page,
+				rowsPerPage: action.payload.rowsPerPage,
+				orderby: action.payload.orderby,
+				filtersSet: action.payload.filtersSet
 			};
 		case acts.ERRORED:
 			return {
