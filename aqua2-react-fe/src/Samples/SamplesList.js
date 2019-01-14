@@ -9,7 +9,7 @@ import { requestSamples } from "./samples_actions";
 import { getSamplesTable, getHasLoaded } from "./samples_selectors";
 
 const columns = [
-	{ name: "dbID", options: { display: "excluded" } },
+	{ name: "dbID", options: { display: "excluded", download: false } },
 	{ name: "Sample Name", options: { sort: true } },
 	{ name: "Species", options: { sort: true } },
 	{ name: "Description", options: { sort: false } },

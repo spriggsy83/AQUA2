@@ -22,7 +22,7 @@ import {
 } from "./sequences_selectors";
 
 const columns = [
-	{ name: "dbID", options: { display: "excluded" } },
+	{ name: "dbID", options: { display: "false", download: false } },
 	{ name: "Name", options: { sort: true } },
 	{
 		name: "Length (bp)",
@@ -31,14 +31,14 @@ const columns = [
 			customBodyRender: renderNumber
 		}
 	},
-	{ name: "groupId", options: { display: "excluded" } },
+	{ name: "groupId", options: { display: "excluded", download: false } },
 	{ name: "Group", options: { sort: true } },
-	{ name: "sampleId", options: { display: "excluded" } },
+	{ name: "sampleId", options: { display: "excluded", download: false } },
 	{ name: "Sample", options: { sort: true } },
-	{ name: "typeId", options: { display: "excluded" } },
+	{ name: "typeId", options: { display: "excluded", download: false } },
 	{ name: "Type", options: { sort: true } },
 	{ name: "Annotation note", options: { sort: false } },
-	{ name: "External link", options: { sort: false } }
+	{ name: "External link", options: { sort: false, download: false } }
 ];
 
 class ListSequences extends Component {

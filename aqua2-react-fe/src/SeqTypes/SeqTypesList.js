@@ -16,7 +16,7 @@ const styles = theme => ({
 });
 
 const columns = [
-	{ name: "dbID", options: { display: "excluded" } },
+	{ name: "dbID", options: { display: "excluded", download: false } },
 	{ name: "Seq Type", options: { sort: true } },
 	{
 		name: "Num. sequences",

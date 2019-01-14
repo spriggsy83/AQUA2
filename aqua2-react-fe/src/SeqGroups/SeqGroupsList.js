@@ -9,7 +9,7 @@ import { requestSeqGroups } from "./seqgroups_actions";
 import { getSeqGroupsTable, getHasLoaded } from "./seqgroups_selectors";
 
 const columns = [
-	{ name: "dbID", options: { display: "excluded" } },
+	{ name: "dbID", options: { display: "excluded", download: false } },
 	{ name: "Group Name", options: { sort: true } },
 	{ name: "Description", options: { sort: false } },
 	{

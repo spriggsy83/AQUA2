@@ -240,10 +240,6 @@ paths:
                 type: "array"
                 items:
                   $ref: "#/definitions/Sequence"
-              filterby:
-                type: "array"
-                items:
-                  $ref: "#/definitions/Filterable"
 
         500:
           description: "Error"
@@ -388,18 +384,7 @@ definitions:
       extLink:
         type: "string"
         description: "Relevant external service link"
-  Filterable:
-    type: "object"
-    properties:
-      tablename:
-        type: "array"
-        items:
-          type: "object"
-          properties:
-            id:
-              type: "integer"
-            label:
-              type: "string"
+
 parameters:
   sort:
     name: sort
