@@ -1,14 +1,25 @@
 import React, { Component } from "react";
 import { withRouter } from "react-router-dom";
+import { connect } from "react-redux";
 import compose from "recompose/compose";
-import { map, at, isEmpty, isArray } from "lodash";
 import IconButton from "@material-ui/core/IconButton";
 import FilterListIcon from "@material-ui/icons/FilterList";
 import Tooltip from "@material-ui/core/Tooltip";
 import MuiDataTable from "mui-datatables";
-import API from "../common/API";
 import { renderNumber, renderLoadingBars } from "../common/renderHelpers";
 import SeqFilterBar from "./components/SeqFilterBar";
+import { createStructuredSelector } from "reselect";
+import { requestSequences } from "./sequences_actions";
+import {
+	getHasLoaded,
+	getIsLoading,
+	getSequencesTable,
+	getTablePage,
+	getCount,
+	getTableRows,
+	getTableSort,
+	getFilters
+} from "./sequences_selectors";
 
 const columns = [
 	{ name: "dbID", options: { display: "excluded" } },
@@ -32,89 +43,30 @@ const columns = [
 
 class ListSequences extends Component {
 	state = {
-		page: 0,
-		total: 0,
-		rowsPerPage: 100,
-		orderby: null,
-		sequences: [],
-		loading: true,
-		filtersSet: {},
 		isFilterShowing: false
 	};
 
 	componentDidMount() {
-		this.getData();
+		if (!this.props.hasloaded) {
+			// Get initial data
+			this.getData();
+		}
 	}
 
-	/** Get initial data **/
-	getData = () => {
-		const { page, rowsPerPage, orderby, filtersSet } = this.state;
-		const offset = page * rowsPerPage;
-		var qParams = {
-			limit: rowsPerPage,
-			offset: offset
-		};
-		if (orderby) {
-			qParams["sort"] = orderby;
-		}
-		if (!isEmpty(filtersSet)) {
-			qParams["filter"] = filtersSet;
-		}
-		API.get(`sequences`, {
-			params: qParams
-		}).then(res => {
-			if (isArray(res.data.data)) {
-				const sequences = map(res.data.data, sequence => {
-					var seqRow = at(sequence, [
-						"id",
-						"name",
-						"length",
-						"groupId",
-						"groupName",
-						"sampleId",
-						"sampleName",
-						"typeId",
-						"typeName",
-						"annotNote"
-					]);
-					seqRow.push(
-						<a
-							href={sequence.extLink}
-							target="_blank"
-							rel="noopener noreferrer"
-						>
-							{sequence.extLinkLabel}
-						</a>
-					);
-					return seqRow;
-				});
-				this.setState({
-					sequences,
-					total: res.data.total,
-					loading: false
-				});
-			} else {
-				this.setState({
-					sequences: [],
-					total: 0,
-					loading: false
-				});
-			}
+	getData = ({ newPage, newRowsPerPage, newOrderby, newFiltersSet } = {}) => {
+		const { page, rowsPerPage, orderby, filtersSet } = this.props;
+		this.props.requestSequences({
+			page: newPage !== undefined ? newPage : page,
+			rowsPerPage:
+				newRowsPerPage !== undefined ? newRowsPerPage : rowsPerPage,
+			orderby: newOrderby !== undefined ? newOrderby : orderby,
+			filtersSet: newFiltersSet !== undefined ? newFiltersSet : filtersSet
 		});
 	};
 
 	/** SeqFilterBar submitting new filter list **/
 	onFilterSubmit = newFiltersSet => {
-		this.setState(
-			{
-				loading: true,
-				page: 0,
-				filtersSet: newFiltersSet
-			},
-			() => {
-				this.getData();
-			}
-		);
+		this.getData({ newPage: 0, newFiltersSet: newFiltersSet });
 	};
 
 	/** Show/hide SeqFilterBar **/
@@ -138,7 +90,10 @@ class ListSequences extends Component {
 					</IconButton>
 				</Tooltip>
 				{isFilterShowing && (
-					<SeqFilterBar onFilterSubmit={this.onFilterSubmit} />
+					<SeqFilterBar
+						filtersSet={this.props.filtersSet}
+						onFilterSubmit={this.onFilterSubmit}
+					/>
 				)}
 			</>
 		);
@@ -153,35 +108,16 @@ class ListSequences extends Component {
 			.replace("Sample", "sampleName")
 			.replace("Type", "typeName");
 		var dir = direction.replace(/(asc|desc)ending/, "$1");
-		this.setState(
-			{
-				loading: true,
-				orderby: `${col} ${dir}`,
-				page: 0
-			},
-			() => {
-				this.getData();
-			}
-		);
+		this.getData({ newPage: 0, newOrderby: `${col} ${dir}` });
 	};
 
 	/** Table page changed **/
 	onTableChange = (action, tableState) => {
-		const { page, rowsPerPage } = this.state;
-		if (
-			tableState.page !== page ||
-			tableState.rowsPerPage !== rowsPerPage
-		) {
-			this.setState(
-				{
-					loading: true,
-					page: tableState.page,
-					rowsPerPage: tableState.rowsPerPage
-				},
-				() => {
-					this.getData();
-				}
-			);
+		const { page, rowsPerPage } = this.props;
+		const newPage = tableState.page;
+		const newRowsPerPage = tableState.rowsPerPage;
+		if (newPage !== page || newRowsPerPage !== rowsPerPage) {
+			this.getData({ newPage: newPage, newRowsPerPage: newRowsPerPage });
 		}
 	};
 
@@ -189,7 +125,7 @@ class ListSequences extends Component {
 		/* If NOT ExtLink column clicked */
 		if (cellMeta.colIndex !== 10) {
 			/* Then go to sequence/:name page */
-			const clickedSeq = this.state.sequences[cellMeta.rowIndex];
+			const clickedSeq = this.props.sequences[cellMeta.rowIndex];
 			this.props.history.push(
 				this.props.location.pathname +
 					"/" +
@@ -200,7 +136,7 @@ class ListSequences extends Component {
 
 	/** options Object required by mui-datatable **/
 	getTableOptions = () => {
-		const { page, total, rowsPerPage } = this.state;
+		const { page, total, rowsPerPage } = this.props;
 		return {
 			pagination: true,
 			viewColumns: true,
@@ -220,17 +156,19 @@ class ListSequences extends Component {
 	};
 
 	render() {
-		const { sequences, loading } = this.state;
+		const { sequences, loading, hasloaded } = this.props;
 		return (
 			<>
 				{loading && renderLoadingBars()}
 				<>
-					<MuiDataTable
-						data={sequences}
-						columns={columns}
-						options={this.getTableOptions()}
-						title={"Sequences"}
-					/>
+					{hasloaded && (
+						<MuiDataTable
+							data={sequences}
+							columns={columns}
+							options={this.getTableOptions()}
+							title={"Sequences"}
+						/>
+					)}
 				</>
 				{loading && renderLoadingBars()}
 			</>
@@ -238,4 +176,27 @@ class ListSequences extends Component {
 	}
 }
 
-export default compose(withRouter)(ListSequences);
+/**
+ * allows us to call our application state from props
+ */
+const mapStateToProps = createStructuredSelector({
+	hasloaded: getHasLoaded,
+	loading: getIsLoading,
+	sequences: getSequencesTable,
+	page: getTablePage,
+	total: getCount,
+	rowsPerPage: getTableRows,
+	orderby: getTableSort,
+	filtersSet: getFilters
+});
+
+/**
+ * exports our component and gives it access to the redux state
+ */
+export default compose(
+	withRouter,
+	connect(
+		mapStateToProps,
+		{ requestSequences }
+	)
+)(ListSequences);
