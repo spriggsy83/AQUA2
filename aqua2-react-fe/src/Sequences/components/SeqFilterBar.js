@@ -200,7 +200,7 @@ class SeqFilterBar extends Component {
  * Defines required props
  */
 SeqFilterBar.propTypes = {
-	filtersSet: PropTypes.object.isRequired,
+	filtersSet: PropTypes.object,
 	onFilterSubmit: PropTypes.func.isRequired,
 	classes: PropTypes.object.isRequired
 };

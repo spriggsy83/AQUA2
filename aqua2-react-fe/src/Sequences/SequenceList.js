@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import { withRouter } from "react-router-dom";
-import { connect } from "react-redux";
 import compose from "recompose/compose";
 import { map, at, isEmpty } from "lodash";
 import IconButton from "@material-ui/core/IconButton";
@@ -10,9 +9,6 @@ import MuiDataTable from "mui-datatables";
 import API from "../common/API";
 import { renderNumber, renderLoadingBars } from "../common/renderHelpers";
 import SeqFilterBar from "./components/SeqFilterBar";
-import { createStructuredSelector } from "reselect";
-import { requestSequences } from "./sequences_actions";
-import { getSequencesTable, getHasLoaded } from "./sequences_selectors";
 
 const columns = [
 	{ name: "dbID", options: { display: "excluded" } },
@@ -53,12 +49,6 @@ class ListSequences extends Component {
 	/** Get initial data **/
 	getData = () => {
 		const { page, rowsPerPage, orderby, filtersSet } = this.state;
-		/*this.props.requestSequences({
-			page: page,
-			rowsPerPage: rowsPerPage,
-			orderby: orderby,
-			filtersSet: filtersSet
-		});*/
 		const offset = page * rowsPerPage;
 		var qParams = {
 			limit: rowsPerPage,
@@ -140,10 +130,7 @@ class ListSequences extends Component {
 					</IconButton>
 				</Tooltip>
 				{isFilterShowing && (
-					<SeqFilterBar
-						filtersSet={this.filtersSet}
-						onFilterSubmit={this.onFilterSubmit}
-					/>
+					<SeqFilterBar onFilterSubmit={this.onFilterSubmit} />
 				)}
 			</>
 		);
@@ -243,21 +230,4 @@ class ListSequences extends Component {
 	}
 }
 
-/**
- * allows us to call our application state from props
- */
-const mapStateToProps = createStructuredSelector({
-	loaded: getHasLoaded,
-	sequences: getSequencesTable
-});
-
-/**
- * exports our component and gives it access to the redux state
- */
-export default compose(
-	withRouter,
-	connect(
-		mapStateToProps,
-		{ requestSequences }
-	)
-)(ListSequences);
+export default compose(withRouter)(ListSequences);
