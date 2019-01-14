@@ -1,4 +1,7 @@
 import React, { Component } from "react";
+import { connect } from "react-redux";
+import compose from "recompose/compose";
+import { createStructuredSelector } from "reselect";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import Button from "@material-ui/core/Button";
@@ -9,7 +12,23 @@ import FormControl from "@material-ui/core/FormControl";
 import ListItemText from "@material-ui/core/ListItemText";
 import Select from "@material-ui/core/Select";
 import Checkbox from "@material-ui/core/Checkbox";
-import { map } from "lodash";
+import { map, isEqual, reduce } from "lodash";
+import { renderLoadingBars } from "../../common/renderHelpers";
+import {
+	actions as SampleActions,
+	selectors as SampleSelectors
+} from "../../Samples";
+import {
+	actions as SeqGroupActions,
+	selectors as SeqGroupSelectors
+} from "../../SeqGroups";
+import {
+	actions as SeqTypeActions,
+	selectors as SeqTypeSelectors
+} from "../../SeqTypes";
+const requestSamples = SampleActions.requestSamples;
+const requestSeqGroups = SeqGroupActions.requestSeqGroups;
+const requestSeqTypes = SeqTypeActions.requestSeqTypes;
 
 const styles = theme => ({
 	root: {
@@ -45,18 +64,60 @@ const MenuProps = {
 };
 
 class SeqFilterBar extends Component {
+	state = {
+		checked: { sample: [], seqtype: [], seqgroup: [] }
+	};
+
+	componentDidMount() {
+		if (!this.props.samplesLoaded) {
+			this.props.requestSamples();
+		}
+		if (!this.props.seqtypesLoaded) {
+			this.props.requestSeqTypes();
+		}
+		if (!this.props.seqgroupsLoaded) {
+			this.props.requestSeqGroups();
+		}
+	}
+
 	/** Check boxes checked/unchecked **/
 	handleChange = source => event => {
-		this.props.onFilterChange(source, event.target.value);
+		// Source == sample/seqtype/seqgroup
+		// event.target.value == Array of checked idNums
+		this.setState(prevState => ({
+			checked: {
+				...prevState.checked,
+				[source]: event.target.value
+			}
+		}));
 	};
 
 	/** Submit/Filter button clicked **/
 	handleClick = event => {
-		this.props.onFilterSubmit();
+		const { checked } = this.state;
+		const { filterOpts, filtersSet } = this.props;
+		// Convert list of checked names to list of idNums
+		var newFiltersSet = reduce(
+			checked,
+			function(result, flist, tablename) {
+				if (flist.length) {
+					result[tablename] = map(flist, label => {
+						return filterOpts[tablename][label];
+					});
+				}
+				return result;
+			},
+			{}
+		);
+		if (!isEqual(newFiltersSet, filtersSet)) {
+			// If not current filterSet, submit upwards
+			this.props.onFilterSubmit(newFiltersSet);
+		}
 	};
 
 	renderFilterLists = () => {
-		const { classes, filterOpts, checked } = this.props;
+		const { checked } = this.state;
+		const { classes, filterOpts } = this.props;
 		return map(Object.keys(filterOpts), tablename => {
 			return (
 				<FormControl
@@ -90,7 +151,8 @@ class SeqFilterBar extends Component {
 	};
 
 	renderFListRows = tablename => {
-		const { filterOpts, checked } = this.props;
+		const { checked } = this.state;
+		const { filterOpts } = this.props;
 		const fList = filterOpts[tablename];
 		return map(Object.keys(fList), rowlabel => {
 			return (
@@ -108,37 +170,62 @@ class SeqFilterBar extends Component {
 	};
 
 	render() {
-		const { classes, filterOpts } = this.props;
-		if (filterOpts) {
-			if (Object.keys(filterOpts).length > 0) {
-				return (
-					<div className={classes.root}>
-						<Button
-							variant="outlined"
-							size="small"
-							className={classes.margin + " " + classes.smallText}
-							onClick={this.handleClick}
-						>
-							Filter:
-						</Button>
-						{this.renderFilterLists()}
-					</div>
-				);
-			} else {
-				return null;
-			}
+		const {
+			classes,
+			samplesLoaded,
+			seqtypesLoaded,
+			seqgroupsLoaded
+		} = this.props;
+		if (samplesLoaded && seqtypesLoaded && seqgroupsLoaded) {
+			return (
+				<div className={classes.root}>
+					<Button
+						variant="outlined"
+						size="small"
+						className={classes.margin + " " + classes.smallText}
+						onClick={this.handleClick}
+					>
+						Filter:
+					</Button>
+					{this.renderFilterLists()}
+				</div>
+			);
 		} else {
-			return null;
+			return renderLoadingBars();
 		}
 	}
 }
 
+/**
+ * Defines required props
+ */
 SeqFilterBar.propTypes = {
-	checked: PropTypes.object.isRequired,
-	filterOpts: PropTypes.object.isRequired,
-	onFilterChange: PropTypes.func.isRequired,
+	filtersSet: PropTypes.object,
 	onFilterSubmit: PropTypes.func.isRequired,
 	classes: PropTypes.object.isRequired
 };
 
-export default withStyles(styles, { withTheme: true })(SeqFilterBar);
+/**
+ * allows us to call our application state from props
+ */
+const mapStateToProps = createStructuredSelector({
+	samplesLoaded: SampleSelectors.getHasLoaded,
+	seqtypesLoaded: SeqTypeSelectors.getHasLoaded,
+	seqgroupsLoaded: SeqGroupSelectors.getHasLoaded,
+	filterOpts: createStructuredSelector({
+		sample: SampleSelectors.getNamesIDsList,
+		seqgroup: SeqGroupSelectors.getNamesIDsList,
+		seqtype: SeqTypeSelectors.getNamesIDsList
+	})
+});
+
+/**
+ * exports our component and gives it access to the redux state
+ */
+export default compose(
+	withStyles(styles, { withTheme: true }),
+	connect(
+		mapStateToProps,
+		{ requestSamples, requestSeqGroups, requestSeqTypes }
+	)
+)(SeqFilterBar);

@@ -1,5 +1,5 @@
 "use-strict";
-import * as acts from "./seqgroups_action_list";
+import * as acts from "./sequences_action_list";
 
 /**
  * define the initial state of our reducer
@@ -9,7 +9,11 @@ const INITIAL_STATE = {
 	loading: false,
 	error: null,
 	total: 0,
-	seqgroups: []
+	sequences: [],
+	page: 0,
+	rowsPerPage: 100,
+	orderby: null,
+	filtersSet: {}
 };
 
 /**
@@ -30,7 +34,11 @@ export default function(state = INITIAL_STATE, action) {
 				loading: false,
 				error: null,
 				total: action.payload.total,
-				seqgroups: action.payload.seqgroups
+				sequences: action.payload.sequences,
+				page: action.payload.page,
+				rowsPerPage: action.payload.rowsPerPage,
+				orderby: action.payload.orderby,
+				filtersSet: action.payload.filtersSet
 			};
 		case acts.ERRORED:
 			return {

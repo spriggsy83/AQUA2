@@ -6,7 +6,7 @@ import MuiDataTable from "mui-datatables";
 import { renderNumber, renderLoadingBars } from "../common/renderHelpers";
 import { createStructuredSelector } from "reselect";
 import { requestSeqGroups } from "./seqgroups_actions";
-import { getSeqGroupsTable, getStatus } from "./seqgroups_selectors";
+import { getSeqGroupsTable, getHasLoaded } from "./seqgroups_selectors";
 
 const columns = [
 	{ name: "dbID", options: { display: "excluded" } },
@@ -97,7 +97,7 @@ class ListSeqGroups extends Component {
  * allows us to call our application state from props
  */
 const mapStateToProps = createStructuredSelector({
-	loaded: getStatus,
+	loaded: getHasLoaded,
 	seqgroups: getSeqGroupsTable
 });
 

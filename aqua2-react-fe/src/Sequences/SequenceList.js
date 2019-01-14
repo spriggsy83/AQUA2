@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { withRouter } from "react-router-dom";
 import compose from "recompose/compose";
-import { map, at, isEqual, isEmpty, reduce } from "lodash";
+import { map, at, isEmpty, isArray } from "lodash";
 import IconButton from "@material-ui/core/IconButton";
 import FilterListIcon from "@material-ui/icons/FilterList";
 import Tooltip from "@material-ui/core/Tooltip";
@@ -38,9 +38,7 @@ class ListSequences extends Component {
 		orderby: null,
 		sequences: [],
 		loading: true,
-		filterOpts: {},
 		filtersSet: {},
-		filtersChecked: {},
 		isFilterShowing: false
 	};
 
@@ -50,13 +48,7 @@ class ListSequences extends Component {
 
 	/** Get initial data **/
 	getData = () => {
-		const {
-			page,
-			rowsPerPage,
-			orderby,
-			filtersSet,
-			filterOpts
-		} = this.state;
+		const { page, rowsPerPage, orderby, filtersSet } = this.state;
 		const offset = page * rowsPerPage;
 		var qParams = {
 			limit: rowsPerPage,
@@ -71,31 +63,31 @@ class ListSequences extends Component {
 		API.get(`sequences`, {
 			params: qParams
 		}).then(res => {
-			const sequences = map(res.data.data, sequence => {
-				var seqRow = at(sequence, [
-					"id",
-					"name",
-					"length",
-					"groupId",
-					"groupName",
-					"sampleId",
-					"sampleName",
-					"typeId",
-					"typeName",
-					"annotNote"
-				]);
-				seqRow.push(
-					<a
-						href={sequence.extLink}
-						target="_blank"
-						rel="noopener noreferrer"
-					>
-						{sequence.extLinkLabel}
-					</a>
-				);
-				return seqRow;
-			});
-			if (isEqual(filterOpts, res.data.filterby)) {
+			if (isArray(res.data.data)) {
+				const sequences = map(res.data.data, sequence => {
+					var seqRow = at(sequence, [
+						"id",
+						"name",
+						"length",
+						"groupId",
+						"groupName",
+						"sampleId",
+						"sampleName",
+						"typeId",
+						"typeName",
+						"annotNote"
+					]);
+					seqRow.push(
+						<a
+							href={sequence.extLink}
+							target="_blank"
+							rel="noopener noreferrer"
+						>
+							{sequence.extLinkLabel}
+						</a>
+					);
+					return seqRow;
+				});
 				this.setState({
 					sequences,
 					total: res.data.total,
@@ -103,60 +95,26 @@ class ListSequences extends Component {
 				});
 			} else {
 				this.setState({
-					sequences,
-					total: res.data.total,
-					loading: false,
-					filterOpts: res.data.filterby,
-					filtersChecked: reduce(
-						res.data.filterby,
-						function(result, value, key) {
-							result[key] = [];
-							return result;
-						},
-						{}
-					)
+					sequences: [],
+					total: 0,
+					loading: false
 				});
 			}
 		});
 	};
 
-	/** SeqFilterBar checkbox ticked/unticked **/
-	onFilterChange = (tablename, checkList) => {
-		this.setState(prevState => ({
-			filtersChecked: {
-				...prevState.filtersChecked,
-				[tablename]: checkList
-			}
-		}));
-	};
-
 	/** SeqFilterBar submitting new filter list **/
-	onFilterSubmit = () => {
-		const { filtersChecked, filterOpts, filtersSet } = this.state;
-		var newFiltersSet = reduce(
-			filtersChecked,
-			function(result, flist, tablename) {
-				if (flist.length) {
-					result[tablename] = map(flist, label => {
-						return filterOpts[tablename][label];
-					});
-				}
-				return result;
+	onFilterSubmit = newFiltersSet => {
+		this.setState(
+			{
+				loading: true,
+				page: 0,
+				filtersSet: newFiltersSet
 			},
-			{}
+			() => {
+				this.getData();
+			}
 		);
-		if (!isEqual(newFiltersSet, filtersSet)) {
-			this.setState(
-				{
-					loading: true,
-					page: 0,
-					filtersSet: newFiltersSet
-				},
-				() => {
-					this.getData();
-				}
-			);
-		}
 	};
 
 	/** Show/hide SeqFilterBar **/
@@ -168,29 +126,22 @@ class ListSequences extends Component {
 
 	/** SeqFilterBar contains checkbox filter controls **/
 	renderFilterToolbar = () => {
-		const { filterOpts, filtersChecked, isFilterShowing } = this.state;
-		if (filterOpts) {
-			return (
-				<>
-					<Tooltip id="filter-button" title="Filter">
-						<IconButton
-							aria-label="Filter"
-							onClick={this.onFilterHiderClick}
-						>
-							<FilterListIcon />
-						</IconButton>
-					</Tooltip>
-					{isFilterShowing && (
-						<SeqFilterBar
-							checked={filtersChecked}
-							filterOpts={filterOpts}
-							onFilterChange={this.onFilterChange}
-							onFilterSubmit={this.onFilterSubmit}
-						/>
-					)}
-				</>
-			);
-		}
+		const { isFilterShowing } = this.state;
+		return (
+			<>
+				<Tooltip id="filter-button" title="Filter">
+					<IconButton
+						aria-label="Filter"
+						onClick={this.onFilterHiderClick}
+					>
+						<FilterListIcon />
+					</IconButton>
+				</Tooltip>
+				{isFilterShowing && (
+					<SeqFilterBar onFilterSubmit={this.onFilterSubmit} />
+				)}
+			</>
+		);
 	};
 
 	/** Table sort changed **/

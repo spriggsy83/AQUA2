@@ -7,7 +7,7 @@ import { withStyles } from "@material-ui/core/styles";
 import { renderNumber, renderLoadingBars } from "../common/renderHelpers";
 import { createStructuredSelector } from "reselect";
 import { requestSeqTypes } from "./seqtypes_actions";
-import { getSeqTypesTable, getStatus } from "./seqtypes_selectors";
+import { getSeqTypesTable, getHasLoaded } from "./seqtypes_selectors";
 
 const styles = theme => ({
 	narrowlist: {
@@ -74,7 +74,7 @@ class ListSeqTypes extends Component {
  * allows us to call our application state from props
  */
 const mapStateToProps = createStructuredSelector({
-	loaded: getStatus,
+	loaded: getHasLoaded,
 	seqtypes: getSeqTypesTable
 });
 

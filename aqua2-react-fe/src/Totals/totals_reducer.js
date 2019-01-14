@@ -4,7 +4,12 @@ import * as acts from "./totals_action_list";
 /**
  * define the initial state of our reducer
  */
-const INITIAL_STATE = { loaded: false, totals: [] };
+const INITIAL_STATE = {
+	loaded: false,
+	loading: false,
+	error: null,
+	totals: []
+};
 
 /**
  * switch statement checks to see if the dispatched action requires any work from
@@ -15,13 +20,22 @@ export default function(state = INITIAL_STATE, action) {
 		case acts.LOADING:
 			return {
 				...state,
-				loaded: false
+				loading: true
 			};
 		case acts.LOADED:
 			return {
 				...state,
 				loaded: true,
+				loading: false,
+				error: null,
 				totals: action.payload.totals
+			};
+		case acts.ERRORED:
+			return {
+				...state,
+				loaded: false,
+				loading: false,
+				error: action.payload.error
 			};
 		default:
 			return state;
