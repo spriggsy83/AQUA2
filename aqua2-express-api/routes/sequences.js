@@ -150,15 +150,9 @@ router.get(
 		}
 
 		/* Submit series of async queries */
-		/* qTotal from either a fast total-lookup
+		/* qTotal is either a fast totals-table-lookup
 		  or a slow WHERE query, depending on 'filterSQL' */
-		const [
-			qTotal,
-			qAll,
-			filterbySamps,
-			filterbyGroups,
-			filterbyType
-		] = await Promise.all([
+		const [qTotal, qAll] = await Promise.all([
 			filterSQL
 				? dbLink.dbCountQueryToJRes(
 						sequenceCountQuery({ filterSQL: filterSQL })
@@ -171,16 +165,12 @@ router.get(
 					sort: sort,
 					filterSQL: filterSQL
 				})
-			),
-			dbLink.dbFilterListToJRes("sample", "name"),
-			dbLink.dbFilterListToJRes("seqgroup", "name"),
-			dbLink.dbFilterListToJRes("seqtype", "type")
+			)
 		]);
 
 		res.json({
 			...qTotal,
-			...qAll,
-			filterby: { ...filterbySamps, ...filterbyGroups, ...filterbyType }
+			...qAll
 		});
 	})
 );
