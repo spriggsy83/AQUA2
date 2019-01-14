@@ -1,4 +1,5 @@
 "use-strict";
+import { isArray } from "lodash";
 import * as acts from "./samples_action_list";
 import { getIsLoading } from "./samples_selectors";
 import API from "../common/API";
@@ -11,13 +12,24 @@ export function requestSamples() {
 			});
 			API.get(`samples`)
 				.then(response => {
-					dispatch({
-						type: acts.LOADED,
-						payload: {
-							total: response.data.total,
-							samples: response.data.data
-						}
-					});
+					if (isArray(response.data.data)) {
+						dispatch({
+							type: acts.LOADED,
+							payload: {
+								total: response.data.total,
+								samples: response.data.data
+							}
+						});
+					} else {
+						dispatch({
+							type: acts.LOADED,
+							payload: {
+								total: 0,
+								samples: [],
+								error: "No data found"
+							}
+						});
+					}
 				})
 				.catch(error => {
 					dispatch({

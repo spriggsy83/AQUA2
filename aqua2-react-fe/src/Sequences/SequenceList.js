@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { withRouter } from "react-router-dom";
 import compose from "recompose/compose";
-import { map, at, isEmpty } from "lodash";
+import { map, at, isEmpty, isArray } from "lodash";
 import IconButton from "@material-ui/core/IconButton";
 import FilterListIcon from "@material-ui/icons/FilterList";
 import Tooltip from "@material-ui/core/Tooltip";
@@ -63,35 +63,43 @@ class ListSequences extends Component {
 		API.get(`sequences`, {
 			params: qParams
 		}).then(res => {
-			const sequences = map(res.data.data, sequence => {
-				var seqRow = at(sequence, [
-					"id",
-					"name",
-					"length",
-					"groupId",
-					"groupName",
-					"sampleId",
-					"sampleName",
-					"typeId",
-					"typeName",
-					"annotNote"
-				]);
-				seqRow.push(
-					<a
-						href={sequence.extLink}
-						target="_blank"
-						rel="noopener noreferrer"
-					>
-						{sequence.extLinkLabel}
-					</a>
-				);
-				return seqRow;
-			});
-			this.setState({
-				sequences,
-				total: res.data.total,
-				loading: false
-			});
+			if (isArray(res.data.data)) {
+				const sequences = map(res.data.data, sequence => {
+					var seqRow = at(sequence, [
+						"id",
+						"name",
+						"length",
+						"groupId",
+						"groupName",
+						"sampleId",
+						"sampleName",
+						"typeId",
+						"typeName",
+						"annotNote"
+					]);
+					seqRow.push(
+						<a
+							href={sequence.extLink}
+							target="_blank"
+							rel="noopener noreferrer"
+						>
+							{sequence.extLinkLabel}
+						</a>
+					);
+					return seqRow;
+				});
+				this.setState({
+					sequences,
+					total: res.data.total,
+					loading: false
+				});
+			} else {
+				this.setState({
+					sequences: [],
+					total: 0,
+					loading: false
+				});
+			}
 		});
 	};
 

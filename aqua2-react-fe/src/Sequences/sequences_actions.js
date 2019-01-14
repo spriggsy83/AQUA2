@@ -1,5 +1,5 @@
 "use-strict";
-import { isEmpty } from "lodash";
+import { isEmpty, isArray } from "lodash";
 import * as acts from "./sequences_action_list";
 import { getIsLoading } from "./sequences_selectors";
 import API from "../common/API";
@@ -30,17 +30,32 @@ export const requestSequences = ({
 				params: qParams
 			})
 				.then(response => {
-					dispatch({
-						type: acts.LOADED,
-						payload: {
-							total: response.data.total,
-							sequences: response.data.data,
-							page: page,
-							rowsPerPage: rowsPerPage,
-							orderby: orderby,
-							filtersSet: filtersSet
-						}
-					});
+					if (isArray(response.data.data)) {
+						dispatch({
+							type: acts.LOADED,
+							payload: {
+								total: response.data.total,
+								sequences: response.data.data,
+								page: page,
+								rowsPerPage: rowsPerPage,
+								orderby: orderby,
+								filtersSet: filtersSet
+							}
+						});
+					} else {
+						dispatch({
+							type: acts.LOADED,
+							payload: {
+								total: 0,
+								sequences: [],
+								page: page,
+								rowsPerPage: rowsPerPage,
+								orderby: orderby,
+								filtersSet: filtersSet,
+								error: "No data found"
+							}
+						});
+					}
 				})
 				.catch(error => {
 					dispatch({
