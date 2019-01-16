@@ -11,6 +11,8 @@ import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
 import { Link } from "react-router-dom";
 
+import { SearchBar } from "../Search";
+
 const drawerWidth = 180;
 
 const styles = theme => ({
@@ -31,12 +33,13 @@ const styles = theme => ({
         flexGrow: 1,
         padding: theme.spacing.unit * 3
     },
-    toolbar: theme.mixins.toolbar
-    /*    listItem: {
-        "&:hover": {
-            backgroundColor: theme.palette.secondary.main + " !important"
-        }
-    }*/
+    toolbar: theme.mixins.toolbar,
+    grow: {
+        flexGrow: 1
+    },
+    searchbox: {
+        justifyContent: "flex-end"
+    }
 });
 
 class SideMenu extends Component {
@@ -60,6 +63,8 @@ class SideMenu extends Component {
                                 AQUA2
                             </Link>
                         </Typography>
+                        <div className={classes.grow} />
+                        <SearchBar className={classes.searchbox} />
                     </Toolbar>
                 </AppBar>
                 <Drawer
