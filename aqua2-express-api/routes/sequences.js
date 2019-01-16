@@ -7,6 +7,7 @@ var dbLink = require("../util/db-link.js");
 
 function sequenceQuery({
 	id = null,
+	name = null,
 	limit = 100,
 	offset = 0,
 	sort = null,
@@ -37,6 +38,8 @@ WHERE 1 = 1
 `;
 	if (id) {
 		query.append(SQL` AND seq.id = ${id}`);
+	} else if (name) {
+		query.append(SQL` AND seq.name = ${name}`);
 	} else if (filterSQL) {
 		query.append(filterSQL);
 	}
@@ -107,12 +110,24 @@ function filterParamJsonToSql({ filterParamStr = null } = {}) {
 	}
 }
 
-/* GET 1 sequence listing. */
+/** GET 1 sequence listing.
+ * Integer-only = seq ID
+ * OR Starting with alphanumeric char = seq name
+ */
 router.get(
 	"/:id([0-9]{1,})",
 	asyncHandler(async (req, res, next) => {
 		const qRes = await dbLink.dbQueryToJRes(
 			sequenceQuery({ id: req.params.id })
+		);
+		res.json(qRes);
+	})
+);
+router.get(
+	"/:name(\\w\\S{0,})",
+	asyncHandler(async (req, res, next) => {
+		const qRes = await dbLink.dbQueryToJRes(
+			sequenceQuery({ name: req.params.name })
 		);
 		res.json(qRes);
 	})
