@@ -17,7 +17,8 @@ export function requestSeqGroups() {
 							type: acts.LOADED,
 							payload: {
 								total: response.data.total,
-								seqgroups: response.data.data
+								seqgroups: response.data.data,
+								error: null
 							}
 						});
 					} else {

@@ -1,32 +1,59 @@
 "use-strict";
-import { isEmpty, isArray } from "lodash";
-import * as acts from "./sequences_action_list";
-import { getIsLoading } from "./sequences_selectors";
+import { isArray, isEqual } from "lodash";
+import * as acts from "./search_action_list";
+import {
+	getIsLoading,
+	getSearchTerm,
+	getSearchType,
+	getSearchParams
+} from "./search_selectors";
 import API from "../common/API";
 
-export const requestSequences = ({
+const validSearchTerms = ["seqs", "annots", "all"];
+
+export const requestSearch = ({
+	searchTerm = "",
+	searchType = "seqs",
 	page = 0,
 	rowsPerPage = 50,
-	orderby = null,
-	filtersSet = {}
+	orderby = null
 } = {}) => {
 	const offset = page * rowsPerPage;
 	var qParams = {
 		limit: rowsPerPage,
 		offset: offset
 	};
+	if (searchType && validSearchTerms.includes(searchType)) {
+		qParams["searchtype"] = searchType;
+	}
 	if (orderby) {
 		qParams["sort"] = orderby;
 	}
-	if (!isEmpty(filtersSet)) {
-		qParams["filter"] = filtersSet;
-	}
 	return function(dispatch, getState) {
-		if (!getIsLoading(getState())) {
+		var doFetch = false;
+		if (
+			searchTerm !== getSearchTerm(getState()) ||
+			searchType !== getSearchType(getState())
+		) {
+			dispatch({
+				type: acts.NEWSEARCH,
+				payload: {
+					searchTerm: searchTerm,
+					searchType: searchType
+				}
+			});
+			doFetch = true;
+		} else if (
+			!isEqual(qParams, getSearchParams(getState())) ||
+			!getIsLoading(getState())
+		) {
 			dispatch({
 				type: acts.LOADING
 			});
-			API.get(`sequences`, {
+			doFetch = true;
+		}
+		if (doFetch) {
+			API.get(`search/${searchTerm}`, {
 				params: qParams
 			})
 				.then(response => {
@@ -35,11 +62,10 @@ export const requestSequences = ({
 							type: acts.LOADED,
 							payload: {
 								total: response.data.total,
-								sequences: response.data.data,
+								searchResult: response.data.data,
 								page: page,
 								rowsPerPage: rowsPerPage,
 								orderby: orderby,
-								filtersSet: filtersSet,
 								error: null
 							}
 						});
@@ -48,11 +74,10 @@ export const requestSequences = ({
 							type: acts.LOADED,
 							payload: {
 								total: 0,
-								sequences: [],
+								searchResult: [],
 								page: page,
 								rowsPerPage: rowsPerPage,
 								orderby: orderby,
-								filtersSet: filtersSet,
 								error: "No data found"
 							}
 						});

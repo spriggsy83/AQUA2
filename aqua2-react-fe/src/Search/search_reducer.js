@@ -1,5 +1,5 @@
 "use-strict";
-import * as acts from "./seqgroups_action_list";
+import * as acts from "./search_action_list";
 
 /**
  * define the initial state of our reducer
@@ -9,7 +9,12 @@ const INITIAL_STATE = {
 	loading: false,
 	error: null,
 	total: 0,
-	seqgroups: []
+	searchTerm: "",
+	searchType: "seqs",
+	searchResult: [],
+	page: 0,
+	rowsPerPage: 100,
+	orderby: null
 };
 
 /**
@@ -18,6 +23,17 @@ const INITIAL_STATE = {
  */
 export default function(state = INITIAL_STATE, action) {
 	switch (action.type) {
+		case acts.NEWSEARCH:
+			return {
+				...state,
+				loading: true,
+				loaded: false,
+				error: null,
+				total: 0,
+				searchResult: [],
+				searchTerm: action.payload.searchTerm,
+				searchType: action.payload.searchType
+			};
 		case acts.LOADING:
 			return {
 				...state,
@@ -30,13 +46,18 @@ export default function(state = INITIAL_STATE, action) {
 				loading: false,
 				error: action.payload.error,
 				total: action.payload.total,
-				seqgroups: action.payload.seqgroups
+				searchResult: action.payload.searchResult,
+				page: action.payload.page,
+				rowsPerPage: action.payload.rowsPerPage,
+				orderby: action.payload.orderby
 			};
 		case acts.ERRORED:
 			return {
 				...state,
 				loaded: false,
 				loading: false,
+				total: 0,
+				searchResult: [],
 				error: action.payload.error
 			};
 		default:

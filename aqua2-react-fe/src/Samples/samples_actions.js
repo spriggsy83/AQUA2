@@ -17,7 +17,8 @@ export function requestSamples() {
 							type: acts.LOADED,
 							payload: {
 								total: response.data.total,
-								samples: response.data.data
+								samples: response.data.data,
+								error: null
 							}
 						});
 					} else {

@@ -28,7 +28,7 @@ export default function(state = INITIAL_STATE, action) {
 				...state,
 				loaded: true,
 				loading: false,
-				error: null,
+				error: action.payload.error,
 				total: action.payload.total,
 				samples: action.payload.samples
 			};

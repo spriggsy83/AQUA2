@@ -8,6 +8,7 @@ import { reducer as SamplesReducer } from "./Samples";
 import { reducer as SeqTypesReducer } from "./SeqTypes";
 import { reducer as SeqGroupsReducer } from "./SeqGroups";
 import { reducer as SequencesReducer } from "./Sequences";
+import { reducer as SearchReducer } from "./Search";
 
 /**
  * combine the reducers
@@ -17,7 +18,8 @@ const rootReducer = combineReducers({
 	samples: SamplesReducer,
 	seqtypes: SeqTypesReducer,
 	seqgroups: SeqGroupsReducer,
-	sequences: SequencesReducer
+	sequences: SequencesReducer,
+	search: SearchReducer
 });
 
 export default rootReducer;

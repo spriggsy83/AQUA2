@@ -1,4 +1,7 @@
 import React, { Component } from "react";
+import { withRouter } from "react-router-dom";
+import { connect } from "react-redux";
+import { createStructuredSelector } from "reselect";
 import compose from "recompose/compose";
 import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
@@ -12,6 +15,8 @@ import MenuItem from "@material-ui/core/MenuItem";
 import FormControl from "@material-ui/core/FormControl";
 import Select from "@material-ui/core/Select";
 import Typography from "@material-ui/core/Typography";
+import { requestSearch } from "./search_actions";
+import { getSearchTerm, getSearchType } from "./search_selectors";
 
 const styles = theme => ({
 	root: {
@@ -55,7 +60,22 @@ class SearchBar extends Component {
 	};
 
 	onSearchSubmit = () => {
-		console.log("Submit");
+		const { searchtext, searchtype } = this.state;
+		const { prevSearchTerm, prevSearchType, location } = this.props;
+		if (searchtext !== "") {
+			if (
+				searchtext !== prevSearchTerm ||
+				searchtype !== prevSearchType
+			) {
+				this.props.requestSearch({
+					searchTerm: searchtext,
+					searchType: searchtype
+				});
+			}
+			if (location.pathname !== "/Search") {
+				this.props.history.push("/Search");
+			}
+		}
 	};
 
 	onKeyPress = event => {
@@ -77,9 +97,9 @@ class SearchBar extends Component {
 					}}
 					disableUnderline={true}
 				>
-					<MenuItem value={"seqs"}>Sequence IDs</MenuItem>
-					<MenuItem value={"annots"}>Annotations</MenuItem>
-					<MenuItem value={"all"}>Seqs & annots</MenuItem>
+					<MenuItem value={"seqs"}>sequence IDs</MenuItem>
+					<MenuItem value={"annots"}>annotations</MenuItem>
+					<MenuItem value={"all"}>seqs & annots</MenuItem>
 				</Select>
 			</FormControl>
 		);
@@ -96,8 +116,11 @@ class SearchBar extends Component {
 					placeholder="Search"
 					onChange={this.updateSearchText}
 					onKeyDown={this.onKeyPress}
+					inputProps={{
+						style: { textAlign: "right" }
+					}}
 				/>
-				<Typography variant="h6">:</Typography>
+				<Typography variant="subtitle1">in</Typography>
 				<Tooltip id="sfilter-button-tip" title="Search what?">
 					{this.renderTypeSelect()}
 				</Tooltip>
@@ -118,10 +141,28 @@ class SearchBar extends Component {
 }
 
 /**
+ * allows us to call our application state from props
+ */
+const mapStateToProps = createStructuredSelector({
+	prevSearchTerm: getSearchTerm,
+	prevSearchType: getSearchType
+});
+
+/**
  * Defines required props
  */
 SearchBar.propTypes = {
 	classes: PropTypes.object.isRequired
 };
 
-export default compose(withStyles(styles, { withTheme: true }))(SearchBar);
+/**
+ * exports our component and gives it access to the redux state
+ */
+export default compose(
+	withStyles(styles, { withTheme: true }),
+	withRouter,
+	connect(
+		mapStateToProps,
+		{ requestSearch }
+	)
+)(SearchBar);

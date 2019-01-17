@@ -17,7 +17,8 @@ export function requestSeqTypes() {
 							type: acts.LOADED,
 							payload: {
 								total: response.data.total,
-								seqtypes: response.data.data
+								seqtypes: response.data.data,
+								error: null
 							}
 						});
 					} else {
