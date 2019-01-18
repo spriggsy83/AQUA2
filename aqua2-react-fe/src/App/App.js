@@ -8,6 +8,7 @@ import { ListSamples } from "../Samples";
 import { ListSeqTypes } from "../SeqTypes";
 import { ListSeqGroups } from "../SeqGroups";
 import { ListSequences } from "../Sequences";
+import { SearchResultList } from "../Search";
 import "./App.css";
 
 import { UnderConstruction } from "../common/renderHelpers";
@@ -38,7 +39,7 @@ class App extends Component {
 				/>
 				<Route path="/Sequences" component={ListSequences} />
 				<Route path="/BulkAnnot" component={UnderConstruction} />
-				<Route path="/Search" component={UnderConstruction} />
+				<Route path="/Search" component={SearchResultList} />
 			</Switch>
 		);
 	};

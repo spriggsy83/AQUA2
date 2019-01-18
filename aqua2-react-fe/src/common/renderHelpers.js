@@ -28,6 +28,10 @@ export function renderNumber(value) {
 	);
 }
 
+export function renderRightText(value) {
+	return <Typography align={"right"}>{value}</Typography>;
+}
+
 export function renderLoadingBars() {
 	return (
 		<>

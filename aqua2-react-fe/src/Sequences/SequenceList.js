@@ -143,7 +143,7 @@ class ListSequences extends Component {
 			selectableRows: false,
 			search: false,
 			filter: false,
-			rowsPerPageOptions: [50, 100, 200],
+			rowsPerPageOptions: [50, 100, 200, 1000],
 			rowsPerPage: rowsPerPage,
 			page: page,
 			count: total,

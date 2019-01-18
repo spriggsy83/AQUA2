@@ -38,13 +38,7 @@ SELECT
   NULL AS alignSpecies,
   NULL AS alignSource,
   NULL AS alignMethod,
-  NULL AS alignScore,
-  NULL AS alignGroupId,
-  NULL AS alignGroupName,
-  NULL AS alignSampleId,
-  NULL AS alignSampleName,
-  NULL AS alignSeqId,
-  NULL AS alignSeqName
+  NULL AS alignScore
 FROM sequence AS seq
 JOIN seqgroup AS grp
   ON grp.id=seq.belongsGroup
@@ -94,13 +88,7 @@ SELECT
   aln.species AS alignSpecies,
   aln.source AS alignSource,
   aln.method AS alignMethod,
-  aln.score AS alignScore,
-  aln.belongsGroup AS alignGroupId,
-  grp2.name AS alignGroupName,
-  aln.isSample AS alignSampleId,
-  samp2.name AS alignSampleName,
-  aln.isSequence AS alignSeqId,
-  seq2.name AS alignSeqName
+  aln.score AS alignScore
 FROM alignedannot aln
 JOIN sequence AS seq
   ON seq.id=aln.onSequence
@@ -110,12 +98,6 @@ JOIN sample AS samp
   ON samp.id=seq.isSample
 JOIN seqtype AS stype
   ON stype.id=seq.isType
-LEFT JOIN seqgroup AS grp2
-  ON grp2.id=aln.belongsGroup
-LEFT JOIN sample AS samp2
-  ON samp2.id=aln.isSample
-LEFT JOIN sequence AS seq2
-  ON seq2.id=aln.isSequence
 WHERE aln.name LIKE ${searchTerm} 
 OR aln.annotation LIKE ${searchTerm}
 `);
