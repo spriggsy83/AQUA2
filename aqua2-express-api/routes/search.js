@@ -29,7 +29,7 @@ SELECT
   stype.type AS seqTypeName,
   seq.extLink AS seqExtLink,
   seq.extLinkLabel AS seqExtLinkLabel,
-  seq.annotNote AS annotation,
+  seq.annotNote AS seqAnnot,
   NULL AS alignId,
   NULL AS alignName,
   NULL AS alignStart,
@@ -38,7 +38,8 @@ SELECT
   NULL AS alignSpecies,
   NULL AS alignSource,
   NULL AS alignMethod,
-  NULL AS alignScore
+  NULL AS alignScore,
+  NULL AS alignAnnot
 FROM sequence AS seq
 JOIN seqgroup AS grp
   ON grp.id=seq.belongsGroup
@@ -79,7 +80,7 @@ SELECT
   stype.type AS seqTypeName,
   seq.extLink AS seqExtLink,
   seq.extLinkLabel AS seqExtLinkLabel,
-  aln.annotation AS annotation,
+  seq.annotNote AS seqAnnot,
   aln.id AS alignId,
   aln.name AS alignName,
   aln.start AS alignStart,
@@ -88,7 +89,8 @@ SELECT
   aln.species AS alignSpecies,
   aln.source AS alignSource,
   aln.method AS alignMethod,
-  aln.score AS alignScore
+  aln.score AS alignScore,
+  aln.annotation AS alignAnnot
 FROM alignedannot aln
 JOIN sequence AS seq
   ON seq.id=aln.onSequence

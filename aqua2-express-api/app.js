@@ -5,6 +5,9 @@ var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 var swaggerUi = require("swagger-ui-express");
 var YAML = require("yamljs");
+
+require("dotenv").config();
+
 var swaggerDocument = YAML.load("./docs/swagger.yaml");
 
 var indexRouter = require("./routes/index");

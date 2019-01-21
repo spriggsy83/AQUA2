@@ -4,10 +4,10 @@ const SQL = require("sql-template-strings");
 
 const dbpool = mysql.createPool({
 	connectionLimit: 10,
-	host: "cowpea.it.csiro.au",
-	user: "sails",
-	password: "sailsDBpw",
-	database: "annotQDB"
+	host: process.env.DB_HOST,
+	user: process.env.DB_USER,
+	password: process.env.DB_PASS,
+	database: process.env.DB_DBNAME
 });
 
 /** Turns a SELECT COUNT(*) into a {total: X}

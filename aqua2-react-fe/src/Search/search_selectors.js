@@ -1,6 +1,6 @@
 import React from "react";
 import { createSelector } from "reselect";
-import { map, at } from "lodash";
+import { map, at, find } from "lodash";
 
 export const getStateSlice = state => state.search;
 
@@ -106,13 +106,58 @@ export const getSearchTable = createSelector(getSearchResult, searchRes => {
 					"alignSpecies",
 					"alignSource",
 					"alignMethod",
-					"alignScore",
-					"annotation"
+					"alignScore"
 				])
 			);
+			if (resultRow.resultType === "sequence") {
+				tableRow.push(resultRow.seqAnnot);
+			} else if (resultRow.resultType === "alignedannot") {
+				tableRow.push(resultRow.alignAnnot);
+			} else {
+				tableRow.push(null);
+			}
 			return tableRow;
 		});
 	} else {
 		return [];
 	}
 });
+
+const searchObjToSeqObj = searchRow => {
+	return {
+		id: searchRow.seqId,
+		name: searchRow.seqName,
+		length: searchRow.seqLength,
+		groupId: searchRow.seqGroupId,
+		groupName: searchRow.seqGroupName,
+		sampleId: searchRow.seqSampleId,
+		sampleName: searchRow.seqSampleName,
+		typeId: searchRow.seqTypeId,
+		typeName: searchRow.seqTypeName,
+		annotNote: searchRow.seqAnnot,
+		extLink: searchRow.seqExtLink,
+		extLinkLabel: searchRow.seqExtLinkLabel
+	};
+};
+
+export const getSeqByID = seqID => {
+	return createSelector(getSearchResult, searchRes => {
+		var searchRow = find(searchRes, { id: seqID });
+		if (searchRow) {
+			return searchObjToSeqObj(searchRow);
+		} else {
+			return undefined;
+		}
+	});
+};
+
+export const getSeqByName = seqName => {
+	return createSelector(getSearchResult, searchRes => {
+		var searchRow = find(searchRes, { name: seqName });
+		if (searchRow) {
+			return searchObjToSeqObj(searchRow);
+		} else {
+			return undefined;
+		}
+	});
+};

@@ -1,6 +1,6 @@
 import React from "react";
 import { createSelector } from "reselect";
-import { map, at } from "lodash";
+import { map, at, find } from "lodash";
 
 export const getStateSlice = state => state.sequences;
 
@@ -49,3 +49,15 @@ export const getSequencesTable = createSelector(
 		}
 	}
 );
+
+export const getSeqByID = seqID => {
+	return createSelector(getSequencesObj, sequencesObj => {
+		return find(sequencesObj, { id: seqID });
+	});
+};
+
+export const getSeqByName = seqName => {
+	return createSelector(getSequencesObj, sequencesObj => {
+		return find(sequencesObj, { name: seqName });
+	});
+};
