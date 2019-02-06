@@ -38,90 +38,87 @@ export const getSearchParams = createSelector(
 	}
 );
 
-export const getSearchTable = createSelector(getSearchResult, searchRes => {
-	if (searchRes.length) {
-		return map(searchRes, resultRow => {
-			var tableRow = at(resultRow, [
-				"resultType",
-				"seqId",
-				"seqName",
-				"seqLength",
-				"seqGroupName",
-				"seqSampleName",
-				"seqTypeName"
-			]);
-			tableRow.push(
-				<a
-					href={resultRow.extLink}
-					target="_blank"
-					rel="noopener noreferrer"
-				>
-					{resultRow.extLinkLabel}
-				</a>
-			);
-
-			tableRow.push(resultRow.alignName);
-
-			if (resultRow.resultType === "sequence") {
-				tableRow.push(resultRow.seqLength.toLocaleString());
-			} else if (resultRow.resultType === "alignedannot") {
+export const getSearchTable = createSelector(
+	getSearchResult,
+	searchRes => {
+		if (searchRes.length) {
+			return map(searchRes, resultRow => {
+				var tableRow = at(resultRow, [
+					"resultType",
+					"seqId",
+					"seqName",
+					"seqLength",
+					"seqGroupName",
+					"seqSampleName",
+					"seqTypeName"
+				]);
 				tableRow.push(
-					resultRow.alignStart.toLocaleString() +
-						"-" +
-						resultRow.alignEnd.toLocaleString() +
-						" / " +
-						resultRow.seqLength.toLocaleString()
+					<a href={resultRow.extLink} target="_blank" rel="noopener noreferrer">
+						{resultRow.extLinkLabel}
+					</a>
 				);
-			} else {
-				tableRow.push(null);
-			}
 
-			tableRow.push(resultRow.alignStart);
-			tableRow.push(resultRow.alignEnd);
-			if (resultRow.alignStrand === 1) {
-				tableRow.push("+");
-			} else if (resultRow.alignStrand === 0) {
-				tableRow.push("-");
-			} else {
-				tableRow.push(null);
-			}
+				tableRow.push(resultRow.alignName);
 
-			if (resultRow.resultType === "sequence") {
+				if (resultRow.resultType === "sequence") {
+					tableRow.push(resultRow.seqLength.toLocaleString());
+				} else if (resultRow.resultType === "alignedannot") {
+					tableRow.push(
+						resultRow.alignStart.toLocaleString() +
+							"-" +
+							resultRow.alignEnd.toLocaleString() +
+							" / " +
+							resultRow.seqLength.toLocaleString()
+					);
+				} else {
+					tableRow.push(null);
+				}
+
+				tableRow.push(resultRow.alignStart);
+				tableRow.push(resultRow.alignEnd);
+				if (resultRow.alignStrand === 1) {
+					tableRow.push("+");
+				} else if (resultRow.alignStrand === 0) {
+					tableRow.push("-");
+				} else {
+					tableRow.push(null);
+				}
+
+				if (resultRow.resultType === "sequence") {
+					tableRow.push(resultRow.seqGroupName + " | " + resultRow.seqTypeName);
+				} else if (resultRow.resultType === "alignedannot") {
+					tableRow.push(
+						resultRow.alignMethod +
+							" | " +
+							resultRow.alignSource +
+							" | " +
+							resultRow.alignSpecies
+					);
+				} else {
+					tableRow.push(null);
+				}
 				tableRow.push(
-					resultRow.seqGroupName + " | " + resultRow.seqTypeName
+					...at(resultRow, [
+						"alignSpecies",
+						"alignSource",
+						"alignMethod",
+						"alignScore"
+					])
 				);
-			} else if (resultRow.resultType === "alignedannot") {
-				tableRow.push(
-					resultRow.alignMethod +
-						" | " +
-						resultRow.alignSource +
-						" | " +
-						resultRow.alignSpecies
-				);
-			} else {
-				tableRow.push(null);
-			}
-			tableRow.push(
-				...at(resultRow, [
-					"alignSpecies",
-					"alignSource",
-					"alignMethod",
-					"alignScore"
-				])
-			);
-			if (resultRow.resultType === "sequence") {
-				tableRow.push(resultRow.seqAnnot);
-			} else if (resultRow.resultType === "alignedannot") {
-				tableRow.push(resultRow.alignAnnot);
-			} else {
-				tableRow.push(null);
-			}
-			return tableRow;
-		});
-	} else {
-		return [];
+				if (resultRow.resultType === "sequence") {
+					tableRow.push(resultRow.seqAnnot);
+				} else if (resultRow.resultType === "alignedannot") {
+					tableRow.push(resultRow.alignAnnot);
+				} else {
+					tableRow.push(null);
+				}
+				return tableRow;
+			});
+		} else {
+			return [];
+		}
 	}
-});
+);
 
 const searchObjToSeqObj = searchRow => {
 	return {
@@ -141,23 +138,19 @@ const searchObjToSeqObj = searchRow => {
 };
 
 export const getSeqByID = seqID => {
-	return createSelector(getSearchResult, searchRes => {
-		var searchRow = find(searchRes, { id: seqID });
-		if (searchRow) {
-			return searchObjToSeqObj(searchRow);
-		} else {
-			return undefined;
-		}
-	});
+	var searchRow = find(getSearchResult, { id: seqID });
+	if (searchRow) {
+		return searchObjToSeqObj(searchRow);
+	} else {
+		return undefined;
+	}
 };
 
 export const getSeqByName = seqName => {
-	return createSelector(getSearchResult, searchRes => {
-		var searchRow = find(searchRes, { name: seqName });
-		if (searchRow) {
-			return searchObjToSeqObj(searchRow);
-		} else {
-			return undefined;
-		}
-	});
+	var searchRow = find(getSearchResult, { name: seqName });
+	if (searchRow) {
+		return searchObjToSeqObj(searchRow);
+	} else {
+		return undefined;
+	}
 };

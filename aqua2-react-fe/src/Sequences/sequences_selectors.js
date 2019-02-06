@@ -34,11 +34,7 @@ export const getSequencesTable = createSelector(
 					"annotNote"
 				]);
 				seqRow.push(
-					<a
-						href={sequence.extLink}
-						target="_blank"
-						rel="noopener noreferrer"
-					>
+					<a href={sequence.extLink} target="_blank" rel="noopener noreferrer">
 						{sequence.extLinkLabel}
 					</a>
 				);
@@ -51,13 +47,9 @@ export const getSequencesTable = createSelector(
 );
 
 export const getSeqByID = seqID => {
-	return createSelector(getSequencesObj, sequencesObj => {
-		return find(sequencesObj, { id: seqID });
-	});
+	return find(getSequencesObj, { id: seqID });
 };
 
 export const getSeqByName = seqName => {
-	return createSelector(getSequencesObj, sequencesObj => {
-		return find(sequencesObj, { name: seqName });
-	});
+	return find(getSequencesObj, { name: seqName });
 };
