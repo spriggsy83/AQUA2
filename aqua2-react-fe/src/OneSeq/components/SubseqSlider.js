@@ -28,7 +28,7 @@ class SubseqSlider extends Component {
 SubseqSlider.propTypes = {
 	subseqStart: PropTypes.number.isRequired,
 	subseqEnd: PropTypes.number.isRequired,
-	seqLength: PropTypes.number.isRequiredd
+	seqLength: PropTypes.number.isRequired
 };
 
 export default SubseqSlider;

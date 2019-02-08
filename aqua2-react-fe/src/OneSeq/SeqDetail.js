@@ -12,6 +12,9 @@ import ListItemText from "@material-ui/core/ListItemText";
 import { Link } from "react-router-dom";
 import { renderLoadingBars } from "../common/renderHelpers";
 import SubseqSlider from "./components/SubseqSlider";
+import SequenceViewer from "./components/SequenceViewer";
+import AnnotTabViewer from "./components/AnnotTabViewer";
+import RelationshipViewer from "./components/RelationshipViewer";
 import { requestOneSeq } from "./oneseq_actions";
 import {
 	getHasLoaded,
@@ -144,20 +147,25 @@ class SeqDetail extends Component {
 			classes
 		} = this.props;
 		return (
-			<Paper className={classes.narrowlist} elevation={1}>
-				<Typography variant="h6">{seqName}:</Typography>
-				{loading && renderLoadingBars()}
-				{errorMsg && <Typography>{errorMsg}</Typography>}
-				{hasloaded && this.renderSeqList()}
-				{hasloaded && (
-					<SubseqSlider
-						subseqStart={subseqStart}
-						subseqEnd={subseqEnd}
-						seqLength={seqDetail["length"]}
-					/>
-				)}
-				{loading && renderLoadingBars()}
-			</Paper>
+			<>
+				<Paper className={classes.narrowlist} elevation={1}>
+					<Typography variant="h6">{seqName}:</Typography>
+					{loading && renderLoadingBars()}
+					{errorMsg && <Typography>{errorMsg}</Typography>}
+					{hasloaded && this.renderSeqList()}
+					{hasloaded && (
+						<SubseqSlider
+							subseqStart={subseqStart}
+							subseqEnd={subseqEnd}
+							seqLength={seqDetail["length"]}
+						/>
+					)}
+					{loading && renderLoadingBars()}
+				</Paper>
+				{hasloaded && <SequenceViewer />}
+				{hasloaded && <AnnotTabViewer />}
+				{hasloaded && <RelationshipViewer />}
+			</>
 		);
 	}
 }
