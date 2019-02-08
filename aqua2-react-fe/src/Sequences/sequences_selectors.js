@@ -46,10 +46,10 @@ export const getSequencesTable = createSelector(
 	}
 );
 
-export const getSeqByID = seqID => {
-	return find(getSequencesObj, { id: seqID });
+export const getSeqByID = (state, seqID) => {
+	return find(getSequencesObj(state), { id: seqID });
 };
 
-export const getSeqByName = seqName => {
-	return find(getSequencesObj, { name: seqName });
+export const getSeqByName = (state, seqName) => {
+	return find(getSequencesObj(state), { name: seqName });
 };

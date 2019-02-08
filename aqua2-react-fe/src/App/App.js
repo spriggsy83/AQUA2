@@ -8,6 +8,7 @@ import { ListSamples } from "../Samples";
 import { ListSeqTypes } from "../SeqTypes";
 import { ListSeqGroups } from "../SeqGroups";
 import { ListSequences } from "../Sequences";
+import { SeqDetail } from "../OneSeq";
 import { SearchResultList } from "../Search";
 import "./App.css";
 
@@ -18,25 +19,13 @@ class App extends Component {
 		return (
 			<Switch>
 				<Route exact path="/" component={ListTotals} />
-				<Route
-					path="/Samples/:sample_id"
-					component={UnderConstruction}
-				/>
+				<Route path="/Samples/:sample_id" component={UnderConstruction} />
 				<Route path="/Samples" component={ListSamples} />
-				<Route
-					path="/SeqTypes/:seqtype_id"
-					component={UnderConstruction}
-				/>
+				<Route path="/SeqTypes/:seqtype_id" component={UnderConstruction} />
 				<Route path="/SeqTypes" component={ListSeqTypes} />
-				<Route
-					path="/SeqGroups/:seqgroup_id"
-					component={UnderConstruction}
-				/>
+				<Route path="/SeqGroups/:seqgroup_id" component={UnderConstruction} />
 				<Route path="/SeqGroups" component={ListSeqGroups} />
-				<Route
-					path="/Sequences/:sequence_id"
-					component={UnderConstruction}
-				/>
+				<Route path="/Sequences/:sequence_name" component={SeqDetail} />
 				<Route path="/Sequences" component={ListSequences} />
 				<Route path="/BulkAnnot" component={UnderConstruction} />
 				<Route path="/Search" component={SearchResultList} />

@@ -137,8 +137,8 @@ const searchObjToSeqObj = searchRow => {
 	};
 };
 
-export const getSeqByID = seqID => {
-	var searchRow = find(getSearchResult, { id: seqID });
+export const getSeqByID = (state, seqID) => {
+	var searchRow = find(getSearchResult(state), { id: seqID });
 	if (searchRow) {
 		return searchObjToSeqObj(searchRow);
 	} else {
@@ -146,8 +146,8 @@ export const getSeqByID = seqID => {
 	}
 };
 
-export const getSeqByName = seqName => {
-	var searchRow = find(getSearchResult, { name: seqName });
+export const getSeqByName = (state, seqName) => {
+	var searchRow = find(getSearchResult(state), { name: seqName });
 	if (searchRow) {
 		return searchObjToSeqObj(searchRow);
 	} else {
