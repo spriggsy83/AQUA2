@@ -16,6 +16,7 @@ var samplesRouter = require("./routes/samples");
 var seqgroupsRouter = require("./routes/seqgroups");
 var seqtypesRouter = require("./routes/seqtypes");
 var sequencesRouter = require("./routes/sequences");
+var seqstringRouter = require("./routes/seqstring");
 var searchRouter = require("./routes/search");
 
 var app = express();
@@ -35,6 +36,7 @@ app.use("/api/v2/samples", samplesRouter);
 app.use("/api/v2/seqgroups", seqgroupsRouter);
 app.use("/api/v2/seqtypes", seqtypesRouter);
 app.use("/api/v2/sequences", sequencesRouter);
+app.use("/api/v2/seqstring", seqstringRouter);
 app.use("/api/v2/search", searchRouter);
 
 module.exports = app;

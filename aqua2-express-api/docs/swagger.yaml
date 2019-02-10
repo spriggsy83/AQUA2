@@ -15,6 +15,8 @@ tags:
   - name: "seqtypes"
   - name: "seqgroups"
   - name: "sequences"
+  - name: "seqstring"
+  - name: "search"
 paths:
   /totals:
     get:
@@ -294,6 +296,83 @@ paths:
           description: "Error"
         404:
           description: "sequenceId not found"
+  /seqstring/{sequenceId}:
+    get:
+      tags:
+        - "seqstring"
+      summary: "Find a sequence string"
+      description: "Returns the actual string representng a sequence"
+      operationId: "getSeqstringBySeqId"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "sequenceId"
+          in: "path"
+          description: "ID of sequence to return"
+          required: true
+          type: "integer"
+        - name: "start"
+          in: "query"
+          description: "Start of a sub-seq string to return (counts from 1)"
+          required: false
+          type: "integer"
+        - name: "length"
+          in: "query"
+          description: "Length of a sub-seq string to return (counts from 1)"
+          required: false
+          type: "integer"
+      responses:
+        200:
+          description: "Success"
+          schema:
+            $ref: "#/definitions/SeqString"
+        500:
+          description: "Error"
+        404:
+          description: "sequenceId not found"
+  /search:
+    get:
+      tags:
+        - "search"
+      summary: "Keyword search"
+      description: "Returns a list of matching sequences or annotations"
+      operationId: "getSearch"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "searchTerm"
+          in: "path"
+          description: "Keyword to search for"
+          required: true
+          type: "string"
+        - name: "searchType"
+          in: "query"
+          description: "Type of search: 'seqs', 'annots', 'all'"
+          required: false
+          type: "string"
+        - $ref: "#/parameters/sort"
+        - $ref: "#/parameters/limit"
+        - $ref: "#/parameters/offset"
+      responses:
+        200:
+          description: "Success"
+          headers:
+            total:
+              description: "Query total for pagination range"
+              type: "integer"
+          schema:
+            type: "object"
+            properties:
+              data:
+                description: "Search result"
+                type: "array"
+                items:
+                  $ref: "#/definitions/Search"
+
+        500:
+          description: "Error"
+        404:
+          description: "sequenceId not found"
 definitions:
   Totals:
     type: "object"
@@ -408,6 +487,87 @@ definitions:
       extLink:
         type: "string"
         description: "Relevant external service link"
+      extLinkLabel:
+        type: "string"
+        description: "Short label for relevant external service link"
+  SeqString:
+    type: "object"
+    properties:
+      seqstring:
+        type: "string"
+        description: "Sequence string"
+  Search:
+    type: "object"
+    properties:
+      resultType:
+        type: "string"
+        description: "'sequence' or 'alignedannot'"
+      seqName:
+        type: "string"
+        description: "Sequence name"
+      seqId:
+        type: "integer"
+        description: "Sequence id"
+      seqLength:
+        type: "integer"
+        description: "Sequence length (bp)"
+      seqGroupId:
+        type: "integer"
+        description: "ID of seqgroup"
+      seqGroupName:
+        type: "string"
+        description: "Seqgroup label"
+      seqSampleId:
+        type: "integer"
+        description: "ID of sample"
+      seqSampleName:
+        type: "string"
+        description: "Sample label"
+      seqTypeId:
+        type: "integer"
+        description: "ID of seqtype"
+      seqTypeName:
+        type: "string"
+        description: "Seqtype label"
+      seqAnnot:
+        type: "string"
+        description: "Annotation note"
+      seqExtLink:
+        type: "string"
+        description: "Relevant external service link"
+      seqExtLinkLabel:
+        type: "string"
+        description: "Short label for relevant external service link"
+      alignId:
+        type: "integer"
+        description: "Aligned annotation id"
+      alignName:
+        type: "string"
+        description: "Aligned annotation name"
+      alignStart:
+        type: "integer"
+        description: "Alignment start on reference sequence"
+      alignEnd:
+        type: "integer"
+        description: "Alignment end on reference sequence"
+      alignStrand:
+        type: "integer"
+        description: "Alignment orientation on reference sequence 1 is +, 0 is -"
+      alignSpecies:
+        type: "string"
+        description: "Aligned annotation species"
+      alignSource:
+        type: "string"
+        description: "Aligned annotation source"
+      alignMethod:
+        type: "string"
+        description: "Alignment method"
+      alignScore:
+        type: "string"
+        description: "Alignment score"
+      alignAnnot:
+        type: "string"
+        description: "Aligned annotation"
 
 parameters:
   sort:
