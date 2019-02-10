@@ -1,4 +1,6 @@
 "use-strict";
+import { combineReducers } from "redux";
+import { reducer as SeqstringReducer } from "./SeqString";
 import * as acts from "./oneseq_action_list";
 
 /**
@@ -15,11 +17,7 @@ const INITIAL_STATE = {
 	subseqEnd: null
 };
 
-/**
- * switch statement checks to see if the dispatched action requires any work from
- * this reducer
- */
-export default function(state = INITIAL_STATE, action) {
+function OneseqReducer(state = INITIAL_STATE, action) {
 	switch (action.type) {
 		case acts.NEWFOCUS:
 			return {
@@ -61,3 +59,11 @@ export default function(state = INITIAL_STATE, action) {
 			return state;
 	}
 }
+
+/**
+ * Export this reducer combined with sub-part reducers
+ */
+export default combineReducers({
+	seqstring: SeqstringReducer,
+	seqdetail: OneseqReducer
+});
