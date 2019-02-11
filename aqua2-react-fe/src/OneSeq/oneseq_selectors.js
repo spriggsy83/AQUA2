@@ -9,8 +9,6 @@ export const getError = state => state.oneseq.seqdetail.error;
 export const getSeqID = state => state.oneseq.seqdetail.id;
 export const getSeqName = state => state.oneseq.seqdetail.name;
 export const getSeqDetail = state => state.oneseq.seqdetail.seqDetail;
-export const getSubseqStart = state => state.oneseq.seqdetail.subseqStart;
-export const getSubseqEnd = state => state.oneseq.seqdetail.subseqEnd;
 
 export const getSeqDetailTable = createSelector(
 	getHasLoaded,

@@ -12,9 +12,7 @@ const INITIAL_STATE = {
 	error: null,
 	id: null,
 	name: null,
-	seqDetail: null,
-	subseqStart: null,
-	subseqEnd: null
+	seqDetail: null
 };
 
 function OneseqReducer(state = INITIAL_STATE, action) {
@@ -27,9 +25,7 @@ function OneseqReducer(state = INITIAL_STATE, action) {
 				error: null,
 				seqDetail: null,
 				id: action.payload.id,
-				name: action.payload.name,
-				subseqStart: action.payload.subseqStart,
-				subseqEnd: action.payload.subseqEnd
+				name: action.payload.name
 			};
 		case acts.LOADING:
 			return {
@@ -44,9 +40,7 @@ function OneseqReducer(state = INITIAL_STATE, action) {
 				error: action.payload.error,
 				id: action.payload.id,
 				name: action.payload.name,
-				seqDetail: action.payload.seqDetail,
-				subseqStart: action.payload.subseqStart,
-				subseqEnd: action.payload.subseqEnd
+				seqDetail: action.payload.seqDetail
 			};
 		case acts.ERRORED:
 			return {

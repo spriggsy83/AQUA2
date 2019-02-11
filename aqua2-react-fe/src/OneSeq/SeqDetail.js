@@ -9,24 +9,15 @@ import Typography from "@material-ui/core/Typography";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
+import ExpansionPanel from "@material-ui/core/ExpansionPanel";
+import ExpansionPanelDetails from "@material-ui/core/ExpansionPanelDetails";
+import ExpansionPanelSummary from "@material-ui/core/ExpansionPanelSummary";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import { Link } from "react-router-dom";
-import { renderLoadingBars } from "../common/renderHelpers";
-import SubseqSlider from "./components/SubseqSlider";
-import SequenceViewer from "./components/SequenceViewer";
-import AnnotTabViewer from "./components/AnnotTabViewer";
-import RelationshipViewer from "./components/RelationshipViewer";
+import { renderLoadingBars, UnderConstruction } from "../common/renderHelpers";
 import { requestOneSeq } from "./oneseq_actions";
-import {
-	getHasLoaded,
-	getIsLoading,
-	getError,
-	getSeqID,
-	getSeqName,
-	getSeqDetail,
-	getSeqDetailTable,
-	getSubseqStart,
-	getSubseqEnd
-} from "./oneseq_selectors";
+import * as selectors from "./oneseq_selectors";
+import { SequenceViewer } from "./SeqString";
 
 const styles = theme => ({
 	narrowlist: {
@@ -41,8 +32,7 @@ const styles = theme => ({
 
 class SeqDetail extends Component {
 	state = {
-		subseqStart: 1,
-		subseqEnd: 10
+		expanded: null
 	};
 
 	componentDidMount() {
@@ -55,13 +45,9 @@ class SeqDetail extends Component {
 				subseqStart = parseInt(matchArr[1]);
 				subseqEnd = parseInt(matchArr[2]);
 				if (subseqStart > subseqEnd) {
-					// One line swap!
+					// One-liner value swap :o
 					[subseqStart, subseqEnd] = [subseqEnd, subseqStart];
 				}
-				this.setState({
-					subseqStart: subseqStart,
-					subseqEnd: subseqEnd
-				});
 			}
 		}
 		if (seqName !== this.props.seqName || !this.props.hasloaded) {
@@ -135,17 +121,55 @@ class SeqDetail extends Component {
 		);
 	};
 
+	handleSectionChange = panel => (event, expanded) => {
+		this.setState({
+			expanded: expanded ? panel : false
+		});
+	};
+
+	renderFeatureAccordion = () => {
+		const { expanded } = this.state;
+		return (
+			<>
+				<ExpansionPanel
+					expanded={expanded === "seqstring"}
+					onChange={this.handleSectionChange("seqstring")}
+				>
+					<ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+						<Typography variant="h6">Sequence viewer</Typography>
+					</ExpansionPanelSummary>
+					<ExpansionPanelDetails>
+						{expanded === "seqstring" && <SequenceViewer />}
+					</ExpansionPanelDetails>
+				</ExpansionPanel>
+				<ExpansionPanel
+					expanded={expanded === "annottab"}
+					onChange={this.handleSectionChange("annottab")}
+				>
+					<ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+						<Typography variant="h6">Annotations table</Typography>
+					</ExpansionPanelSummary>
+					<ExpansionPanelDetails>
+						{expanded === "annottab" && <UnderConstruction />}
+					</ExpansionPanelDetails>
+				</ExpansionPanel>
+				<ExpansionPanel
+					expanded={expanded === "hierarchyviz"}
+					onChange={this.handleSectionChange("hierarchyviz")}
+				>
+					<ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+						<Typography variant="h6">Relationship viewer</Typography>
+					</ExpansionPanelSummary>
+					<ExpansionPanelDetails>
+						{expanded === "hierarchyviz" && <UnderConstruction />}
+					</ExpansionPanelDetails>
+				</ExpansionPanel>
+			</>
+		);
+	};
+
 	render() {
-		const {
-			seqName,
-			seqDetail,
-			subseqStart,
-			subseqEnd,
-			loading,
-			hasloaded,
-			errorMsg,
-			classes
-		} = this.props;
+		const { seqName, loading, hasloaded, errorMsg, classes } = this.props;
 		return (
 			<>
 				<Paper className={classes.narrowlist} elevation={1}>
@@ -153,18 +177,9 @@ class SeqDetail extends Component {
 					{loading && renderLoadingBars()}
 					{errorMsg && <Typography>{errorMsg}</Typography>}
 					{hasloaded && this.renderSeqList()}
-					{hasloaded && (
-						<SubseqSlider
-							subseqStart={subseqStart}
-							subseqEnd={subseqEnd}
-							seqLength={seqDetail["length"]}
-						/>
-					)}
 					{loading && renderLoadingBars()}
 				</Paper>
-				{hasloaded && <SequenceViewer />}
-				{hasloaded && <AnnotTabViewer />}
-				{hasloaded && <RelationshipViewer />}
+				{hasloaded && this.renderFeatureAccordion()}
 			</>
 		);
 	}
@@ -174,15 +189,13 @@ class SeqDetail extends Component {
  * allows us to call our application state from props
  */
 const mapStateToProps = createStructuredSelector({
-	hasloaded: getHasLoaded,
-	loading: getIsLoading,
-	errorMsg: getError,
-	seqID: getSeqID,
-	seqName: getSeqName,
-	seqDetail: getSeqDetail,
-	seqDetailTab: getSeqDetailTable,
-	subseqStart: getSubseqStart,
-	subseqEnd: getSubseqEnd
+	hasloaded: selectors.getHasLoaded,
+	loading: selectors.getIsLoading,
+	errorMsg: selectors.getError,
+	seqID: selectors.getSeqID,
+	seqName: selectors.getSeqName,
+	seqDetail: selectors.getSeqDetail,
+	seqDetailTab: selectors.getSeqDetailTable
 });
 
 /**

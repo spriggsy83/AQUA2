@@ -6,6 +6,7 @@ import * as acts from "./seqstring_action_list";
  */
 const INITIAL_STATE = {
 	id: null,
+	seqLen: null,
 	loaded: false,
 	loading: false,
 	error: null,
@@ -24,18 +25,17 @@ const INITIAL_STATE = {
  */
 export default function(state = INITIAL_STATE, action) {
 	switch (action.type) {
+		case acts.CLEAR:
+			return {
+				...state,
+				...INITIAL_STATE
+			};
 		case acts.NEWFOCUS:
 			return {
 				...state,
+				...INITIAL_STATE,
 				id: action.payload.id,
-				loaded: false,
-				loading: false,
-				error: null,
-				seqStr: null,
-				subLoaded: false,
-				subLoading: false,
-				subError: null,
-				subseqStr: null,
+				seqLen: action.payload.seqLen,
 				subseqStart: action.payload.subseqStart,
 				subseqEnd: action.payload.subseqEnd
 			};
@@ -60,7 +60,7 @@ export default function(state = INITIAL_STATE, action) {
 				error: action.payload.error,
 				seqStr: null
 			};
-		case acts.NEWSUB:
+		case acts.NEWSUBRANGE:
 			return {
 				...state,
 				subLoaded: false,
