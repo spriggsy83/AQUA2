@@ -94,7 +94,8 @@ export const requestOneSeq = ({
 						type: seqStringActs.NEWFOCUS,
 						payload: {
 							id: seqFromList.id,
-							seqLen: seqFromList["length"],
+							seqName: seqFromList.name,
+							seqLength: seqFromList["length"],
 							subseqStart: subseqStart,
 							subseqEnd: subseqEnd
 						}
@@ -128,7 +129,8 @@ export const requestOneSeq = ({
 									type: seqStringActs.NEWFOCUS,
 									payload: {
 										id: seqObj.id,
-										seqLen: seqObj["length"],
+										seqName: seqObj.name,
+										seqLength: seqObj["length"],
 										subseqStart: subseqStart,
 										subseqEnd: subseqEnd
 									}

@@ -6,7 +6,8 @@ import * as acts from "./seqstring_action_list";
  */
 const INITIAL_STATE = {
 	id: null,
-	seqLen: null,
+	seqName: null,
+	seqLength: null,
 	loaded: false,
 	loading: false,
 	error: null,
@@ -35,7 +36,8 @@ export default function(state = INITIAL_STATE, action) {
 				...state,
 				...INITIAL_STATE,
 				id: action.payload.id,
-				seqLen: action.payload.seqLen,
+				seqName: action.payload.seqName,
+				seqLength: action.payload.seqLength,
 				subseqStart: action.payload.subseqStart,
 				subseqEnd: action.payload.subseqEnd
 			};
@@ -55,7 +57,7 @@ export default function(state = INITIAL_STATE, action) {
 		case acts.ERRORED:
 			return {
 				...state,
-				loaded: false,
+				loaded: true,
 				loading: false,
 				error: action.payload.error,
 				seqStr: null
@@ -81,12 +83,12 @@ export default function(state = INITIAL_STATE, action) {
 				subLoaded: true,
 				subLoading: false,
 				subError: action.payload.error,
-				subseqStr: action.payload.seqStr
+				subseqStr: action.payload.subseqStr
 			};
 		case acts.SUBERRORED:
 			return {
 				...state,
-				subLoaded: false,
+				subLoaded: true,
 				subLoading: false,
 				subError: action.payload.error,
 				subseqStr: null
