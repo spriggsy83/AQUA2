@@ -14,6 +14,8 @@ RUN npm install
 
 # Bundle app source
 COPY . .
+# Source an alternate solution to this!:
+COPY .env ./
 
 EXPOSE 4000
 CMD [ "npm", "start" ]
