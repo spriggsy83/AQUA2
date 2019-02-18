@@ -8,6 +8,7 @@ const INITIAL_STATE = {
 	id: null,
 	seqName: null,
 	seqLength: null,
+	seqType: null,
 	loaded: false,
 	loading: false,
 	error: null,
@@ -38,6 +39,7 @@ export default function(state = INITIAL_STATE, action) {
 				id: action.payload.id,
 				seqName: action.payload.seqName,
 				seqLength: action.payload.seqLength,
+				seqType: action.payload.seqType,
 				subseqStart: action.payload.subseqStart,
 				subseqEnd: action.payload.subseqEnd
 			};

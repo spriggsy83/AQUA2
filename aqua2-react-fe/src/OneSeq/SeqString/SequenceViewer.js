@@ -63,6 +63,7 @@ class SequenceViewer extends Component {
 	};
 
 	componentDidMount() {
+		console.log(this.props.seqType);
 		const { subseqStart, subseqEnd, seqLength } = this.props;
 		var viewSubstring = false;
 		if (subseqStart && subseqEnd && seqLength) {
@@ -205,8 +206,12 @@ class SequenceViewer extends Component {
 	};
 
 	render() {
-		const { classes } = this.props;
+		const { classes, seqType } = this.props;
 		const { viewSubstring } = this.state;
+		var revCompDisabled = false;
+		if (seqType === "protein") {
+			revCompDisabled = true;
+		}
 		return (
 			<div className={classes.root}>
 				<div className={classes.row}>
@@ -227,6 +232,7 @@ class SequenceViewer extends Component {
 							onChange={this.handleSwitchChange("viewRevcomp")}
 							value="viewRevcomp"
 							color="primary"
+							disabled={revCompDisabled}
 						/>
 						<Typography>Reverse complement</Typography>
 					</Paper>
@@ -251,6 +257,7 @@ const mapStateToProps = createStructuredSelector({
 	loading: selectors.getIsLoading,
 	errorMsg: selectors.getError,
 	seqLength: selectors.getSeqLength,
+	seqType: selectors.getSeqType,
 	seqStr: selectors.getFormattedSeqstr,
 	subHasLoaded: selectors.getSubseqHasLoaded,
 	subLoading: selectors.getSubseqIsLoading,

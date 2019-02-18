@@ -9,6 +9,7 @@ export const getError = state => state.oneseq.seqstring.error;
 export const getSeqID = state => state.oneseq.seqstring.id;
 export const getSeqName = state => state.oneseq.seqstring.seqName;
 export const getSeqLength = state => state.oneseq.seqstring.seqLength;
+export const getSeqType = state => state.oneseq.seqstring.seqType;
 export const getSeqString = state => state.oneseq.seqstring.seqStr;
 
 export const getSubseqHasLoaded = state => state.oneseq.seqstring.subLoaded;

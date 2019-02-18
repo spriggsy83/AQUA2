@@ -96,6 +96,7 @@ export const requestOneSeq = ({
 							id: seqFromList.id,
 							seqName: seqFromList.name,
 							seqLength: seqFromList["length"],
+							seqType: seqFromList.typeName,
 							subseqStart: subseqStart,
 							subseqEnd: subseqEnd
 						}
@@ -131,6 +132,7 @@ export const requestOneSeq = ({
 										id: seqObj.id,
 										seqName: seqObj.name,
 										seqLength: seqObj["length"],
+										seqType: seqObj.typeName,
 										subseqStart: subseqStart,
 										subseqEnd: subseqEnd
 									}
