@@ -63,10 +63,25 @@ class SequenceViewer extends Component {
 	};
 
 	componentDidMount() {
-		this.props.requestSeqString();
+		const { subseqStart, subseqEnd, seqLength } = this.props;
+		var viewSubstring = false;
+		if (subseqStart && subseqEnd && seqLength) {
+			if (subseqStart > 1 || subseqEnd !== seqLength) {
+				viewSubstring = true;
+				this.props.requestSubseqString({
+					subseqStart: subseqStart,
+					subseqEnd: subseqEnd
+				});
+			} else {
+				this.props.requestSeqString();
+			}
+		} else {
+			this.props.requestSeqString();
+		}
 		this.setState({
-			sliderSubStart: this.props.subseqStart,
-			sliderSubEnd: this.props.subseqEnd
+			viewSubstring: viewSubstring,
+			sliderSubStart: subseqStart,
+			sliderSubEnd: subseqEnd
 		});
 	}
 

@@ -123,9 +123,14 @@ class SearchResultList extends Component {
 
 	onCellClick = (colData, cellMeta) => {
 		const clickedSeq = this.props.results[cellMeta.rowIndex];
-		this.props.history.push(
-			"/Sequences/" + encodeURIComponent(clickedSeq[2])
-		);
+		this.props.history.push({
+			pathname: "/Sequences/" + encodeURIComponent(clickedSeq[2]),
+			search:
+				"?" +
+				encodeURIComponent(clickedSeq[10]) +
+				"-" +
+				encodeURIComponent(clickedSeq[11])
+		});
 	};
 
 	/** options Object required by mui-datatable **/
