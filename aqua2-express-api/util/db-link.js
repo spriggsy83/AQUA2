@@ -1,13 +1,13 @@
-const mysql = require("mysql");
-const map = require("lodash");
-const SQL = require("sql-template-strings");
+const mysql = require('mysql');
+const map = require('lodash');
+const SQL = require('sql-template-strings');
 
 const dbpool = mysql.createPool({
 	connectionLimit: 10,
 	host: process.env.DB_HOST,
 	user: process.env.DB_USER,
 	password: process.env.DB_PASS,
-	database: process.env.DB_DBNAME
+	database: process.env.DB_DBNAME,
 });
 
 /** Turns a SELECT COUNT(*) into a {total: X}
@@ -17,7 +17,7 @@ async function dbCountAllToJRes(tableName) {
 		var sqlTQuery;
 		if (
 			/^(sample|seqgroup|sequence|seqrelation|alignedannot|geneprediction)$/i.test(
-				tableName
+				tableName,
 			)
 		) {
 			sqlTQuery = SQL`SELECT `
@@ -65,7 +65,7 @@ async function dbQueryToJRes(sqlTemplateQuery) {
 			} else if (results && results.length) {
 				resolve({ status: 200, error: null, data: results });
 			} else {
-				resolve({ status: 404, error: null, data: "Not found" });
+				resolve({ status: 404, error: null, data: 'Not found' });
 			}
 		});
 	});
@@ -95,8 +95,24 @@ async function dbFilterListToJRes(tableName, labelCol) {
 	});
 }
 
+/** Run an SQL Update statement and return effect **/
+async function dbUpdateToJRes(sqlTemplateQuery) {
+	return new Promise(function(resolve, reject) {
+		dbpool.query(sqlTemplateQuery, function(error, results, fields) {
+			if (error) {
+				resolve({ status: 500, error: error, data: null });
+			} else if (results && results.affectedRows) {
+				resolve({ status: 200, error: null, data: results });
+			} else {
+				resolve({ status: 404, error: null, data: 'Not found' });
+			}
+		});
+	});
+}
+
 module.exports.dbpool = dbpool;
 module.exports.dbCountAllToJRes = dbCountAllToJRes;
 module.exports.dbCountQueryToJRes = dbCountQueryToJRes;
 module.exports.dbQueryToJRes = dbQueryToJRes;
 module.exports.dbFilterListToJRes = dbFilterListToJRes;
+module.exports.dbUpdateToJRes = dbUpdateToJRes;

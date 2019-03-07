@@ -1,21 +1,19 @@
-var express = require("express");
+var express = require('express');
 var router = express.Router();
-const SQL = require("sql-template-strings");
-const asyncHandler = require("express-async-handler");
+const SQL = require('sql-template-strings');
+const asyncHandler = require('express-async-handler');
 
-var dbLink = require("../util/db-link.js");
+var dbLink = require('../util/db-link.js');
 
 function searchQuery({
 	searchTerm = null,
 	searchType = null,
 	limit = 100,
 	offset = 0,
-	sort = null
+	sort = null,
 } = {}) {
 	if (searchTerm) {
-		const query = SQL``;
-		if (!searchType || searchType === "all" || searchType === "seqs") {
-			query.append(SQL`
+		const query = SQL`
 SELECT
   'sequence' AS resultType,
   seq.id AS seqId,
@@ -47,25 +45,21 @@ JOIN sample AS samp
   ON samp.id=seq.isSample
 JOIN seqtype AS stype
   ON stype.id=seq.isType
-`);
-			if (!searchType || searchType === "all") {
-				query.append(
-					SQL`WHERE ( seq.name LIKE ${searchTerm} OR seq.annotNote LIKE ${searchTerm} )`
-				);
-			} else if (searchType === "seqs") {
-				query.append(SQL`WHERE seq.name LIKE ${searchTerm}`);
-			} else if (searchType === "annots") {
-				query.append(SQL`WHERE seq.annotNote LIKE ${searchTerm}`);
-			}
+`;
+		if (!searchType || searchType === 'all') {
+			query.append(
+				SQL`WHERE ( seq.name LIKE ${searchTerm} OR seq.annotNote LIKE ${searchTerm} )`,
+			);
+		} else if (searchType === 'seqs') {
+			query.append(SQL`WHERE seq.name LIKE ${searchTerm}`);
+		} else if (searchType === 'annots') {
+			query.append(SQL`WHERE seq.annotNote LIKE ${searchTerm}`);
 		}
 
-		if (!searchType || searchType === "all") {
-			query.append(SQL`
+		query.append(SQL`
 UNION ALL
 `);
-		}
-
-		if (!searchType || searchType === "all" || searchType === "annots") {
+		if (searchType !== 'seqs') {
 			query.append(SQL`
 SELECT
   'alignedannot' AS resultType,
@@ -122,27 +116,27 @@ function searchCountQuery({ searchTerm = null, searchType = null } = {}) {
 SELECT sum(counts) AS total
 FROM (
 `;
-		if (!searchType || searchType === "all" || searchType === "seqs") {
+		if (!searchType || searchType === 'all' || searchType === 'seqs') {
 			countQuery.append(SQL`
   SELECT count(id) AS counts 
   FROM sequence AS seq
 `);
-			if (!searchType || searchType === "all") {
+			if (!searchType || searchType === 'all') {
 				countQuery.append(
-					SQL` WHERE ( seq.name LIKE ${searchTerm} OR seq.annotNote LIKE ${searchTerm} )`
+					SQL` WHERE ( seq.name LIKE ${searchTerm} OR seq.annotNote LIKE ${searchTerm} )`,
 				);
-			} else if (searchType === "seqs") {
+			} else if (searchType === 'seqs') {
 				countQuery.append(SQL` WHERE seq.name LIKE ${searchTerm}`);
-			} else if (searchType === "annots") {
+			} else if (searchType === 'annots') {
 				countQuery.append(SQL` WHERE seq.annotNote LIKE ${searchTerm}`);
 			}
 		}
-		if (!searchType || searchType === "all") {
+		if (!searchType || searchType === 'all') {
 			countQuery.append(SQL`
 UNION ALL
 `);
 		}
-		if (!searchType || searchType === "all" || searchType === "annots") {
+		if (!searchType || searchType === 'all' || searchType === 'annots') {
 			countQuery.append(SQL`
   SELECT count(id) AS counts 
   FROM alignedannot AS aln
@@ -160,15 +154,15 @@ UNION ALL
 
 /* GET keyword/phrase search */
 router.get(
-	"/:searchterm",
+	'/:searchterm',
 	asyncHandler(async (req, res, next) => {
-		var searchTerm = "%" + req.params.searchterm.replace(/\*/g, "%") + "%";
+		var searchTerm = '%' + req.params.searchterm.replace(/\*/g, '%') + '%';
 		var limit = parseInt(req.query.limit, 10) || 100;
 		var offset =
 			parseInt(req.query.offset, 10) || parseInt(req.query.skip, 10) || 0;
 		var searchType = null;
 		if (req.query.searchtype) {
-			if (["seqs", "annots", "all"].includes(req.query.searchtype)) {
+			if (['seqs', 'annots', 'all'].includes(req.query.searchtype)) {
 				searchType = req.query.searchtype;
 			}
 		}
@@ -178,16 +172,16 @@ router.get(
 			if (sortParamTest) {
 				if (
 					[
-						"resultType",
-						"seqName",
-						"seqLength",
-						"seqGroupName",
-						"seqSampleName",
-						"seqTypeName",
-						"alignName",
-						"alignSpecies",
-						"alignSource",
-						"alignMethod"
+						'resultType',
+						'seqName',
+						'seqLength',
+						'seqGroupName',
+						'seqSampleName',
+						'seqTypeName',
+						'alignName',
+						'alignSpecies',
+						'alignSource',
+						'alignMethod',
 					].includes(sortParamTest[1])
 				) {
 					sort = req.query.sort;
@@ -200,8 +194,8 @@ router.get(
 			dbLink.dbCountQueryToJRes(
 				searchCountQuery({
 					searchTerm: searchTerm,
-					searchType: searchType
-				})
+					searchType: searchType,
+				}),
 			),
 			dbLink.dbQueryToJRes(
 				searchQuery({
@@ -209,16 +203,16 @@ router.get(
 					searchType: searchType,
 					limit: limit,
 					offset: offset,
-					sort: sort
-				})
-			)
+					sort: sort,
+				}),
+			),
 		]);
 
 		res.json({
 			...qTotal,
-			...qAll
+			...qAll,
 		});
-	})
+	}),
 );
 
 module.exports = router;

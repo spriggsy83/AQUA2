@@ -1,20 +1,20 @@
-"use-strict";
-import { isArray } from "lodash";
-import * as seqDetailActs from "./oneseq_action_list";
+'use-strict';
+import { isArray } from 'lodash';
+import * as seqDetailActs from './oneseq_action_list';
 import {
 	actsList as seqStringActs,
-	selectors as seqStringSelectors
-} from "./SeqString";
-import { getIsLoading, getSeqID, getSeqName } from "./oneseq_selectors";
-import { selectors as seqsSelectors } from "../Sequences";
-import { selectors as searchSelectors } from "../Search";
-import API from "../common/API";
+	selectors as seqStringSelectors,
+} from './SeqString';
+import { getIsLoading, getSeqID, getSeqName } from './oneseq_selectors';
+import { selectors as seqsSelectors } from '../Sequences';
+import { selectors as searchSelectors } from '../Search';
+import API from '../common/API';
 
 export const requestOneSeq = ({
 	name = null,
 	id = null,
 	subseqStart = null,
-	subseqEnd = null
+	subseqEnd = null,
 } = {}) => {
 	return function(dispatch, getState) {
 		if (id || name) {
@@ -28,8 +28,8 @@ export const requestOneSeq = ({
 					type: seqDetailActs.NEWFOCUS,
 					payload: {
 						id: id,
-						name: name
-					}
+						name: name,
+					},
 				});
 				doFetch = true;
 			} else {
@@ -50,8 +50,8 @@ export const requestOneSeq = ({
 						type: seqStringActs.NEWSUBRANGE,
 						payload: {
 							subseqStart: subseqStart,
-							subseqEnd: subseqEnd
-						}
+							subseqEnd: subseqEnd,
+						},
 					});
 				}
 			}
@@ -59,7 +59,7 @@ export const requestOneSeq = ({
 			if (doFetch) {
 				// If fetching, clear child feature parts
 				dispatch({
-					type: seqStringActs.CLEAR
+					type: seqStringActs.CLEAR,
 				});
 				// First see if seq available in sequence list or search result
 				var seqFromList = null;
@@ -79,7 +79,7 @@ export const requestOneSeq = ({
 						subseqStart = 1;
 					}
 					if (!subseqEnd) {
-						subseqEnd = seqFromList["length"];
+						subseqEnd = seqFromList['length'];
 					}
 					dispatch({
 						type: seqDetailActs.LOADED,
@@ -87,35 +87,35 @@ export const requestOneSeq = ({
 							id: seqFromList.id,
 							name: seqFromList.name,
 							seqDetail: seqFromList,
-							error: null
-						}
+							error: null,
+						},
 					});
 					dispatch({
 						type: seqStringActs.NEWFOCUS,
 						payload: {
 							id: seqFromList.id,
 							seqName: seqFromList.name,
-							seqLength: seqFromList["length"],
+							seqLength: seqFromList['length'],
 							seqType: seqFromList.typeName,
 							subseqStart: subseqStart,
-							subseqEnd: subseqEnd
-						}
+							subseqEnd: subseqEnd,
+						},
 					});
 				} else {
 					// Else, do API fetch
 					dispatch({
-						type: seqDetailActs.LOADING
+						type: seqDetailActs.LOADING,
 					});
 
 					API.get(`sequences/` + (id ? id : name))
-						.then(response => {
+						.then((response) => {
 							if (isArray(response.data.data)) {
 								var seqObj = response.data.data[0];
 								if (!subseqStart) {
 									subseqStart = 1;
 								}
 								if (!subseqEnd) {
-									subseqEnd = seqObj["length"];
+									subseqEnd = seqObj['length'];
 								}
 								dispatch({
 									type: seqDetailActs.LOADED,
@@ -123,19 +123,19 @@ export const requestOneSeq = ({
 										id: seqObj.id,
 										name: seqObj.name,
 										seqDetail: seqObj,
-										error: null
-									}
+										error: null,
+									},
 								});
 								dispatch({
 									type: seqStringActs.NEWFOCUS,
 									payload: {
 										id: seqObj.id,
 										seqName: seqObj.name,
-										seqLength: seqObj["length"],
+										seqLength: seqObj['length'],
 										seqType: seqObj.typeName,
 										subseqStart: subseqStart,
-										subseqEnd: subseqEnd
-									}
+										subseqEnd: subseqEnd,
+									},
 								});
 							} else {
 								dispatch({
@@ -147,28 +147,76 @@ export const requestOneSeq = ({
 										subseqStart: null,
 										subseqEnd: null,
 										error:
-											"No data found for sequence '" + (id ? id : name) + "'"
-									}
+											"No data found for sequence '" + (id ? id : name) + "'",
+									},
 								});
 								dispatch({
-									type: seqStringActs.CLEAR
+									type: seqStringActs.CLEAR,
 								});
 							}
 						})
-						.catch(error => {
+						.catch((error) => {
 							dispatch({
 								type: seqDetailActs.ERRORED,
 								payload: {
-									error: error
-								}
+									error: error,
+								},
 							});
 							dispatch({
-								type: seqStringActs.CLEAR
+								type: seqStringActs.CLEAR,
 							});
 							console.log(error);
 						});
 				}
 			}
+		}
+	};
+};
+
+export const patchOneSeq = ({ id = null, annotNote = '' } = {}) => {
+	return function(dispatch, getState) {
+		if (id) {
+			dispatch({
+				type: seqDetailActs.LOADING,
+			});
+
+			var data = {
+				annotNote: annotNote,
+			};
+
+			API.patch(`sequences/` + id, {
+				data: data,
+			})
+				.then((response) => {
+					if (isArray(response.data.data)) {
+						var seqObj = response.data.data[0];
+						dispatch({
+							type: seqDetailActs.LOADED,
+							payload: {
+								id: seqObj.id,
+								name: seqObj.name,
+								seqDetail: seqObj,
+								error: null,
+							},
+						});
+					} else {
+						dispatch({
+							type: seqDetailActs.ERRORED,
+							payload: {
+								error: "No Update match for sequence '" + id + "'",
+							},
+						});
+					}
+				})
+				.catch((error) => {
+					dispatch({
+						type: seqDetailActs.ERRORED,
+						payload: {
+							error: error,
+						},
+					});
+					console.log(error);
+				});
 		}
 	};
 };

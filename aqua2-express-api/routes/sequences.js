@@ -1,9 +1,9 @@
-var express = require("express");
+var express = require('express');
 var router = express.Router();
-const SQL = require("sql-template-strings");
-const asyncHandler = require("express-async-handler");
+const SQL = require('sql-template-strings');
+const asyncHandler = require('express-async-handler');
 
-var dbLink = require("../util/db-link.js");
+var dbLink = require('../util/db-link.js');
 
 function sequenceQuery({
 	id = null,
@@ -11,7 +11,7 @@ function sequenceQuery({
 	limit = 100,
 	offset = 0,
 	sort = null,
-	filterSQL = null
+	filterSQL = null,
 } = {}) {
 	const query = SQL`
 SELECT 
@@ -63,14 +63,23 @@ WHERE 1 = 1
 	return countQuery;
 }
 
+function sequenceUpdateQuery({ id = null, annotNote = null } = {}) {
+	const query = SQL`
+UPDATE sequence
+SET annotNote = ${annotNote}
+WHERE id = ${id}
+`;
+	return query;
+}
+
 /* Parse 'filter=' param for valid entry.
  Returns SQL WHERE clause component string "AND key IN ( values )"
  Or null/error */
 function filterParamJsonToSql({ filterParamStr = null } = {}) {
-	var filterableTables = ["sample", "seqgroup", "seqtype"];
-	var queryAliases = ["isSample", "belongsGroup", "isType"];
+	var filterableTables = ['sample', 'seqgroup', 'seqtype'];
+	var queryAliases = ['isSample', 'belongsGroup', 'isType'];
 	var doFilter = false;
-	var filterSQL = "";
+	var filterSQL = '';
 	if (filterParamStr) {
 		try {
 			let filterParam = JSON.parse(filterParamStr);
@@ -115,27 +124,27 @@ function filterParamJsonToSql({ filterParamStr = null } = {}) {
  * OR Starting with alphanumeric char = seq name
  */
 router.get(
-	"/:id([0-9]{1,})",
+	'/:id([0-9]{1,})',
 	asyncHandler(async (req, res, next) => {
 		const qRes = await dbLink.dbQueryToJRes(
-			sequenceQuery({ id: req.params.id })
+			sequenceQuery({ id: req.params.id }),
 		);
 		res.json(qRes);
-	})
+	}),
 );
 router.get(
-	"/:name(\\w\\S{0,})",
+	'/:name(\\w\\S{0,})',
 	asyncHandler(async (req, res, next) => {
 		const qRes = await dbLink.dbQueryToJRes(
-			sequenceQuery({ name: req.params.name })
+			sequenceQuery({ name: req.params.name }),
 		);
 		res.json(qRes);
-	})
+	}),
 );
 
 /* GET sequences listing. */
 router.get(
-	"/",
+	'/',
 	asyncHandler(async (req, res, next) => {
 		var limit = parseInt(req.query.limit, 10) || 100;
 		var offset =
@@ -144,7 +153,7 @@ router.get(
 		if (req.query.sort) {
 			if (
 				/^(name|length|groupName|sampleName|typeName)( (ASC|DESC))?$/i.test(
-					req.query.sort
+					req.query.sort,
 				)
 			) {
 				sort = req.query.sort;
@@ -152,14 +161,14 @@ router.get(
 		}
 		try {
 			var filterSQL = filterParamJsonToSql({
-				filterParamStr: req.query.filter
+				filterParamStr: req.query.filter,
 			});
 		} catch (error) {
 			/* Filter Param not valid JSON.*/
 			res.json({
 				status: 400,
 				error: "Invalid JSON in 'filter=' query.  " + error,
-				data: null
+				data: null,
 			});
 			return;
 		}
@@ -170,24 +179,54 @@ router.get(
 		const [qTotal, qAll] = await Promise.all([
 			filterSQL
 				? dbLink.dbCountQueryToJRes(
-						sequenceCountQuery({ filterSQL: filterSQL })
+						sequenceCountQuery({ filterSQL: filterSQL }),
 				  )
-				: dbLink.dbCountAllToJRes("sequence"),
+				: dbLink.dbCountAllToJRes('sequence'),
 			dbLink.dbQueryToJRes(
 				sequenceQuery({
 					limit: limit,
 					offset: offset,
 					sort: sort,
-					filterSQL: filterSQL
-				})
-			)
+					filterSQL: filterSQL,
+				}),
+			),
 		]);
 
 		res.json({
 			...qTotal,
-			...qAll
+			...qAll,
 		});
-	})
+	}),
+);
+
+/** PATCH 1 sequence listing.
+ * Takes seq ID as primary param
+ * Currently only allows Patch of seq.annotNote
+ */
+router.patch(
+	'/:id([0-9]{1,})',
+	asyncHandler(async (req, res, next) => {
+		var id = req.params.id || null;
+		var pdata = req.body.data || null;
+		var annotNote = null;
+		if (typeof pdata.annotNote === 'string') {
+			annotNote = pdata.annotNote;
+		}
+
+		if (id && typeof annotNote === 'string') {
+			const qRes = await dbLink.dbUpdateToJRes(
+				sequenceUpdateQuery({ id: id, annotNote: annotNote }),
+			);
+			if (qRes.status === 200) {
+				const qRes2 = await dbLink.dbQueryToJRes(
+					sequenceQuery({ id: req.params.id }),
+				);
+				res.json(qRes2);
+			} else {
+				res.json(qRes);
+			}
+		}
+	}),
 );
 
 module.exports = router;
