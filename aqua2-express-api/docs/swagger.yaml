@@ -272,6 +272,30 @@ paths:
           description: "Error"
         404:
           description: "sequenceId not found"
+    patch:
+      tags:
+        - "sequences"
+      summary: "Update sequence annotation"
+      description: "Update details of a sequence"
+      operationId: "patchSequenceById"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "sequenceId"
+          in: "path"
+          description: "ID of sequence to return"
+          required: true
+          type: "integer"
+        - $ref: "#/parameters/seqdata"
+      responses:
+        200:
+          description: "Success"
+          schema:
+            $ref: "#/definitions/Sequence"
+        500:
+          description: "Error"
+        404:
+          description: "sequenceId not found"
   /sequences/{seqName}:
     get:
       tags:
@@ -590,3 +614,12 @@ parameters:
     in: query
     description: Where filter={"sample":[1,5],"seqgroup":[3],"seqtype":[2,4]}
     type: string
+  seqdata:
+    name: data
+    in: query
+    description: Where data={"annotNote":"Blah"}
+    type: object
+    properties:
+      annotNote:
+        type: string
+        description: "Sequence annotation or note"
