@@ -6,9 +6,10 @@ import { withStyles } from '@material-ui/core/styles';
 import { createStructuredSelector } from 'reselect';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
+import Table from '@material-ui/core/Table';
+import TableBody from '@material-ui/core/TableBody';
+import TableCell from '@material-ui/core/TableCell';
+import TableRow from '@material-ui/core/TableRow';
 import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
@@ -31,8 +32,24 @@ const styles = (theme) => ({
 		paddingLeft: theme.spacing.unit * 2,
 		paddingRight: theme.spacing.unit * 2,
 	},
-	narrowlist: {
-		width: 500,
+	tabCell: {
+		borderBottom: 'none',
+		width: '250px',
+		overflow: 'hidden',
+	},
+	tabCell2: {
+		borderBottom: 'none',
+		width: '500px',
+		overflow: 'hidden',
+	},
+	cellLink: {
+		color: 'inherit',
+		textDecoration: 'none',
+		display: 'block',
+		margin: '-20px',
+		padding: '20px',
+		height: '100%',
+		width: '100%',
 	},
 	rightjust: {
 		display: 'flex',
@@ -45,7 +62,7 @@ const styles = (theme) => ({
 		marginRight: theme.spacing.unit,
 	},
 	textField: {
-		flexGrow: 1,
+		width: '100%',
 	},
 });
 
@@ -93,64 +110,6 @@ class SeqDetail extends Component {
 		window.removeEventListener('keydown', this.textEditKeyPress);
 	}
 
-	renderSeqList = () => {
-		const { seqDetailTab, classes } = this.props;
-		return (
-			<List>
-				{seqDetailTab.map(function(field, index) {
-					var [fieldLabel, fieldValue, fieldLink] = field;
-					if (fieldLabel === 'External link') {
-						return (
-							<a
-								href={fieldLink}
-								target="_blank"
-								style={{ textDecoration: 'none' }}
-								rel="noopener noreferrer"
-								key={index + '-extlink'}
-							>
-								<ListItem button>
-									<ListItemText primary={fieldLabel} />
-									<ListItemText
-										className={classes.rightjust}
-										primary={fieldValue}
-									/>
-								</ListItem>
-							</a>
-						);
-					} else if (fieldLink) {
-						return (
-							<Link
-								to={fieldLink}
-								style={{ textDecoration: 'none' }}
-								key={index + '-link'}
-							>
-								<ListItem button>
-									<ListItemText primary={fieldLabel} />
-									<ListItemText
-										className={classes.rightjust}
-										primary={fieldValue}
-									/>
-								</ListItem>
-							</Link>
-						);
-					} else if (fieldLabel !== 'Annotation/note') {
-						return (
-							<ListItem key={index + '-listitem'}>
-								<ListItemText primary={fieldLabel} />
-								<ListItemText
-									className={classes.rightjust}
-									primary={fieldValue}
-								/>
-							</ListItem>
-						);
-					} else {
-						return null;
-					}
-				})}
-			</List>
-		);
-	};
-
 	toggleEditAnnot = () => {
 		const { editAnnot } = this.state;
 		const { seqDetail } = this.props;
@@ -197,62 +156,140 @@ class SeqDetail extends Component {
 		this.setState({ editAnnot: false });
 	};
 
-	renderAnnotNotes = () => {
+	renderSeqListTable = () => {
+		const { seqDetailTab } = this.props;
+		return (
+			<Table>
+				<TableBody>
+					{seqDetailTab.map(function(field, index) {
+						var [fieldLabel, fieldValue, fieldLink] = field;
+						if (fieldLabel !== 'Annotation/note') {
+							return this.renderSeqListTableRow(
+								fieldLabel,
+								fieldValue,
+								fieldLink,
+								index,
+							);
+						} else {
+							return null;
+						}
+					}, this)}
+					{this.renderAnnotNotesRow()}
+				</TableBody>
+			</Table>
+		);
+	};
+
+	renderSeqListTableRow = (fieldLabel, fieldValue, fieldLink, index) => {
+		const { classes } = this.props;
+		if (fieldLink) {
+			var extLink = fieldLabel === 'External link' ? true : false;
+			return (
+				<TableRow key={'seqrow' + index}>
+					<TableCell className={classes.tabCell}>
+						{this.renderTableCellLink(fieldLabel, fieldLink, extLink)}
+					</TableCell>
+					<TableCell className={classes.tabCell}>
+						{this.renderTableCellLink(fieldValue, fieldLink, extLink)}
+					</TableCell>
+				</TableRow>
+			);
+		} else if (fieldLabel !== 'Annotation/note') {
+			return (
+				<TableRow key={'seqrow' + index}>
+					<TableCell className={classes.tabCell}>{fieldLabel}</TableCell>
+					<TableCell className={classes.tabCell}>{fieldValue}</TableCell>
+				</TableRow>
+			);
+		}
+	};
+
+	renderTableCellLink = (label, link, external) => {
+		const { classes } = this.props;
+		if (external) {
+			return (
+				<a
+					href={link}
+					target="_blank"
+					rel="noopener noreferrer"
+					className={classes.cellLink}
+				>
+					{label}
+				</a>
+			);
+		} else {
+			return (
+				<Link className={classes.cellLink} to={link}>
+					{label}
+				</Link>
+			);
+		}
+	};
+
+	renderAnnotNotesRow = () => {
 		const { seqDetail, classes } = this.props;
 		const seqAnnot = seqDetail.annotNote || '';
 		const { editAnnot, draftAnnotNote } = this.state;
 
 		if (editAnnot) {
 			return (
-				<ListItem>
-					<ListItemText primary="Annotation/note" />
-					<TextField
-						className={classes.textField}
-						id="annot-text"
-						value={draftAnnotNote}
-						inputProps={{ maxLength: 255 }}
-						margin="normal"
-						autoFocus
-						onChange={(e) => this.handleAnnotTextChange(e)}
-					/>
-					<Button
-						variant="contained"
-						aria-label="Submit"
-						size="small"
-						className={classes.margin}
-						onClick={(e) => this.submitNewAnnotNote()}
-					>
-						<OkIcon className={classes.rightMargin} />
-						Submit
-					</Button>
-					<Button
-						variant="contained"
-						aria-label="Submit"
-						size="small"
-						className={classes.margin}
-						onClick={(e) => this.toggleEditAnnot()}
-					>
-						<UndoIcon className={classes.rightMargin} />
-						Cancel
-					</Button>
-				</ListItem>
+				<TableRow>
+					<TableCell className={classes.tabCell}>Annotation/note</TableCell>
+					<TableCell className={classes.tabCell2} colSpan={2}>
+						<TextField
+							className={classes.textField}
+							id="annot-text"
+							value={draftAnnotNote}
+							inputProps={{ maxLength: 255 }}
+							margin="normal"
+							autoFocus
+							onChange={(e) => this.handleAnnotTextChange(e)}
+						/>
+					</TableCell>
+					<TableCell className={classes.tabCell}>
+						<Button
+							variant="contained"
+							aria-label="Submit"
+							size="small"
+							className={classes.margin}
+							onClick={(e) => this.submitNewAnnotNote()}
+						>
+							<OkIcon className={classes.rightMargin} />
+							Submit
+						</Button>
+						<Button
+							variant="contained"
+							aria-label="Submit"
+							size="small"
+							className={classes.margin}
+							onClick={(e) => this.toggleEditAnnot()}
+						>
+							<UndoIcon className={classes.rightMargin} />
+							Cancel
+						</Button>
+					</TableCell>
+				</TableRow>
 			);
 		} else {
 			return (
-				<ListItem onClick={(e) => this.toggleEditAnnot()}>
-					<ListItemText primary="Annotation/note" />
-					<ListItemText primary={seqAnnot} />
-					<Button
-						variant="contained"
-						size="small"
-						aria-label="Edit"
-						className={classes.margin}
-						onClick={(e) => this.toggleEditAnnot()}
-					>
-						<EditIcon className={classes.rightMargin} />
-						Edit
-					</Button>
-				</ListItem>
+				<TableRow onClick={(e) => this.toggleEditAnnot()}>
+					<TableCell className={classes.tabCell}>Annotation/note</TableCell>
+					<TableCell className={classes.tabCell2} colSpan={2}>
+						{seqAnnot}
+					</TableCell>
+					<TableCell className={classes.tabCell}>
+						<Button
+							variant="contained"
+							size="small"
+							aria-label="Edit"
+							className={classes.margin}
+							onClick={(e) => this.toggleEditAnnot()}
+						>
+							<EditIcon className={classes.rightMargin} />
+							Edit
+						</Button>
+					</TableCell>
+				</TableRow>
 			);
 		}
 	};
@@ -312,10 +349,7 @@ class SeqDetail extends Component {
 					<Typography variant="h6">Sequence detail:</Typography>
 					{loading && renderLoadingBars()}
 					{errorMsg && <Typography>{errorMsg}</Typography>}
-					<div className={classes.narrowlist}>
-						{hasloaded && this.renderSeqList()}
-					</div>
-					{hasloaded && this.renderAnnotNotes()}
+					{hasloaded && this.renderSeqListTable()}
 					{loading && renderLoadingBars()}
 				</Paper>
 				{hasloaded && this.renderFeatureAccordion()}
