@@ -56,11 +56,9 @@ JOIN seqtype AS stype
 			query.append(SQL`WHERE seq.annotNote LIKE ${searchTerm}`);
 		}
 
-		query.append(SQL`
-UNION ALL
-`);
 		if (searchType !== 'seqs') {
 			query.append(SQL`
+UNION ALL
 SELECT
   'alignedannot' AS resultType,
   seq.id AS seqId,
@@ -115,29 +113,21 @@ function searchCountQuery({ searchTerm = null, searchType = null } = {}) {
 		const countQuery = SQL`
 SELECT sum(counts) AS total
 FROM (
-`;
-		if (!searchType || searchType === 'all' || searchType === 'seqs') {
-			countQuery.append(SQL`
   SELECT count(id) AS counts 
   FROM sequence AS seq
-`);
-			if (!searchType || searchType === 'all') {
-				countQuery.append(
-					SQL` WHERE ( seq.name LIKE ${searchTerm} OR seq.annotNote LIKE ${searchTerm} )`,
-				);
-			} else if (searchType === 'seqs') {
-				countQuery.append(SQL` WHERE seq.name LIKE ${searchTerm}`);
-			} else if (searchType === 'annots') {
-				countQuery.append(SQL` WHERE seq.annotNote LIKE ${searchTerm}`);
-			}
-		}
+`;
 		if (!searchType || searchType === 'all') {
+			countQuery.append(
+				SQL` WHERE ( seq.name LIKE ${searchTerm} OR seq.annotNote LIKE ${searchTerm} )`,
+			);
+		} else if (searchType === 'seqs') {
+			countQuery.append(SQL` WHERE seq.name LIKE ${searchTerm}`);
+		} else if (searchType === 'annots') {
+			countQuery.append(SQL` WHERE seq.annotNote LIKE ${searchTerm}`);
+		}
+		if (searchType !== 'seqs') {
 			countQuery.append(SQL`
 UNION ALL
-`);
-		}
-		if (!searchType || searchType === 'all' || searchType === 'annots') {
-			countQuery.append(SQL`
   SELECT count(id) AS counts 
   FROM alignedannot AS aln
   WHERE aln.name LIKE ${searchTerm} 
