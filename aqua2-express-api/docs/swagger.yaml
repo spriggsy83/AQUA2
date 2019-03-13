@@ -17,6 +17,7 @@ tags:
   - name: "sequences"
   - name: "seqstring"
   - name: "search"
+  - name: "alignments"
 paths:
   /totals:
     get:
@@ -397,6 +398,59 @@ paths:
           description: "Error"
         404:
           description: "sequenceId not found"
+  /alignments/{sequenceId}:
+    get:
+      tags:
+        - "alignments"
+      summary: "Get alignments and annotations for a sequence"
+      description: "Returns a list of alignments and annotations for a sequence"
+      operationId: "getAlignments"
+      produces:
+        - "application/json"
+      parameters:
+        - name: "sequenceId"
+          in: "path"
+          description: "ID of sequence to return"
+          required: true
+          type: "integer"
+        - name: "start"
+          in: "query"
+          description: "Start of a sub-region to limit annotations to"
+          required: false
+          type: "integer"
+        - name: "end"
+          in: "query"
+          description: "End of a sub-region to limit annotations to"
+          required: false
+          type: "integer"
+        - name: "filter"
+          in: "query"
+          description: Where filter={"parentseqs":true,"childseqs":true,"alignedannots":true,"genepreds":true,"repeats":true}
+          required: false
+          type: "string"
+        - $ref: "#/parameters/sort"
+        - $ref: "#/parameters/limit"
+        - $ref: "#/parameters/offset"
+      responses:
+        200:
+          description: "Success"
+          headers:
+            total:
+              description: "Query total for pagination range"
+              type: "integer"
+          schema:
+            type: "object"
+            properties:
+              data:
+                description: "Alignments & Annotations"
+                type: "array"
+                items:
+                  $ref: "#/definitions/Alignments"
+
+        500:
+          description: "Error"
+        404:
+          description: "sequenceId not found"
 definitions:
   Totals:
     type: "object"
@@ -582,7 +636,7 @@ definitions:
         description: "Aligned annotation species"
       alignSource:
         type: "string"
-        description: "Aligned annotation source"
+        description: "Aligned annotation data source"
       alignMethod:
         type: "string"
         description: "Alignment method"
@@ -592,6 +646,84 @@ definitions:
       alignAnnot:
         type: "string"
         description: "Aligned annotation"
+  Alignments:
+    type: "object"
+    properties:
+      featureType: 
+        type: "string"
+        description: "Type of alignment or annotation feature"
+      featureId: 
+        type: "integer"
+        description: "db ID in table corresponding to featureType"
+      featureName: 
+        type: "string"
+        description: "Label for feature"
+      seqId: 
+        type: "integer"
+        description: "Sequence ID if reference sequence"
+      seqLength: 
+        type: "integer"
+        description: "Sequence length if reference sequence"
+      seqGroupId: 
+        type: "integer"
+        description: "ID of seqgroup if reference sequence"
+      seqGroupName: 
+        type: "string"
+        description: "Seqgroup label if reference sequence"
+      seqSampleId: 
+        type: "integer"
+        description: "ID of sample if reference sequence"
+      seqSampleName: 
+        type: "string"
+        description: "Sample label if reference sequence"
+      seqTypeId: 
+        type: "integer"
+        description: "ID of seqtype if reference sequence"
+      seqTypeName: 
+        type: "string"
+        description: "Seqtype label if reference sequence"
+      alignStart: 
+        type: "integer"
+        description: "Feature start coord on queried sequence"
+      alignEnd: 
+        type: "integer"
+        description: "Feature end coord on queried sequence"
+      alignStrand: 
+        type: "integer"
+        description: "Relative strand of feature against queried sequence"
+      featureAlignStart: 
+        type: "integer"
+        description: "Start coord of alignment relative to other ref sequence"
+      featureAlignEnd: 
+        type: "integer"
+        description: "End coord alignment relative to other ref sequence"
+      featureSpecies: 
+        type: "string"
+        description: "Aligned annotation species"
+      featureSource: 
+        type: "string"
+        description: "Aligned annotation data source"
+      alignMethod: 
+        type: "string"
+        description: "Alignment or annotation method"
+      alignScore: 
+        type: "string"
+        description: "Alignment or annotation score"
+      featureAnnot: 
+        type: "string"
+        description: "Text annotation description"
+      isCdsID: 
+        type: "integer"
+        description: "Sequence ID if gene prediction loaded as CDS ref sequence"
+      isCdsName: 
+        type: "string"
+        description: "Sequence name if gene prediction loaded as CDS ref sequence"
+      isProtID: 
+        type: "integer"
+        description: "Sequence ID if gene prediction loaded as protein ref sequence"
+      isProtName: 
+        type: "string"
+        description: "Sequence name if gene prediction loaded as protein ref sequence"
 
 parameters:
   sort:
