@@ -1,9 +1,9 @@
-var express = require("express");
+var express = require('express');
 var router = express.Router();
-const SQL = require("sql-template-strings");
-const asyncHandler = require("express-async-handler");
+const SQL = require('sql-template-strings');
+const asyncHandler = require('express-async-handler');
 
-var dbLink = require("../util/db-link.js");
+var dbLink = require('../util/db-link.js');
 
 function sampleQuery({ id = null, limit = 100, offset = 0, sort = null } = {}) {
 	const query = SQL`
@@ -44,18 +44,16 @@ LEFT JOIN (
 
 /* GET 1 sample listing. */
 router.get(
-	"/:id([0-9]{1,})",
+	'/:id([0-9]{1,})',
 	asyncHandler(async (req, res, next) => {
-		const qRes = await dbLink.dbQueryToJRes(
-			sampleQuery({ id: req.params.id })
-		);
+		const qRes = await dbLink.dbQueryToJRes(sampleQuery({ id: req.params.id }));
 		res.json(qRes);
-	})
+	}),
 );
 
 /* GET samples listing. */
 router.get(
-	"/",
+	'/',
 	asyncHandler(async (req, res, next) => {
 		var limit = parseInt(req.query.limit, 10) || 100;
 		var offset =
@@ -63,25 +61,30 @@ router.get(
 		var sort = null;
 		if (req.query.sort) {
 			if (
-				/^(name|species|ingroups|numseqs)( (ASC|DESC))?$/i.test(
-					req.query.sort
-				)
+				/^(name|species|ingroups|numseqs)( (ASC|DESC))?$/i.test(req.query.sort)
 			) {
 				sort = req.query.sort;
+			} else {
+				res.json({
+					status: 400,
+					error: "Invalid 'sort=' parameter, " + req.query.sort,
+					data: null,
+				});
+				return;
 			}
 		}
 		const [qTotal, qAll] = await Promise.all([
-			dbLink.dbCountAllToJRes("sample"),
+			dbLink.dbCountAllToJRes('sample'),
 			dbLink.dbQueryToJRes(
 				sampleQuery({
 					limit: limit,
 					offset: offset,
-					sort: sort
-				})
-			)
+					sort: sort,
+				}),
+			),
 		]);
 		res.json({ ...qTotal, ...qAll });
-	})
+	}),
 );
 
 module.exports = router;

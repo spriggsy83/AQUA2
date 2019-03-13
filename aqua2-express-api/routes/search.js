@@ -175,7 +175,21 @@ router.get(
 					].includes(sortParamTest[1])
 				) {
 					sort = req.query.sort;
+				} else {
+					res.json({
+						status: 400,
+						error: "Invalid 'sort=' parameter, " + req.query.sort,
+						data: null,
+					});
+					return;
 				}
+			} else {
+				res.json({
+					status: 400,
+					error: "Invalid 'sort=' parameter, " + req.query.sort,
+					data: null,
+				});
+				return;
 			}
 		}
 

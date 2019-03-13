@@ -157,6 +157,13 @@ router.get(
 				)
 			) {
 				sort = req.query.sort;
+			} else {
+				res.json({
+					status: 400,
+					error: "Invalid 'sort=' parameter, " + req.query.sort,
+					data: null,
+				});
+				return;
 			}
 		}
 		try {
