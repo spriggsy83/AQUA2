@@ -20,5 +20,17 @@
     "sql-template-strings": "^2.2.2",
     "swagger-ui-express": "^4.0.1",
     "yamljs": "^0.3.0"
+  },
+  "prettier": {
+    "printWidth": 80,
+    "tabWidth": 2,
+    "singleQuote": true,
+    "trailingComma": "all",
+    "bracketSpacing": true,
+    "jsxBracketSameLine": false,
+    "semi": true,
+    "requirePragma": false,
+    "proseWrap": "preserve",
+    "arrowParens": "always"
   }
 }
