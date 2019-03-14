@@ -45,7 +45,8 @@ SELECT
   NULL AS isCdsID,
   NULL AS isCdsName,
   NULL AS isProtID,
-  NULL AS isProtName
+  NULL AS isProtName,
+  count(subparts.id) AS subParts
 FROM seqrelation as align
 JOIN sequence AS pseq
   ON align.parentSeq=pseq.id
@@ -55,6 +56,8 @@ JOIN sample AS samp
   ON samp.id=pseq.isSample
 JOIN seqtype AS stype
   ON stype.id=pseq.isType
+LEFT JOIN seqrelpart as subparts
+  ON align.id=subparts.fromSeqRel
 WHERE align.childSeq = ${id}
 `);
 			if (qStart && qEnd) {
@@ -64,6 +67,9 @@ AND ( ( align.cStart BETWEEN ${qStart} AND ${qEnd} )
   OR ( align.cStart < ${qStart} AND align.cEnd > ${qEnd} ) )
 `);
 			}
+			query.append(SQL`
+GROUP BY align.id
+`);
 		}
 		if (!filter || filter.childseqs) {
 			if (first) {
@@ -98,7 +104,8 @@ SELECT
   NULL AS isCdsID,
   NULL AS isCdsName,
   NULL AS isProtID,
-  NULL AS isProtName
+  NULL AS isProtName,
+  count(subparts.id) AS subParts
 FROM seqrelation as align
 JOIN sequence AS cseq
   ON align.childSeq=cseq.id
@@ -108,6 +115,8 @@ JOIN sample AS samp
   ON samp.id=cseq.isSample
 JOIN seqtype AS stype
   ON stype.id=cseq.isType
+LEFT JOIN seqrelpart as subparts
+  ON align.id=subparts.fromSeqRel
 WHERE align.parentSeq = ${id}
 `);
 			if (qStart && qEnd) {
@@ -117,6 +126,9 @@ AND ( ( align.pStart BETWEEN ${qStart} AND ${qEnd} )
   OR ( align.pStart < ${qStart} AND align.pEnd > ${qEnd} ) )
 `);
 			}
+			query.append(SQL`
+GROUP BY align.id
+`);
 		}
 		if (!filter || filter.alignedannots) {
 			if (first) {
@@ -151,8 +163,11 @@ SELECT
   NULL AS isCdsID,
   NULL AS isCdsName,
   NULL AS isProtID,
-  NULL AS isProtName
+  NULL AS isProtName,
+  count(subparts.id) AS subParts
 FROM alignedannot as align
+LEFT JOIN alignpart as subparts
+  ON align.id=subparts.fromAlignment
 WHERE align.onSequence = ${id}
 `);
 			if (qStart && qEnd) {
@@ -162,6 +177,9 @@ AND ( ( align.start BETWEEN ${qStart} AND ${qEnd} )
   OR ( align.start < ${qStart} AND align.end > ${qEnd} ) )
 `);
 			}
+			query.append(SQL`
+GROUP BY align.id
+`);
 		}
 		if (!filter || filter.genepreds) {
 			if (first) {
@@ -196,12 +214,15 @@ SELECT
   genepred.isCdsSequence AS isCdsID,
   cdsseq.name AS isCdsName,
   genepred.isProtSequence AS isProtID,
-  protseq.name AS isProtName
+  protseq.name AS isProtName,
+  count(subparts.id) AS subParts
 FROM geneprediction as genepred
 LEFT JOIN sequence AS cdsseq
   ON genepred.isCdsSequence=cdsseq.id
 LEFT JOIN sequence AS protseq
   ON genepred.isProtSequence=protseq.id
+LEFT JOIN genepart as subparts
+  ON genepred.id=subparts.fromGenePred
 WHERE genepred.onSequence = ${id}
 `);
 			if (qStart && qEnd) {
@@ -212,6 +233,7 @@ AND ( ( genepred.start BETWEEN ${qStart} AND ${qEnd} )
 `);
 			}
 			query.append(SQL`
+GROUP BY genepred.id
 UNION ALL 
 SELECT 
   'isGenePrediction' AS featureType,
@@ -238,7 +260,8 @@ SELECT
   NULL AS isCdsID,
   NULL AS isCdsName,
   genepred.isProtSequence AS isProtID,
-  protseq.name AS isProtName
+  protseq.name AS isProtName,
+  count(subparts.id) AS subParts
 FROM geneprediction as genepred
 JOIN sequence AS refseq
   ON genepred.onSequence=refseq.id
@@ -252,7 +275,10 @@ LEFT JOIN sequence AS cdsseq
   ON genepred.isCdsSequence=cdsseq.id
 LEFT JOIN sequence AS protseq
   ON genepred.isProtSequence=protseq.id
+LEFT JOIN genepart as subparts
+  ON genepred.id=subparts.fromGenePred
 WHERE genepred.isCdsSequence = ${id}
+GROUP BY genepred.id
 UNION ALL 
 SELECT 
   'isGenePrediction' AS featureType,
@@ -279,7 +305,8 @@ SELECT
   genepred.isCdsSequence AS isCdsID,
   cdsseq.name AS isCdsName,
   NULL AS isProtID,
-  NULL AS isProtName
+  NULL AS isProtName,
+  count(subparts.id) AS subParts
 FROM geneprediction as genepred
 JOIN sequence AS refseq
   ON genepred.onSequence=refseq.id
@@ -293,7 +320,10 @@ LEFT JOIN sequence AS cdsseq
   ON genepred.isCdsSequence=cdsseq.id
 LEFT JOIN sequence AS protseq
   ON genepred.isProtSequence=protseq.id
+LEFT JOIN genepart as subparts
+  ON genepred.id=subparts.fromGenePred
 WHERE genepred.isProtSequence = ${id}
+GROUP BY genepred.id
 `);
 		}
 		if (!filter || filter.repeats) {
@@ -329,7 +359,8 @@ SELECT
   NULL AS isCdsID,
   NULL AS isCdsName,
   NULL AS isProtID,
-  NULL AS isProtName
+  NULL AS isProtName,
+  0 AS subParts
 FROM repeatannot as repannot
 WHERE repannot.onSequence = ${id}
 `);
@@ -346,7 +377,6 @@ AND ( ( repannot.start BETWEEN ${qStart} AND ${qEnd} )
 			query.append(SQL` ORDER BY `).append(sort);
 		}
 		query.append(SQL` LIMIT ${limit} OFFSET ${offset || 0}`);
-		console.log(query);
 		return query;
 	} else {
 		return null;
@@ -473,7 +503,6 @@ UNION ALL `);
 		}
 		countQuery.append(SQL`
 ) sum`);
-		console.log(countQuery);
 		return countQuery;
 	} else {
 		return null;
