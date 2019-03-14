@@ -1,57 +1,57 @@
-import React, { Component } from "react";
-import { withRouter } from "react-router-dom";
-import { connect } from "react-redux";
-import compose from "recompose/compose";
-import { withStyles } from "@material-ui/core/styles";
-import { createStructuredSelector } from "reselect";
-import Paper from "@material-ui/core/Paper";
-import Typography from "@material-ui/core/Typography";
-import Switch from "@material-ui/core/Switch";
-import Button from "@material-ui/core/Button";
-import Slider from "rc-slider";
-import "rc-slider/assets/index.css";
-import { renderLoadingBars } from "../../common/renderHelpers";
-import { requestSeqString, requestSubseqString } from "./seqstring_actions";
-import * as selectors from "./seqstring_selectors";
+import React, { Component } from 'react';
+import { withRouter } from 'react-router-dom';
+import { connect } from 'react-redux';
+import compose from 'recompose/compose';
+import { withStyles } from '@material-ui/core/styles';
+import { createStructuredSelector } from 'reselect';
+import Paper from '@material-ui/core/Paper';
+import Typography from '@material-ui/core/Typography';
+import Switch from '@material-ui/core/Switch';
+import Button from '@material-ui/core/Button';
+import Slider from 'rc-slider';
+import 'rc-slider/assets/index.css';
+import { renderLoadingBars } from '../../common/renderHelpers';
+import { requestSeqString, requestSubseqString } from './seqstring_actions';
+import * as selectors from './seqstring_selectors';
 
 const createSliderWithTooltip = Slider.createSliderWithTooltip;
 const Range = createSliderWithTooltip(Slider.Range);
 
-const styles = theme => ({
+const styles = (theme) => ({
 	root: {
-		display: "flex",
-		flexDirection: "column",
-		width: "100%"
+		display: 'flex',
+		flexDirection: 'column',
+		width: '100%',
 	},
 	row: {
-		display: "inline-flex",
+		display: 'inline-flex',
 		padding: theme.spacing.unit * 2,
-		alignItems: "center",
-		width: "100%"
+		alignItems: 'center',
+		width: '100%',
 	},
 	switchblock: {
 		padding: theme.spacing.unit * 2,
-		justifyContent: "center",
-		display: "inline-flex",
-		alignItems: "center",
-		flexGrow: 1
+		justifyContent: 'center',
+		display: 'inline-flex',
+		alignItems: 'center',
+		flexGrow: 1,
 	},
 	seqbox: {
 		padding: theme.spacing.unit * 2,
-		overflowY: "scroll",
-		maxHeight: "50vh"
+		overflowY: 'scroll',
+		maxHeight: '50vh',
 	},
 	seqfont: {
-		whiteSpace: "pre-line",
-		fontFamily: "courier"
+		whiteSpace: 'pre-line',
+		fontFamily: 'courier',
 	},
 	button: {
-		margin: theme.spacing.unit
+		margin: theme.spacing.unit,
 	},
 	slider: {
 		margin: theme.spacing.unit * 2,
-		flexGrow: 1
-	}
+		flexGrow: 1,
+	},
 });
 
 class SequenceViewer extends Component {
@@ -59,11 +59,10 @@ class SequenceViewer extends Component {
 		viewSubstring: false,
 		viewRevcomp: false,
 		sliderSubStart: 1,
-		sliderSubEnd: 1
+		sliderSubEnd: 1,
 	};
 
 	componentDidMount() {
-		console.log(this.props.seqType);
 		const { subseqStart, subseqEnd, seqLength } = this.props;
 		var viewSubstring = false;
 		if (subseqStart && subseqEnd && seqLength) {
@@ -71,7 +70,7 @@ class SequenceViewer extends Component {
 				viewSubstring = true;
 				this.props.requestSubseqString({
 					subseqStart: subseqStart,
-					subseqEnd: subseqEnd
+					subseqEnd: subseqEnd,
 				});
 			} else {
 				this.props.requestSeqString();
@@ -82,7 +81,7 @@ class SequenceViewer extends Component {
 		this.setState({
 			viewSubstring: viewSubstring,
 			sliderSubStart: subseqStart,
-			sliderSubEnd: subseqEnd
+			sliderSubEnd: subseqEnd,
 		});
 	}
 
@@ -95,9 +94,9 @@ class SequenceViewer extends Component {
 		}
 	}*/
 
-	handleSwitchChange = name => event => {
+	handleSwitchChange = (name) => (event) => {
 		const { loading, hasloaded, subLoading, subHasLoaded } = this.props;
-		if (name === "viewSubstring") {
+		if (name === 'viewSubstring') {
 			if (event.target.checked) {
 				if (!(subLoading || subHasLoaded)) {
 					this.props.requestSubseqString();
@@ -111,7 +110,7 @@ class SequenceViewer extends Component {
 		this.setState({ [name]: event.target.checked });
 	};
 
-	handleSliderChange = value => {
+	handleSliderChange = (value) => {
 		this.setState({ sliderSubStart: value[0], sliderSubEnd: value[1] });
 	};
 
@@ -119,7 +118,7 @@ class SequenceViewer extends Component {
 		const { sliderSubStart, sliderSubEnd } = this.state;
 		this.props.requestSubseqString({
 			subseqStart: sliderSubStart,
-			subseqEnd: sliderSubEnd
+			subseqEnd: sliderSubEnd,
 		});
 	};
 
@@ -145,7 +144,7 @@ class SequenceViewer extends Component {
 			subseqStr,
 			revComp,
 			subRevComp,
-			classes
+			classes,
 		} = this.props;
 		const { viewSubstring, viewRevcomp } = this.state;
 		if (viewSubstring) {
@@ -186,7 +185,7 @@ class SequenceViewer extends Component {
 							1: 1,
 							[subseqStart]: subseqStart.toLocaleString(),
 							[subseqEnd]: subseqEnd.toLocaleString(),
-							[seqLength]: seqLength.toLocaleString()
+							[seqLength]: seqLength.toLocaleString(),
 						}}
 						defaultValue={[subseqStart, subseqEnd]}
 						onChange={this.handleSliderChange}
@@ -209,7 +208,7 @@ class SequenceViewer extends Component {
 		const { classes, seqType } = this.props;
 		const { viewSubstring } = this.state;
 		var revCompDisabled = false;
-		if (seqType === "protein") {
+		if (seqType === 'protein') {
 			revCompDisabled = true;
 		}
 		return (
@@ -219,7 +218,7 @@ class SequenceViewer extends Component {
 						<Typography>Full sequence</Typography>
 						<Switch
 							checked={this.state.viewSubstring}
-							onChange={this.handleSwitchChange("viewSubstring")}
+							onChange={this.handleSwitchChange('viewSubstring')}
 							value="viewSubstring"
 							color="primary"
 						/>
@@ -229,7 +228,7 @@ class SequenceViewer extends Component {
 						<Typography>Forward orientation</Typography>
 						<Switch
 							checked={this.state.viewRevcomp}
-							onChange={this.handleSwitchChange("viewRevcomp")}
+							onChange={this.handleSwitchChange('viewRevcomp')}
 							value="viewRevcomp"
 							color="primary"
 							disabled={revCompDisabled}
@@ -266,7 +265,7 @@ const mapStateToProps = createStructuredSelector({
 	subseqStart: selectors.getSubseqStart,
 	subseqEnd: selectors.getSubseqEnd,
 	revComp: selectors.getFormattedRevComp,
-	subRevComp: selectors.getFormattedRevCompSubseq
+	subRevComp: selectors.getFormattedRevCompSubseq,
 });
 
 /**
@@ -277,6 +276,6 @@ export default compose(
 	withStyles(styles),
 	connect(
 		mapStateToProps,
-		{ requestSeqString, requestSubseqString }
-	)
+		{ requestSeqString, requestSubseqString },
+	),
 )(SequenceViewer);
