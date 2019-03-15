@@ -33,6 +33,9 @@ const styles = (theme) => ({
 		paddingLeft: theme.spacing.unit * 2,
 		paddingRight: theme.spacing.unit * 2,
 	},
+	padRight: {
+		paddingRight: theme.spacing.unit * 10,
+	},
 	tabCell: {
 		borderBottom: 'none',
 		width: '250px',
@@ -69,7 +72,7 @@ const styles = (theme) => ({
 
 class SeqDetail extends Component {
 	state = {
-		expanded: null,
+		expanded: 'seqdetail',
 		editAnnot: false,
 		draftAnnotNote: '',
 	};
@@ -119,7 +122,7 @@ class SeqDetail extends Component {
 		) {
 			// Reset state
 			this.setState({
-				expanded: null,
+				expanded: 'seqdetail',
 				editAnnot: false,
 				draftAnnotNote: '',
 			});
@@ -323,8 +326,23 @@ class SeqDetail extends Component {
 
 	renderFeatureAccordion = () => {
 		const { expanded } = this.state;
+		const { seqName, classes } = this.props;
 		return (
 			<>
+				<ExpansionPanel
+					expanded={expanded === 'seqdetail'}
+					onChange={this.handleSectionChange('seqdetail')}
+				>
+					<ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+						<Typography variant="h6" className={classes.padRight}>
+							Sequence detail
+						</Typography>
+						<Typography variant="h6">{seqName}</Typography>
+					</ExpansionPanelSummary>
+					<ExpansionPanelDetails>
+						{expanded === 'seqdetail' && this.renderSeqListTable()}
+					</ExpansionPanelDetails>
+				</ExpansionPanel>
 				<ExpansionPanel
 					expanded={expanded === 'seqstring'}
 					onChange={this.handleSectionChange('seqstring')}
@@ -366,14 +384,14 @@ class SeqDetail extends Component {
 		const { loading, hasloaded, errorMsg, classes } = this.props;
 		return (
 			<>
-				<Paper className={classes.root} elevation={1}>
-					<Typography variant="h6">Sequence detail:</Typography>
-					{loading && renderLoadingBars()}
-					{errorMsg && <Typography>{errorMsg}</Typography>}
-					{hasloaded && this.renderSeqListTable()}
-					{loading && renderLoadingBars()}
-				</Paper>
+				{loading && renderLoadingBars()}
+				{errorMsg && (
+					<Paper className={classes.root} elevation={1}>
+						<Typography>{errorMsg}</Typography>}
+					</Paper>
+				)}
 				{hasloaded && this.renderFeatureAccordion()}
+				{loading && renderLoadingBars()}
 			</>
 		);
 	}
