@@ -24,6 +24,7 @@ import { renderLoadingBars, UnderConstruction } from '../common/renderHelpers';
 import { requestOneSeq, patchOneSeq } from './oneseq_actions';
 import * as selectors from './oneseq_selectors';
 import { SequenceViewer } from './SeqString';
+import { AlignmentsTab } from './Alignments';
 
 const styles = (theme) => ({
 	root: {
@@ -76,12 +77,31 @@ class SeqDetail extends Component {
 	componentDidMount() {
 		// Required to capture Escape key press
 		window.addEventListener('keydown', this.textEditKeyPress);
+		this.updateData(
+			this.props.match.params.sequence_name,
+			this.props.location.search || null,
+		);
+	}
 
-		var seqName = this.props.match.params.sequence_name;
+	componentWillUnmount() {
+		window.removeEventListener('keydown', this.textEditKeyPress);
+	}
+
+	componentDidUpdate(prevProps) {
+		const seqName = this.props.match.params.sequence_name || null;
+		const prevSeqName = prevProps.match.params.sequence_name || null;
+		const searchProp = this.props.location.search || null;
+		const prevSearchProp = prevProps.location.search || null;
+		if (seqName !== prevSeqName || searchProp !== prevSearchProp) {
+			this.updateData(seqName, searchProp);
+		}
+	}
+
+	updateData = (seqName, searchProp) => {
 		var subseqStart = null;
 		var subseqEnd = null;
-		if (this.props.location.search) {
-			var matchArr = /^\?(\d+)-(\d+)$/.exec(this.props.location.search);
+		if (searchProp) {
+			var matchArr = /^\?(\d+)-(\d+)$/.exec(searchProp);
 			if (matchArr) {
 				subseqStart = parseInt(matchArr[1]);
 				subseqEnd = parseInt(matchArr[2]);
@@ -91,24 +111,25 @@ class SeqDetail extends Component {
 				}
 			}
 		}
-		if (seqName !== this.props.seqName || !this.props.hasloaded) {
+		if (
+			seqName !== this.props.seqName ||
+			subseqStart !== this.props.subseqStart ||
+			subseqEnd !== this.props.subseqEnd ||
+			!this.props.hasloaded
+		) {
+			// Reset state
+			this.setState({
+				expanded: null,
+				editAnnot: false,
+				draftAnnotNote: '',
+			});
 			this.props.requestOneSeq({
 				name: seqName,
 				subseqStart: subseqStart,
 				subseqEnd: subseqEnd,
 			});
-		} else if (
-			subseqStart !== this.props.subseqStart ||
-			subseqEnd !== this.props.subseqEnd
-		) {
-			// To handle!!
-			// Change of sub sequence
 		}
-	}
-
-	componentWillUnmount() {
-		window.removeEventListener('keydown', this.textEditKeyPress);
-	}
+	};
 
 	toggleEditAnnot = () => {
 		const { editAnnot } = this.state;
@@ -320,10 +341,10 @@ class SeqDetail extends Component {
 					onChange={this.handleSectionChange('annottab')}
 				>
 					<ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
-						<Typography variant="h6">Annotations table</Typography>
+						<Typography variant="h6">Alignments & Annotations table</Typography>
 					</ExpansionPanelSummary>
 					<ExpansionPanelDetails>
-						{expanded === 'annottab' && <UnderConstruction />}
+						{expanded === 'annottab' && <AlignmentsTab />}
 					</ExpansionPanelDetails>
 				</ExpansionPanel>
 				<ExpansionPanel

@@ -5,6 +5,10 @@ import {
 	actsList as seqStringActs,
 	selectors as seqStringSelectors,
 } from './SeqString';
+import {
+	actsList as alignActs,
+	selectors as alignSelectors,
+} from './Alignments';
 import { getIsLoading, getSeqID, getSeqName } from './oneseq_selectors';
 import { selectors as seqsSelectors } from '../Sequences';
 import { selectors as searchSelectors } from '../Search';
@@ -54,12 +58,28 @@ export const requestOneSeq = ({
 						},
 					});
 				}
+				if (
+					(subseqStart &&
+						subseqStart !== alignSelectors.getSubseqStart(getState())) ||
+					(subseqEnd && subseqEnd !== alignSelectors.getSubseqEnd(getState()))
+				) {
+					dispatch({
+						type: alignActs.NEWSUBRANGE,
+						payload: {
+							subseqStart: subseqStart,
+							subseqEnd: subseqEnd,
+						},
+					});
+				}
 			}
 
 			if (doFetch) {
 				// If fetching, clear child feature parts
 				dispatch({
 					type: seqStringActs.CLEAR,
+				});
+				dispatch({
+					type: alignActs.CLEAR,
 				});
 				// First see if seq available in sequence list or search result
 				var seqFromList = null;
@@ -101,6 +121,16 @@ export const requestOneSeq = ({
 							subseqEnd: subseqEnd,
 						},
 					});
+					dispatch({
+						type: alignActs.NEWFOCUS,
+						payload: {
+							id: seqFromList.id,
+							seqName: seqFromList.name,
+							seqLength: seqFromList['length'],
+							subseqStart: subseqStart,
+							subseqEnd: subseqEnd,
+						},
+					});
 				} else {
 					// Else, do API fetch
 					dispatch({
@@ -137,6 +167,16 @@ export const requestOneSeq = ({
 										subseqEnd: subseqEnd,
 									},
 								});
+								dispatch({
+									type: alignActs.NEWFOCUS,
+									payload: {
+										id: seqObj.id,
+										seqName: seqObj.name,
+										seqLength: seqObj['length'],
+										subseqStart: subseqStart,
+										subseqEnd: subseqEnd,
+									},
+								});
 							} else {
 								dispatch({
 									type: seqDetailActs.LOADED,
@@ -153,6 +193,9 @@ export const requestOneSeq = ({
 								dispatch({
 									type: seqStringActs.CLEAR,
 								});
+								dispatch({
+									type: alignActs.CLEAR,
+								});
 							}
 						})
 						.catch((error) => {
@@ -164,6 +207,9 @@ export const requestOneSeq = ({
 							});
 							dispatch({
 								type: seqStringActs.CLEAR,
+							});
+							dispatch({
+								type: alignActs.CLEAR,
 							});
 							console.log(error);
 						});

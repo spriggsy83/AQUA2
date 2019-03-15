@@ -1,7 +1,8 @@
-"use-strict";
-import { combineReducers } from "redux";
-import { reducer as SeqstringReducer } from "./SeqString";
-import * as acts from "./oneseq_action_list";
+'use-strict';
+import { combineReducers } from 'redux';
+import { reducer as SeqstringReducer } from './SeqString';
+import { reducer as AlignmentsReducer } from './Alignments';
+import * as acts from './oneseq_action_list';
 
 /**
  * define the initial state of our reducer
@@ -12,7 +13,7 @@ const INITIAL_STATE = {
 	error: null,
 	id: null,
 	name: null,
-	seqDetail: null
+	seqDetail: null,
 };
 
 function OneseqReducer(state = INITIAL_STATE, action) {
@@ -25,12 +26,12 @@ function OneseqReducer(state = INITIAL_STATE, action) {
 				error: null,
 				seqDetail: null,
 				id: action.payload.id,
-				name: action.payload.name
+				name: action.payload.name,
 			};
 		case acts.LOADING:
 			return {
 				...state,
-				loading: true
+				loading: true,
 			};
 		case acts.LOADED:
 			return {
@@ -40,14 +41,14 @@ function OneseqReducer(state = INITIAL_STATE, action) {
 				error: action.payload.error,
 				id: action.payload.id,
 				name: action.payload.name,
-				seqDetail: action.payload.seqDetail
+				seqDetail: action.payload.seqDetail,
 			};
 		case acts.ERRORED:
 			return {
 				...state,
 				loaded: false,
 				loading: false,
-				error: action.payload.error
+				error: action.payload.error,
 			};
 		default:
 			return state;
@@ -59,5 +60,6 @@ function OneseqReducer(state = INITIAL_STATE, action) {
  */
 export default combineReducers({
 	seqstring: SeqstringReducer,
-	seqdetail: OneseqReducer
+	seqdetail: OneseqReducer,
+	alignments: AlignmentsReducer,
 });
