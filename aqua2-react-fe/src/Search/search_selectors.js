@@ -1,22 +1,24 @@
-import React from "react";
-import { createSelector } from "reselect";
-import { map, at, find } from "lodash";
+import React from 'react';
+import { createSelector } from 'reselect';
+import { map, at, find } from 'lodash';
 
-export const getStateSlice = state => state.search;
+export const getStateSlice = (state) => state.search;
 
-export const getSearchTerm = state => state.search.searchTerm;
-export const getSearchType = state => state.search.searchType;
+export const getSearchTerm = (state) => state.search.searchTerm;
+export const getSearchType = (state) => state.search.searchType;
 
-export const getHasLoaded = state => state.search.loaded;
-export const getIsLoading = state => state.search.loading;
-export const getError = state => state.search.error;
-export const getCount = state => state.search.total;
-export const getSearchResult = state => state.search.searchResult;
+export const getHasLoaded = (state) => state.search.loaded;
+export const getIsLoading = (state) => state.search.loading;
+export const getError = (state) => state.search.error;
+export const getCount = (state) => state.search.total;
+export const getSearchResult = (state) => state.search.searchResult;
 
 /* Result table params */
-export const getTablePage = state => state.search.page;
-export const getTableRows = state => state.search.rowsPerPage;
-export const getTableSort = state => state.search.orderby;
+export const getTablePage = (state) => state.search.page;
+export const getTableRows = (state) => state.search.rowsPerPage;
+export const getTableSort = (state) => state.search.orderby;
+export const getDownloadUrl = (state) => state.search.dlUrl;
+export const getDownloadFastaUrl = (state) => state.search.dlFastaUrl;
 
 export const getSearchParams = createSelector(
 	getTablePage,
@@ -26,49 +28,49 @@ export const getSearchParams = createSelector(
 	(page, rowsPerPage, orderby, searchType) => {
 		var qParams = {
 			limit: rowsPerPage,
-			offset: page * rowsPerPage
+			offset: page * rowsPerPage,
 		};
 		if (searchType) {
-			qParams["searchtype"] = searchType;
+			qParams['searchtype'] = searchType;
 		}
 		if (orderby) {
-			qParams["sort"] = orderby;
+			qParams['sort'] = orderby;
 		}
 		return qParams;
-	}
+	},
 );
 
 export const getSearchTable = createSelector(
 	getSearchResult,
-	searchRes => {
+	(searchRes) => {
 		if (searchRes.length) {
-			return map(searchRes, resultRow => {
+			return map(searchRes, (resultRow) => {
 				var tableRow = at(resultRow, [
-					"resultType",
-					"seqId",
-					"seqName",
-					"seqLength",
-					"seqGroupName",
-					"seqSampleName",
-					"seqTypeName"
+					'resultType',
+					'seqId',
+					'seqName',
+					'seqLength',
+					'seqGroupName',
+					'seqSampleName',
+					'seqTypeName',
 				]);
 				tableRow.push(
 					<a href={resultRow.extLink} target="_blank" rel="noopener noreferrer">
 						{resultRow.extLinkLabel}
-					</a>
+					</a>,
 				);
 
 				tableRow.push(resultRow.alignName);
 
-				if (resultRow.resultType === "sequence") {
+				if (resultRow.resultType === 'sequence') {
 					tableRow.push(resultRow.seqLength.toLocaleString());
-				} else if (resultRow.resultType === "alignedannot") {
+				} else if (resultRow.resultType === 'alignedannot') {
 					tableRow.push(
 						resultRow.alignStart.toLocaleString() +
-							"-" +
+							'-' +
 							resultRow.alignEnd.toLocaleString() +
-							" / " +
-							resultRow.seqLength.toLocaleString()
+							' / ' +
+							resultRow.seqLength.toLocaleString(),
 					);
 				} else {
 					tableRow.push(null);
@@ -77,37 +79,37 @@ export const getSearchTable = createSelector(
 				tableRow.push(resultRow.alignStart);
 				tableRow.push(resultRow.alignEnd);
 				if (resultRow.alignStrand === 1) {
-					tableRow.push("+");
+					tableRow.push('+');
 				} else if (resultRow.alignStrand === 0) {
-					tableRow.push("-");
+					tableRow.push('-');
 				} else {
 					tableRow.push(null);
 				}
 
-				if (resultRow.resultType === "sequence") {
-					tableRow.push(resultRow.seqGroupName + " | " + resultRow.seqTypeName);
-				} else if (resultRow.resultType === "alignedannot") {
+				if (resultRow.resultType === 'sequence') {
+					tableRow.push(resultRow.seqGroupName + ' | ' + resultRow.seqTypeName);
+				} else if (resultRow.resultType === 'alignedannot') {
 					tableRow.push(
 						resultRow.alignMethod +
-							" | " +
+							' | ' +
 							resultRow.alignSource +
-							" | " +
-							resultRow.alignSpecies
+							' | ' +
+							resultRow.alignSpecies,
 					);
 				} else {
 					tableRow.push(null);
 				}
 				tableRow.push(
 					...at(resultRow, [
-						"alignSpecies",
-						"alignSource",
-						"alignMethod",
-						"alignScore"
-					])
+						'alignSpecies',
+						'alignSource',
+						'alignMethod',
+						'alignScore',
+					]),
 				);
-				if (resultRow.resultType === "sequence") {
+				if (resultRow.resultType === 'sequence') {
 					tableRow.push(resultRow.seqAnnot);
-				} else if (resultRow.resultType === "alignedannot") {
+				} else if (resultRow.resultType === 'alignedannot') {
 					tableRow.push(resultRow.alignAnnot);
 				} else {
 					tableRow.push(null);
@@ -117,10 +119,10 @@ export const getSearchTable = createSelector(
 		} else {
 			return [];
 		}
-	}
+	},
 );
 
-const searchObjToSeqObj = searchRow => {
+const searchObjToSeqObj = (searchRow) => {
 	return {
 		id: searchRow.seqId,
 		name: searchRow.seqName,
@@ -133,7 +135,7 @@ const searchObjToSeqObj = searchRow => {
 		typeName: searchRow.seqTypeName,
 		annotNote: searchRow.seqAnnot,
 		extLink: searchRow.seqExtLink,
-		extLinkLabel: searchRow.seqExtLinkLabel
+		extLinkLabel: searchRow.seqExtLinkLabel,
 	};
 };
 

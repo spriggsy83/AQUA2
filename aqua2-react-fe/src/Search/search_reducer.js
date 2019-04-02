@@ -1,5 +1,5 @@
-"use-strict";
-import * as acts from "./search_action_list";
+'use-strict';
+import * as acts from './search_action_list';
 
 /**
  * define the initial state of our reducer
@@ -9,12 +9,14 @@ const INITIAL_STATE = {
 	loading: false,
 	error: null,
 	total: 0,
-	searchTerm: "",
-	searchType: "seqs",
+	searchTerm: '',
+	searchType: 'seqs',
 	searchResult: [],
 	page: 0,
 	rowsPerPage: 100,
-	orderby: null
+	orderby: null,
+	dlUrl: null,
+	dlFastaUrl: null,
 };
 
 /**
@@ -32,12 +34,14 @@ export default function(state = INITIAL_STATE, action) {
 				total: 0,
 				searchResult: [],
 				searchTerm: action.payload.searchTerm,
-				searchType: action.payload.searchType
+				searchType: action.payload.searchType,
+				dlUrl: null,
+				dlFastaUrl: null,
 			};
 		case acts.LOADING:
 			return {
 				...state,
-				loading: true
+				loading: true,
 			};
 		case acts.LOADED:
 			return {
@@ -49,7 +53,9 @@ export default function(state = INITIAL_STATE, action) {
 				searchResult: action.payload.searchResult,
 				page: action.payload.page,
 				rowsPerPage: action.payload.rowsPerPage,
-				orderby: action.payload.orderby
+				orderby: action.payload.orderby,
+				dlUrl: action.payload.dlUrl,
+				dlFastaUrl: action.payload.dlFastaUrl,
 			};
 		case acts.ERRORED:
 			return {
@@ -58,7 +64,9 @@ export default function(state = INITIAL_STATE, action) {
 				loading: false,
 				total: 0,
 				searchResult: [],
-				error: action.payload.error
+				error: action.payload.error,
+				dlUrl: null,
+				dlFastaUrl: null,
 			};
 		default:
 			return state;
