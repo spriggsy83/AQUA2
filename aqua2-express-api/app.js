@@ -20,6 +20,8 @@ var seqDownloadRouter = require('./routes/seq-dl');
 var seqDlFastaRouter = require('./routes/seq-dl-fasta');
 var seqstringRouter = require('./routes/seqstring');
 var searchRouter = require('./routes/search');
+var searchDownloadRouter = require('./routes/search-dl');
+var searchDlFastaRouter = require('./routes/search-dl-fasta');
 var alignmentsRouter = require('./routes/alignments');
 
 var app = express();
@@ -43,6 +45,8 @@ app.use('/api/v2/seq-dl', seqDownloadRouter);
 app.use('/api/v2/seq-dl-fasta', seqDlFastaRouter);
 app.use('/api/v2/seqstring', seqstringRouter);
 app.use('/api/v2/search', searchRouter);
+app.use('/api/v2/search-dl', searchDownloadRouter);
+app.use('/api/v2/search-dl-fasta', searchDlFastaRouter);
 app.use('/api/v2/alignments', alignmentsRouter);
 
 module.exports = app;
