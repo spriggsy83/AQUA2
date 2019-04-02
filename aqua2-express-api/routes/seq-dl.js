@@ -158,20 +158,29 @@ router.get(
 					writableObjectMode: true,
 					readableObjectMode: false,
 					transform(chunk, encoding, callback) {
-						this.push(
+						let line =
 							[
 								chunk.name,
 								chunk.length,
 								chunk.groupName,
 								chunk.sampleName,
 								chunk.typeName,
-							].join(',') +
-								',"' +
-								chunk.annotNote +
-								'",' +
-								[chunk.extLink, chunk.extLinkLabel].join(',') +
-								'\r\n',
-						);
+							].join(',') + ',';
+						if (chunk.annotNote) {
+							if (chunk.annotNote !== 'null' && chunk.annotNote !== 'NULL') {
+								line += '"' + chunk.annotNote + '"';
+							}
+						}
+						if (chunk.extLink) {
+							if (chunk.extLink !== 'null' && chunk.extLink !== 'NULL') {
+								line += ',' + chunk.extLink + ',' + chunk.extLinkLabel + '\r\n';
+							} else {
+								line += ',,\r\n';
+							}
+						} else {
+							line += ',,\r\n';
+						}
+						this.push(line);
 						callback();
 					},
 				});
@@ -185,6 +194,9 @@ router.get(
 							filterSQL: filterSQL,
 						}),
 					)
+					.on('end', function() {
+						connection.release();
+					})
 					.stream({ highWaterMark: 5 })
 					.pipe(queryTransformer)
 					.pipe(res);

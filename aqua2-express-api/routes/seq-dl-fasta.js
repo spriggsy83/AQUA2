@@ -172,6 +172,9 @@ router.get(
 							filterSQL: filterSQL,
 						}),
 					)
+					.on('end', function() {
+						connection.release();
+					})
 					.stream({ highWaterMark: 5 })
 					.pipe(queryTransformer)
 					.pipe(res);
