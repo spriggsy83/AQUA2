@@ -3,6 +3,10 @@ import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 import compose from 'recompose/compose';
 import MuiDataTable from 'mui-datatables';
+import IconButton from '@material-ui/core/IconButton';
+import DownloadIcon from '@material-ui/icons/CloudDownload';
+import FastaIcon from '@material-ui/icons/ArrowForwardIos';
+import Tooltip from '@material-ui/core/Tooltip';
 import {
 	renderNumber,
 	renderRightText,
@@ -20,6 +24,8 @@ import {
 	getCount,
 	getTableRows,
 	getTableSort,
+	getDownloadUrl,
+	getDownloadFastaUrl,
 } from './search_selectors';
 
 const columns = [
@@ -132,6 +138,38 @@ class SearchResultList extends Component {
 		}
 	};
 
+	renderCustomToolbar = () => {
+		const { dlURL, dlFastaURL, total } = this.props;
+		if (total < 500000) {
+			return (
+				<>
+					<Tooltip id="download-button" title="Download CSV">
+						<IconButton
+							aria-label="Download CSV"
+							onClick={() => {
+								window.open(dlURL, '_blank');
+							}}
+						>
+							<DownloadIcon />
+						</IconButton>
+					</Tooltip>
+					<Tooltip id="download-fasta-button" title="Download FASTA">
+						<IconButton
+							aria-label="Download FASTA"
+							onClick={() => {
+								window.open(dlFastaURL, '_blank');
+							}}
+						>
+							<FastaIcon />
+						</IconButton>
+					</Tooltip>
+				</>
+			);
+		} else {
+			return null;
+		}
+	};
+
 	/** options Object required by mui-datatable **/
 	getTableOptions = () => {
 		const { page, total, rowsPerPage } = this.props;
@@ -141,6 +179,8 @@ class SearchResultList extends Component {
 			selectableRows: false,
 			search: false,
 			filter: false,
+			print: false,
+			download: false,
 			rowsPerPageOptions: [50, 100, 200, 1000],
 			rowsPerPage: rowsPerPage,
 			page: page,
@@ -149,6 +189,7 @@ class SearchResultList extends Component {
 			onTableChange: this.onTableChange,
 			onColumnSortChange: this.onColumnSortChange,
 			onCellClick: this.onCellClick,
+			customToolbar: this.renderCustomToolbar,
 		};
 	};
 
@@ -186,6 +227,8 @@ const mapStateToProps = createStructuredSelector({
 	total: getCount,
 	rowsPerPage: getTableRows,
 	orderby: getTableSort,
+	dlURL: getDownloadUrl,
+	dlFastaURL: getDownloadFastaUrl,
 });
 
 /**

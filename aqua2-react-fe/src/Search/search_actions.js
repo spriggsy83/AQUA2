@@ -1,33 +1,33 @@
-"use-strict";
-import { isArray, isEqual } from "lodash";
-import * as acts from "./search_action_list";
+'use-strict';
+import { isArray, isEqual } from 'lodash';
+import * as acts from './search_action_list';
 import {
 	getIsLoading,
 	getSearchTerm,
 	getSearchType,
-	getSearchParams
-} from "./search_selectors";
-import API from "../common/API";
+	getSearchParams,
+} from './search_selectors';
+import API from '../common/API';
 
-const validSearchTerms = ["seqs", "annots", "all"];
+const validSearchTerms = ['seqs', 'annots', 'all'];
 
 export const requestSearch = ({
-	searchTerm = "",
-	searchType = "seqs",
+	searchTerm = '',
+	searchType = 'seqs',
 	page = 0,
 	rowsPerPage = 50,
-	orderby = null
+	orderby = null,
 } = {}) => {
 	const offset = page * rowsPerPage;
 	var qParams = {
 		limit: rowsPerPage,
-		offset: offset
+		offset: offset,
 	};
 	if (searchType && validSearchTerms.includes(searchType)) {
-		qParams["searchtype"] = searchType;
+		qParams['searchtype'] = searchType;
 	}
 	if (orderby) {
-		qParams["sort"] = orderby;
+		qParams['sort'] = orderby;
 	}
 	return function(dispatch, getState) {
 		var doFetch = false;
@@ -39,8 +39,8 @@ export const requestSearch = ({
 				type: acts.NEWSEARCH,
 				payload: {
 					searchTerm: searchTerm,
-					searchType: searchType
-				}
+					searchType: searchType,
+				},
 			});
 			doFetch = true;
 		} else if (
@@ -48,15 +48,15 @@ export const requestSearch = ({
 			!getIsLoading(getState())
 		) {
 			dispatch({
-				type: acts.LOADING
+				type: acts.LOADING,
 			});
 			doFetch = true;
 		}
 		if (doFetch) {
 			API.get(`search/${searchTerm}`, {
-				params: qParams
+				params: qParams,
 			})
-				.then(response => {
+				.then((response) => {
 					if (isArray(response.data.data)) {
 						dispatch({
 							type: acts.LOADED,
@@ -66,8 +66,14 @@ export const requestSearch = ({
 								page: page,
 								rowsPerPage: rowsPerPage,
 								orderby: orderby,
-								error: null
-							}
+								error: null,
+								dlUrl: response.request.responseURL
+									.replace(/search/, 'search-dl')
+									.replace(/limit=\d+&offset=\d+/, ''),
+								dlFastaUrl: response.request.responseURL
+									.replace(/search/, 'search-dl-fasta')
+									.replace(/limit=\d+&offset=\d+/, ''),
+							},
 						});
 					} else {
 						dispatch({
@@ -78,17 +84,19 @@ export const requestSearch = ({
 								page: page,
 								rowsPerPage: rowsPerPage,
 								orderby: orderby,
-								error: "No data found"
-							}
+								error: 'No data found',
+								dlUrl: null,
+								dlFastaUrl: null,
+							},
 						});
 					}
 				})
-				.catch(error => {
+				.catch((error) => {
 					dispatch({
 						type: acts.ERRORED,
 						payload: {
-							error: error
-						}
+							error: error,
+						},
 					});
 					console.log(error);
 				});
