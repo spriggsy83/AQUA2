@@ -1,5 +1,5 @@
-"use-strict";
-import * as acts from "./sequences_action_list";
+'use-strict';
+import * as acts from './sequences_action_list';
 
 /**
  * define the initial state of our reducer
@@ -13,7 +13,9 @@ const INITIAL_STATE = {
 	page: 0,
 	rowsPerPage: 100,
 	orderby: null,
-	filtersSet: {}
+	filtersSet: {},
+	dlUrl: null,
+	dlFastaUrl: null,
 };
 
 /**
@@ -25,7 +27,7 @@ export default function(state = INITIAL_STATE, action) {
 		case acts.LOADING:
 			return {
 				...state,
-				loading: true
+				loading: true,
 			};
 		case acts.LOADED:
 			return {
@@ -38,14 +40,16 @@ export default function(state = INITIAL_STATE, action) {
 				page: action.payload.page,
 				rowsPerPage: action.payload.rowsPerPage,
 				orderby: action.payload.orderby,
-				filtersSet: action.payload.filtersSet
+				filtersSet: action.payload.filtersSet,
+				dlUrl: action.payload.dlUrl,
+				dlFastaUrl: action.payload.dlFastaUrl,
 			};
 		case acts.ERRORED:
 			return {
 				...state,
 				loaded: false,
 				loading: false,
-				error: action.payload.error
+				error: action.payload.error,
 			};
 		default:
 			return state;
