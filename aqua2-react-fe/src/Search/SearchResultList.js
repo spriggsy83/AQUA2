@@ -14,50 +14,66 @@ import {
 } from '../common/renderHelpers';
 import { createStructuredSelector } from 'reselect';
 import { requestSearch } from './search_actions';
-import {
-	getHasLoaded,
-	getIsLoading,
-	getSearchTerm,
-	getSearchType,
-	getSearchTable,
-	getTablePage,
-	getCount,
-	getTableRows,
-	getTableSort,
-	getDownloadUrl,
-	getDownloadFastaUrl,
-} from './search_selectors';
+import * as selectors from './search_selectors';
 
 const columns = [
-	{ name: 'MatchType', options: { sort: true } },
-	{ name: 'seqDbID', options: { display: 'excluded', download: false } },
-	{ name: 'SeqName', options: { sort: true } },
 	{
-		name: 'SeqLength',
+		name: 'resultType',
+		label: 'Match type',
+		options: { display: 'true', sort: true },
+	},
+	{ name: 'seqId', label: 'seqDbID', options: { display: 'excluded' } },
+	{
+		name: 'seqName',
+		label: 'Sequence',
+		options: { display: 'true', sort: true },
+	},
+	{
+		name: 'seqLength',
+		label: 'Seq length',
 		options: {
 			display: 'false',
 			sort: true,
 			customBodyRender: renderNumber,
 		},
 	},
-	{ name: 'SeqGroup', options: { display: 'false', sort: true } },
-	{ name: 'SeqSample', options: { display: 'false', sort: true } },
-	{ name: 'SeqType', options: { display: 'false', sort: true } },
 	{
-		name: 'SeqExtLink',
-		options: { display: 'false', sort: false, download: false },
+		name: 'seqGroupName',
+		label: 'Seq group',
+		options: { display: 'false', sort: true },
 	},
-	{ name: 'AlignedName', options: { sort: true } },
 	{
-		name: 'FeatureLength',
+		name: 'seqSampleName',
+		label: 'Seq sample',
+		options: { display: 'false', sort: true },
+	},
+	{
+		name: 'seqTypeName',
+		label: 'Seq type',
+		options: { display: 'false', sort: true },
+	},
+	{
+		name: 'extLink',
+		label: 'External link',
+		options: { display: 'false', sort: false },
+	},
+	{
+		name: 'alignName',
+		label: 'Name of aligned',
+		options: { display: 'true', sort: true },
+	},
+	{
+		name: 'featureLength',
+		label: 'Feature length',
 		options: {
+			display: 'true',
 			sort: false,
-			download: false,
 			customBodyRender: renderRightText,
 		},
 	},
 	{
-		name: 'AlignStart',
+		name: 'alignStart',
+		label: 'Align start coord',
 		options: {
 			display: 'false',
 			sort: false,
@@ -65,20 +81,49 @@ const columns = [
 		},
 	},
 	{
-		name: 'AlignEnd',
+		name: 'alignEnd',
+		label: 'Align end coord',
 		options: {
 			display: 'false',
 			sort: false,
 			customBodyRender: renderNumber,
 		},
 	},
-	{ name: 'AlignStrand', options: { display: 'false', sort: false } },
-	{ name: 'Source', options: { sort: false, download: false } },
-	{ name: 'AlignSpecies', options: { display: 'false', sort: true } },
-	{ name: 'AlignSource', options: { display: 'false', sort: true } },
-	{ name: 'AlignMethod', options: { display: 'false', sort: true } },
-	{ name: 'AlignScore', options: { display: 'false', sort: false } },
-	{ name: 'Annotation', options: { sort: false } },
+	{
+		name: 'alignStrand',
+		label: 'Strand',
+		options: { display: 'false', sort: false },
+	},
+	{
+		name: 'source',
+		label: 'Feature source',
+		options: { display: 'true', sort: false },
+	},
+	{
+		name: 'alignSpecies',
+		label: 'Species',
+		options: { display: 'false', sort: true },
+	},
+	{
+		name: 'alignSource',
+		label: 'Align source',
+		options: { display: 'false', sort: true },
+	},
+	{
+		name: 'alignMethod',
+		label: 'Align method',
+		options: { display: 'false', sort: true },
+	},
+	{
+		name: 'alignScore',
+		label: 'Align score',
+		options: { display: 'false', sort: false },
+	},
+	{
+		name: 'annotation',
+		label: 'Annotation',
+		options: { display: 'true', sort: false },
+	},
 ];
 
 class SearchResultList extends Component {
@@ -121,20 +166,26 @@ class SearchResultList extends Component {
 	};
 
 	onCellClick = (colData, cellMeta) => {
-		const clickedSeq = this.props.results[cellMeta.rowIndex];
-		if (clickedSeq[10]) {
-			this.props.history.push({
-				pathname: '/Sequences/' + encodeURIComponent(clickedSeq[2]),
-				search:
-					'?' +
-					encodeURIComponent(clickedSeq[10]) +
-					'-' +
-					encodeURIComponent(clickedSeq[11]),
-			});
-		} else {
-			this.props.history.push({
-				pathname: '/Sequences/' + encodeURIComponent(clickedSeq[2]),
-			});
+		// If NOT external link column clicked
+		if (cellMeta.colIndex !== 7) {
+			const clicked = this.props.results[cellMeta.rowIndex];
+			/* If a valid ref seq row clicked */
+			if (clicked.seqName) {
+				if (clicked.alignStart && clicked.alignEnd) {
+					this.props.history.push({
+						pathname: '/Sequences/' + encodeURIComponent(clicked.seqName),
+						search:
+							'?' +
+							encodeURIComponent(clicked.alignStart) +
+							'-' +
+							encodeURIComponent(clicked.alignEnd),
+					});
+				} else {
+					this.props.history.push({
+						pathname: '/Sequences/' + encodeURIComponent(clicked.seqName),
+					});
+				}
+			}
 		}
 	};
 
@@ -218,17 +269,17 @@ class SearchResultList extends Component {
  * allows us to call our application state from props
  */
 const mapStateToProps = createStructuredSelector({
-	hasloaded: getHasLoaded,
-	loading: getIsLoading,
-	searchTerm: getSearchTerm,
-	searchType: getSearchType,
-	results: getSearchTable,
-	page: getTablePage,
-	total: getCount,
-	rowsPerPage: getTableRows,
-	orderby: getTableSort,
-	dlURL: getDownloadUrl,
-	dlFastaURL: getDownloadFastaUrl,
+	hasloaded: selectors.getHasLoaded,
+	loading: selectors.getIsLoading,
+	searchTerm: selectors.getSearchTerm,
+	searchType: selectors.getSearchType,
+	results: selectors.getSearchTable,
+	page: selectors.getTablePage,
+	total: selectors.getCount,
+	rowsPerPage: selectors.getTableRows,
+	orderby: selectors.getTableSort,
+	dlURL: selectors.getDownloadUrl,
+	dlFastaURL: selectors.getDownloadFastaUrl,
 });
 
 /**

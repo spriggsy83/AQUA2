@@ -1,6 +1,6 @@
 import React from 'react';
 import { createSelector } from 'reselect';
-import { map, at, find } from 'lodash';
+import { map, find } from 'lodash';
 
 export const getStateSlice = (state) => state.search;
 
@@ -45,76 +45,58 @@ export const getSearchTable = createSelector(
 	(searchRes) => {
 		if (searchRes.length) {
 			return map(searchRes, (resultRow) => {
-				var tableRow = at(resultRow, [
-					'resultType',
-					'seqId',
-					'seqName',
-					'seqLength',
-					'seqGroupName',
-					'seqSampleName',
-					'seqTypeName',
-				]);
-				tableRow.push(
-					<a href={resultRow.extLink} target="_blank" rel="noopener noreferrer">
-						{resultRow.extLinkLabel}
-					</a>,
+				// Turn extLink into real link
+				resultRow.extLink = (
+					<a
+						href={resultRow.seqExtLink}
+						target="_blank"
+						rel="noopener noreferrer"
+					>
+						{resultRow.seqExtLinkLabel}
+					</a>
 				);
-
-				tableRow.push(resultRow.alignName);
-
+				// Assemble FeatureLength column
 				if (resultRow.resultType === 'sequence') {
-					tableRow.push(resultRow.seqLength.toLocaleString());
+					resultRow.featureLength = resultRow.seqLength.toLocaleString();
 				} else if (resultRow.resultType === 'alignedannot') {
-					tableRow.push(
+					resultRow.featureLength =
 						resultRow.alignStart.toLocaleString() +
-							'-' +
-							resultRow.alignEnd.toLocaleString() +
-							' / ' +
-							resultRow.seqLength.toLocaleString(),
-					);
+						'-' +
+						resultRow.alignEnd.toLocaleString() +
+						' / ' +
+						resultRow.seqLength.toLocaleString();
 				} else {
-					tableRow.push(null);
+					resultRow.featureLength = null;
 				}
-
-				tableRow.push(resultRow.alignStart);
-				tableRow.push(resultRow.alignEnd);
+				// Update strand display
 				if (resultRow.alignStrand === 1) {
-					tableRow.push('+');
+					resultRow.alignStrand = '+';
 				} else if (resultRow.alignStrand === 0) {
-					tableRow.push('-');
-				} else {
-					tableRow.push(null);
+					resultRow.alignStrand = '-';
 				}
-
+				// Assemble Source column
 				if (resultRow.resultType === 'sequence') {
-					tableRow.push(resultRow.seqGroupName + ' | ' + resultRow.seqTypeName);
+					resultRow.source =
+						resultRow.seqGroupName + ' | ' + resultRow.seqTypeName;
 				} else if (resultRow.resultType === 'alignedannot') {
-					tableRow.push(
+					resultRow.source =
 						resultRow.alignMethod +
-							' | ' +
-							resultRow.alignSource +
-							' | ' +
-							resultRow.alignSpecies,
-					);
+						' | ' +
+						resultRow.alignSource +
+						' | ' +
+						resultRow.alignSpecies;
 				} else {
-					tableRow.push(null);
+					resultRow.source = null;
 				}
-				tableRow.push(
-					...at(resultRow, [
-						'alignSpecies',
-						'alignSource',
-						'alignMethod',
-						'alignScore',
-					]),
-				);
+				// Assemble annotation column
 				if (resultRow.resultType === 'sequence') {
-					tableRow.push(resultRow.seqAnnot);
+					resultRow.annotation = resultRow.seqAnnot;
 				} else if (resultRow.resultType === 'alignedannot') {
-					tableRow.push(resultRow.alignAnnot);
+					resultRow.annotation = resultRow.alignAnnot;
 				} else {
-					tableRow.push(null);
+					resultRow.annotation = null;
 				}
-				return tableRow;
+				return resultRow;
 			});
 		} else {
 			return [];
