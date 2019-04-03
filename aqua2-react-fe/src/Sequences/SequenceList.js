@@ -12,37 +12,50 @@ import { renderNumber, renderLoadingBars } from '../common/renderHelpers';
 import SeqFilterBar from './components/SeqFilterBar';
 import { createStructuredSelector } from 'reselect';
 import { requestSequences } from './sequences_actions';
-import {
-	getHasLoaded,
-	getIsLoading,
-	getSequencesTable,
-	getTablePage,
-	getCount,
-	getTableRows,
-	getTableSort,
-	getFilters,
-	getDownloadUrl,
-	getDownloadFastaUrl,
-} from './sequences_selectors';
+import * as selectors from './sequences_selectors';
 
 const columns = [
-	{ name: 'dbID', options: { display: 'false', download: false } },
-	{ name: 'Name', options: { sort: true } },
+	{ name: 'id', label: 'dbID', options: { display: 'false' } },
+	{ name: 'name', label: 'Name', options: { display: 'true', sort: true } },
 	{
-		name: 'Length (bp)',
+		name: 'length',
+		label: 'Length (bp)',
 		options: {
+			display: 'true',
 			sort: true,
 			customBodyRender: renderNumber,
 		},
 	},
-	{ name: 'groupId', options: { display: 'excluded', download: false } },
-	{ name: 'Group', options: { sort: true } },
-	{ name: 'sampleId', options: { display: 'excluded', download: false } },
-	{ name: 'Sample', options: { sort: true } },
-	{ name: 'typeId', options: { display: 'excluded', download: false } },
-	{ name: 'Type', options: { sort: true } },
-	{ name: 'Annotation note', options: { sort: false } },
-	{ name: 'External link', options: { sort: false, download: false } },
+	{ name: 'groupId', label: 'groupId', options: { display: 'excluded' } },
+	{
+		name: 'groupName',
+		label: 'Group',
+		options: { display: 'true', sort: true },
+	},
+	{ name: 'sampleId', label: 'sampleId', options: { display: 'excluded' } },
+	{
+		name: 'sampleName',
+		label: 'Sample',
+		options: { display: 'true', sort: true },
+	},
+	{ name: 'typeId', label: 'typeId', options: { display: 'excluded' } },
+	{ name: 'typeName', label: 'Type', options: { display: 'true', sort: true } },
+	{
+		name: 'annotNote',
+		label: 'Annotation note',
+		options: { display: 'true', sort: false },
+	},
+	{
+		name: 'extLinkAhref',
+		label: 'External link',
+		options: { display: 'true', sort: false },
+	},
+	{ name: 'extLink', label: 'extLink', options: { display: 'excluded' } },
+	{
+		name: 'extLinkLabel',
+		label: 'extLinkLabel',
+		options: { display: 'excluded' },
+	},
 ];
 
 class ListSequences extends Component {
@@ -126,13 +139,7 @@ class ListSequences extends Component {
 	};
 
 	/** Table sort changed **/
-	onColumnSortChange = (changedColumn, direction) => {
-		var col = changedColumn
-			.replace('Name', 'name')
-			.replace('Length (bp)', 'length')
-			.replace('Group', 'groupName')
-			.replace('Sample', 'sampleName')
-			.replace('Type', 'typeName');
+	onColumnSortChange = (col, direction) => {
 		var dir = direction.replace(/(asc|desc)ending/, '$1');
 		this.getData({ newPage: 0, newOrderby: `${col} ${dir}` });
 	};
@@ -153,7 +160,9 @@ class ListSequences extends Component {
 			/* Then go to sequence/:name page */
 			const clickedSeq = this.props.sequences[cellMeta.rowIndex];
 			this.props.history.push(
-				this.props.location.pathname + '/' + encodeURIComponent(clickedSeq[1]),
+				this.props.location.pathname +
+					'/' +
+					encodeURIComponent(clickedSeq.name),
 			);
 		}
 	};
@@ -206,16 +215,16 @@ class ListSequences extends Component {
  * allows us to call our application state from props
  */
 const mapStateToProps = createStructuredSelector({
-	hasloaded: getHasLoaded,
-	loading: getIsLoading,
-	sequences: getSequencesTable,
-	page: getTablePage,
-	total: getCount,
-	rowsPerPage: getTableRows,
-	orderby: getTableSort,
-	filtersSet: getFilters,
-	dlURL: getDownloadUrl,
-	dlFastaURL: getDownloadFastaUrl,
+	hasloaded: selectors.getHasLoaded,
+	loading: selectors.getIsLoading,
+	sequences: selectors.getSequencesTable,
+	page: selectors.getTablePage,
+	total: selectors.getCount,
+	rowsPerPage: selectors.getTableRows,
+	orderby: selectors.getTableSort,
+	filtersSet: selectors.getFilters,
+	dlURL: selectors.getDownloadUrl,
+	dlFastaURL: selectors.getDownloadFastaUrl,
 });
 
 /**

@@ -139,18 +139,7 @@ class SearchResultList extends Component {
 	};
 
 	/** Table sort changed **/
-	onColumnSortChange = (changedColumn, direction) => {
-		var col = changedColumn
-			.replace('MatchType', 'resultType')
-			.replace('SeqName', 'seqName')
-			.replace('SeqLength', 'seqLength')
-			.replace('SeqGroup', 'seqGroupName')
-			.replace('SeqSample', 'seqSampleName')
-			.replace('SeqType', 'seqTypeName')
-			.replace('AlignedName', 'alignName')
-			.replace('AlignSpecies', 'alignSpecies')
-			.replace('AlignSource', 'alignSource')
-			.replace('AlignMethod', 'alignMethod');
+	onColumnSortChange = (col, direction) => {
 		var dir = direction.replace(/(asc|desc)ending/, '$1');
 		this.getData({ newPage: 0, newOrderby: `${col} ${dir}` });
 	};
