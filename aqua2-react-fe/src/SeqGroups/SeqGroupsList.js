@@ -1,54 +1,74 @@
-import React, { Component } from "react";
-import { withRouter } from "react-router-dom";
-import { connect } from "react-redux";
-import compose from "recompose/compose";
-import MuiDataTable from "mui-datatables";
-import { renderNumber, renderLoadingBars } from "../common/renderHelpers";
-import { createStructuredSelector } from "reselect";
-import { requestSeqGroups } from "./seqgroups_actions";
-import { getSeqGroupsTable, getHasLoaded } from "./seqgroups_selectors";
+import React, { Component } from 'react';
+import { withRouter } from 'react-router-dom';
+import { connect } from 'react-redux';
+import compose from 'recompose/compose';
+import MuiDataTable from 'mui-datatables';
+import { renderNumber, renderLoadingBars } from '../common/renderHelpers';
+import { createStructuredSelector } from 'reselect';
+import { requestSeqGroups } from './seqgroups_actions';
+import { getSeqGroupsTable, getHasLoaded } from './seqgroups_selectors';
 
 const columns = [
-	{ name: "dbID", options: { display: "excluded", download: false } },
-	{ name: "Group Name", options: { sort: true } },
-	{ name: "Description", options: { sort: false } },
 	{
-		name: "From samples",
-		options: {
-			display: "hidden",
-			sort: true,
-			customBodyRender: renderNumber
-		}
+		name: 'id',
+		label: 'dbID',
+		options: { display: 'excluded', download: false },
 	},
 	{
-		name: "Num. sequences",
-		options: {
-			sort: true,
-			customBodyRender: renderNumber
-		}
+		name: 'name',
+		label: 'Group Name',
+		options: { display: 'true', sort: true },
 	},
 	{
-		name: "Average seq length",
-		options: {
-			sort: true,
-			customBodyRender: renderNumber
-		}
+		name: 'description',
+		label: 'Description',
+		options: { display: 'true', sort: false },
 	},
 	{
-		name: "N50 seq length",
+		name: 'fromsamps',
+		label: 'From samples',
 		options: {
-			display: "hidden",
+			display: 'false',
 			sort: true,
-			customBodyRender: renderNumber
-		}
+			customBodyRender: renderNumber,
+		},
 	},
 	{
-		name: "Longest seq length",
+		name: 'numseqs',
+		label: 'Num. sequences',
 		options: {
+			display: 'true',
 			sort: true,
-			customBodyRender: renderNumber
-		}
-	}
+			customBodyRender: renderNumber,
+		},
+	},
+	{
+		name: 'avlength',
+		label: 'Average seq length',
+		options: {
+			display: 'true',
+			sort: true,
+			customBodyRender: renderNumber,
+		},
+	},
+	{
+		name: 'n50length',
+		label: 'N50 seq length',
+		options: {
+			display: 'false',
+			sort: true,
+			customBodyRender: renderNumber,
+		},
+	},
+	{
+		name: 'maxlength',
+		label: 'Longest seq length',
+		options: {
+			display: 'true',
+			sort: true,
+			customBodyRender: renderNumber,
+		},
+	},
 ];
 
 class ListSeqGroups extends Component {
@@ -61,7 +81,7 @@ class ListSeqGroups extends Component {
 
 	onRowClick = (rowData, rowMeta) => {
 		this.props.history.push(
-			this.props.location.pathname + "/" + encodeURIComponent(rowData[1])
+			this.props.location.pathname + '/' + encodeURIComponent(rowData[1]),
 		);
 	};
 
@@ -74,7 +94,7 @@ class ListSeqGroups extends Component {
 			search: false,
 			filter: false,
 			rowsPerPage: 999,
-			onRowClick: this.onRowClick
+			onRowClick: this.onRowClick,
 		};
 		if (loaded) {
 			return (
@@ -83,7 +103,7 @@ class ListSeqGroups extends Component {
 						data={seqgroups}
 						columns={columns}
 						options={options}
-						title={"Groups/Assemblies"}
+						title={'Groups/Assemblies'}
 					/>
 				</>
 			);
@@ -98,7 +118,7 @@ class ListSeqGroups extends Component {
  */
 const mapStateToProps = createStructuredSelector({
 	loaded: getHasLoaded,
-	seqgroups: getSeqGroupsTable
+	seqgroups: getSeqGroupsTable,
 });
 
 /**
@@ -108,6 +128,6 @@ export default compose(
 	withRouter,
 	connect(
 		mapStateToProps,
-		{ requestSeqGroups }
-	)
+		{ requestSeqGroups },
+	),
 )(ListSeqGroups);
