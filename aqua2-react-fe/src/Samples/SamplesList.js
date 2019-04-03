@@ -1,32 +1,52 @@
-import React, { Component } from "react";
-import { withRouter } from "react-router-dom";
-import { connect } from "react-redux";
-import compose from "recompose/compose";
-import MuiDataTable from "mui-datatables";
-import { renderNumber, renderLoadingBars } from "../common/renderHelpers";
-import { createStructuredSelector } from "reselect";
-import { requestSamples } from "./samples_actions";
-import { getSamplesTable, getHasLoaded } from "./samples_selectors";
+import React, { Component } from 'react';
+import { withRouter } from 'react-router-dom';
+import { connect } from 'react-redux';
+import compose from 'recompose/compose';
+import MuiDataTable from 'mui-datatables';
+import { renderNumber, renderLoadingBars } from '../common/renderHelpers';
+import { createStructuredSelector } from 'reselect';
+import { requestSamples } from './samples_actions';
+import { getSamplesTable, getHasLoaded } from './samples_selectors';
 
 const columns = [
-	{ name: "dbID", options: { display: "excluded", download: false } },
-	{ name: "Sample Name", options: { sort: true } },
-	{ name: "Species", options: { sort: true } },
-	{ name: "Description", options: { sort: false } },
 	{
-		name: "In groups/assemblies",
-		options: {
-			sort: true,
-			customBodyRender: renderNumber
-		}
+		name: 'id',
+		label: 'dbID',
+		options: { display: 'excluded', download: false },
 	},
 	{
-		name: "Num. sequences",
+		name: 'name',
+		label: 'Sample Name',
+		options: { display: 'true', sort: true },
+	},
+	{
+		name: 'species',
+		label: 'Species',
+		options: { display: 'true', sort: true },
+	},
+	{
+		name: 'description',
+		label: 'Description',
+		options: { display: 'true', sort: false },
+	},
+	{
+		name: 'ingroups',
+		label: 'In groups/assemblies',
 		options: {
+			display: 'true',
 			sort: true,
-			customBodyRender: renderNumber
-		}
-	}
+			customBodyRender: renderNumber,
+		},
+	},
+	{
+		name: 'numseqs',
+		label: 'Num. sequences',
+		options: {
+			display: 'true',
+			sort: true,
+			customBodyRender: renderNumber,
+		},
+	},
 ];
 
 class ListSamples extends Component {
@@ -39,7 +59,7 @@ class ListSamples extends Component {
 
 	onRowClick = (rowData, rowMeta) => {
 		this.props.history.push(
-			this.props.location.pathname + "/" + encodeURIComponent(rowData[1])
+			this.props.location.pathname + '/' + encodeURIComponent(rowData[1]),
 		);
 	};
 
@@ -52,7 +72,7 @@ class ListSamples extends Component {
 			search: false,
 			filter: false,
 			rowsPerPage: 999,
-			onRowClick: this.onRowClick
+			onRowClick: this.onRowClick,
 		};
 
 		if (loaded) {
@@ -62,7 +82,7 @@ class ListSamples extends Component {
 						data={samples}
 						columns={columns}
 						options={options}
-						title={"Samples"}
+						title={'Samples'}
 					/>
 				</>
 			);
@@ -77,7 +97,7 @@ class ListSamples extends Component {
  */
 const mapStateToProps = createStructuredSelector({
 	loaded: getHasLoaded,
-	samples: getSamplesTable
+	samples: getSamplesTable,
 });
 
 /**
@@ -87,6 +107,6 @@ export default compose(
 	withRouter,
 	connect(
 		mapStateToProps,
-		{ requestSamples }
-	)
+		{ requestSamples },
+	),
 )(ListSamples);

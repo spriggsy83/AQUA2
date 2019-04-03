@@ -1,30 +1,36 @@
-import React, { Component } from "react";
-import { withRouter } from "react-router-dom";
-import MuiDataTable from "mui-datatables";
-import { connect } from "react-redux";
-import compose from "recompose/compose";
-import { withStyles } from "@material-ui/core/styles";
-import { renderNumber, renderLoadingBars } from "../common/renderHelpers";
-import { createStructuredSelector } from "reselect";
-import { requestSeqTypes } from "./seqtypes_actions";
-import { getSeqTypesTable, getHasLoaded } from "./seqtypes_selectors";
+import React, { Component } from 'react';
+import { withRouter } from 'react-router-dom';
+import MuiDataTable from 'mui-datatables';
+import { connect } from 'react-redux';
+import compose from 'recompose/compose';
+import { withStyles } from '@material-ui/core/styles';
+import { renderNumber, renderLoadingBars } from '../common/renderHelpers';
+import { createStructuredSelector } from 'reselect';
+import { requestSeqTypes } from './seqtypes_actions';
+import { getSeqTypesTable, getHasLoaded } from './seqtypes_selectors';
 
-const styles = theme => ({
+const styles = (theme) => ({
 	narrowlist: {
-		width: 500
-	}
+		width: 500,
+	},
 });
 
 const columns = [
-	{ name: "dbID", options: { display: "excluded", download: false } },
-	{ name: "Seq Type", options: { sort: true } },
 	{
-		name: "Num. sequences",
+		name: 'id',
+		label: 'dbID',
+		options: { display: 'excluded', download: false },
+	},
+	{ name: 'type', label: 'Seq Type', options: { display: 'true', sort: true } },
+	{
+		name: 'numseqs',
+		label: 'Num. sequences',
 		options: {
+			display: 'true',
 			sort: true,
-			customBodyRender: renderNumber
-		}
-	}
+			customBodyRender: renderNumber,
+		},
+	},
 ];
 
 class ListSeqTypes extends Component {
@@ -37,7 +43,7 @@ class ListSeqTypes extends Component {
 
 	onRowClick = (rowData, rowMeta) => {
 		this.props.history.push(
-			this.props.location.pathname + "/" + encodeURIComponent(rowData[1])
+			this.props.location.pathname + '/' + encodeURIComponent(rowData[1]),
 		);
 	};
 
@@ -50,7 +56,7 @@ class ListSeqTypes extends Component {
 			search: false,
 			filter: false,
 			rowsPerPage: 999,
-			onRowClick: this.onRowClick
+			onRowClick: this.onRowClick,
 		};
 
 		if (loaded) {
@@ -60,7 +66,7 @@ class ListSeqTypes extends Component {
 						data={seqtypes}
 						columns={columns}
 						options={options}
-						title={"SeqTypes"}
+						title={'SeqTypes'}
 					/>
 				</div>
 			);
@@ -75,7 +81,7 @@ class ListSeqTypes extends Component {
  */
 const mapStateToProps = createStructuredSelector({
 	loaded: getHasLoaded,
-	seqtypes: getSeqTypesTable
+	seqtypes: getSeqTypesTable,
 });
 
 /**
@@ -86,6 +92,6 @@ export default compose(
 	withRouter,
 	connect(
 		mapStateToProps,
-		{ requestSeqTypes }
-	)
+		{ requestSeqTypes },
+	),
 )(ListSeqTypes);
