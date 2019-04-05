@@ -17,6 +17,27 @@ const INITIAL_STATE = {
 	orderby: null,
 	dlUrl: null,
 	dlFastaUrl: null,
+	columnView: {
+		resultType: 'true',
+		seqId: 'excluded',
+		seqName: 'true',
+		seqLength: 'false',
+		seqGroupName: 'false',
+		seqSampleName: 'false',
+		seqTypeName: 'false',
+		extLink: 'false',
+		alignName: 'true',
+		featureLength: 'true',
+		alignStart: 'false',
+		alignEnd: 'false',
+		alignStrand: 'false',
+		source: 'true',
+		alignSpecies: 'false',
+		alignSource: 'false',
+		alignMethod: 'false',
+		alignScore: 'false',
+		annotation: 'true',
+	},
 };
 
 /**
@@ -28,6 +49,7 @@ export default function(state = INITIAL_STATE, action) {
 		case acts.NEWSEARCH:
 			return {
 				...state,
+				columnView: { ...state.columnView },
 				loading: true,
 				loaded: false,
 				error: null,
@@ -41,11 +63,13 @@ export default function(state = INITIAL_STATE, action) {
 		case acts.LOADING:
 			return {
 				...state,
+				columnView: { ...state.columnView },
 				loading: true,
 			};
 		case acts.LOADED:
 			return {
 				...state,
+				columnView: { ...state.columnView },
 				loaded: true,
 				loading: false,
 				error: action.payload.error,
@@ -60,6 +84,7 @@ export default function(state = INITIAL_STATE, action) {
 		case acts.ERRORED:
 			return {
 				...state,
+				columnView: { ...state.columnView },
 				loaded: false,
 				loading: false,
 				total: 0,
@@ -67,6 +92,14 @@ export default function(state = INITIAL_STATE, action) {
 				error: action.payload.error,
 				dlUrl: null,
 				dlFastaUrl: null,
+			};
+		case acts.COLVIEWCHANGE:
+			return {
+				...state,
+				columnView: {
+					...state.columnView,
+					[action.payload.column]: action.payload.value,
+				},
 			};
 		default:
 			return state;
