@@ -7,124 +7,11 @@ import IconButton from '@material-ui/core/IconButton';
 import DownloadIcon from '@material-ui/icons/CloudDownload';
 import FastaIcon from '@material-ui/icons/ArrowForwardIos';
 import Tooltip from '@material-ui/core/Tooltip';
-import {
-	renderNumber,
-	renderRightText,
-	renderLoadingBars,
-} from '../common/renderHelpers';
+import { renderLoadingBars } from '../common/renderHelpers';
 import { createStructuredSelector } from 'reselect';
-import { requestSearch } from './search_actions';
+import { requestSearch, changeColumnView } from './search_actions';
 import * as selectors from './search_selectors';
-
-const columns = [
-	{
-		name: 'resultType',
-		label: 'Match type',
-		options: { display: 'true', sort: true },
-	},
-	{ name: 'seqId', label: 'seqDbID', options: { display: 'excluded' } },
-	{
-		name: 'seqName',
-		label: 'Sequence',
-		options: { display: 'true', sort: true },
-	},
-	{
-		name: 'seqLength',
-		label: 'Seq length',
-		options: {
-			display: 'false',
-			sort: true,
-			customBodyRender: renderNumber,
-		},
-	},
-	{
-		name: 'seqGroupName',
-		label: 'Seq group',
-		options: { display: 'false', sort: true },
-	},
-	{
-		name: 'seqSampleName',
-		label: 'Seq sample',
-		options: { display: 'false', sort: true },
-	},
-	{
-		name: 'seqTypeName',
-		label: 'Seq type',
-		options: { display: 'false', sort: true },
-	},
-	{
-		name: 'extLink',
-		label: 'External link',
-		options: { display: 'false', sort: false },
-	},
-	{
-		name: 'alignName',
-		label: 'Name of aligned',
-		options: { display: 'true', sort: true },
-	},
-	{
-		name: 'featureLength',
-		label: 'Feature length',
-		options: {
-			display: 'true',
-			sort: false,
-			customBodyRender: renderRightText,
-		},
-	},
-	{
-		name: 'alignStart',
-		label: 'Align start coord',
-		options: {
-			display: 'false',
-			sort: false,
-			customBodyRender: renderNumber,
-		},
-	},
-	{
-		name: 'alignEnd',
-		label: 'Align end coord',
-		options: {
-			display: 'false',
-			sort: false,
-			customBodyRender: renderNumber,
-		},
-	},
-	{
-		name: 'alignStrand',
-		label: 'Strand',
-		options: { display: 'false', sort: false },
-	},
-	{
-		name: 'source',
-		label: 'Feature source',
-		options: { display: 'true', sort: false },
-	},
-	{
-		name: 'alignSpecies',
-		label: 'Species',
-		options: { display: 'false', sort: true },
-	},
-	{
-		name: 'alignSource',
-		label: 'Align source',
-		options: { display: 'false', sort: true },
-	},
-	{
-		name: 'alignMethod',
-		label: 'Align method',
-		options: { display: 'false', sort: true },
-	},
-	{
-		name: 'alignScore',
-		label: 'Align score',
-		options: { display: 'false', sort: false },
-	},
-	{
-		name: 'annotation',
-		label: 'Annotation',
-		options: { display: 'true', sort: false },
-	},
-];
+import { getSearchColumns } from './search_columns';
 
 class SearchResultList extends Component {
 	getData = ({ newPage, newRowsPerPage, newOrderby } = {}) => {
@@ -142,6 +29,11 @@ class SearchResultList extends Component {
 	onColumnSortChange = (col, direction) => {
 		var dir = direction.replace(/(asc|desc)ending/, '$1');
 		this.getData({ newPage: 0, newOrderby: `${col} ${dir}` });
+	};
+
+	/** Table column view on/off change **/
+	onColumnViewChange = (col, value) => {
+		this.props.changeColumnView(col, value === 'add' ? 'true' : 'false');
 	};
 
 	/** Table page changed **/
@@ -228,13 +120,15 @@ class SearchResultList extends Component {
 			serverSide: true,
 			onTableChange: this.onTableChange,
 			onColumnSortChange: this.onColumnSortChange,
+			onColumnViewChange: this.onColumnViewChange,
 			onCellClick: this.onCellClick,
 			customToolbar: this.renderCustomToolbar,
 		};
 	};
 
 	render() {
-		const { results, loading, hasloaded, searchTerm } = this.props;
+		const { results, columns, loading, hasloaded, searchTerm } = this.props;
+
 		return (
 			<>
 				{loading && renderLoadingBars()}
@@ -269,6 +163,7 @@ const mapStateToProps = createStructuredSelector({
 	orderby: selectors.getTableSort,
 	dlURL: selectors.getDownloadUrl,
 	dlFastaURL: selectors.getDownloadFastaUrl,
+	columns: getSearchColumns,
 });
 
 /**
@@ -278,6 +173,6 @@ export default compose(
 	withRouter,
 	connect(
 		mapStateToProps,
-		{ requestSearch },
+		{ requestSearch, changeColumnView },
 	),
 )(SearchResultList);

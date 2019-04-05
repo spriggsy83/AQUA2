@@ -16,6 +16,21 @@ const INITIAL_STATE = {
 	filtersSet: {},
 	dlUrl: null,
 	dlFastaUrl: null,
+	columnView: {
+		id: 'excluded',
+		name: 'true',
+		length: 'true',
+		groupId: 'excluded',
+		groupName: 'true',
+		sampleId: 'excluded',
+		sampleName: 'true',
+		typeId: 'excluded',
+		typeName: 'true',
+		annotNote: 'true',
+		extLinkAhref: 'true',
+		extLink: 'excluded',
+		extLinkLabel: 'excluded',
+	},
 };
 
 /**
@@ -27,11 +42,13 @@ export default function(state = INITIAL_STATE, action) {
 		case acts.LOADING:
 			return {
 				...state,
+				columnView: { ...state.columnView },
 				loading: true,
 			};
 		case acts.LOADED:
 			return {
 				...state,
+				columnView: { ...state.columnView },
 				loaded: true,
 				loading: false,
 				error: action.payload.error,
@@ -47,9 +64,18 @@ export default function(state = INITIAL_STATE, action) {
 		case acts.ERRORED:
 			return {
 				...state,
+				columnView: { ...state.columnView },
 				loaded: false,
 				loading: false,
 				error: action.payload.error,
+			};
+		case acts.COLVIEWCHANGE:
+			return {
+				...state,
+				columnView: {
+					...state.columnView,
+					[action.payload.column]: action.payload.value,
+				},
 			};
 		default:
 			return state;

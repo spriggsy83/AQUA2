@@ -19,6 +19,31 @@ const INITIAL_STATE = {
 	rowsPerPage: 100,
 	orderby: null,
 	filtersSet: {},
+	columnView: {
+		featureType: 'true',
+		featureId: 'excluded',
+		featureName: 'true',
+		seqLength: 'false',
+		seqGroupName: 'false',
+		seqSampleName: 'false',
+		seqTypeName: 'false',
+		alignStart: 'false',
+		alignEnd: 'false',
+		alignCoords: 'true',
+		alignStrand: 'false',
+		featureAlignStart: 'false',
+		featureAlignEnd: 'false',
+		featureAlignCoords: 'false',
+		source: 'true',
+		featureSpecies: 'false',
+		featureSource: 'false',
+		method: 'false',
+		score: 'false',
+		featureAnnot: 'true',
+		isCdsName: 'false',
+		isProtName: 'false',
+		subParts: 'true',
+	},
 };
 
 /**
@@ -29,13 +54,13 @@ export default function(state = INITIAL_STATE, action) {
 	switch (action.type) {
 		case acts.CLEAR:
 			return {
-				...state,
 				...INITIAL_STATE,
+				columnView: { ...state.columnView },
 			};
 		case acts.NEWFOCUS:
 			return {
-				...state,
 				...INITIAL_STATE,
+				columnView: { ...state.columnView },
 				id: action.payload.id,
 				seqName: action.payload.seqName,
 				seqLength: action.payload.seqLength,
@@ -45,6 +70,7 @@ export default function(state = INITIAL_STATE, action) {
 		case acts.NEWSUBRANGE:
 			return {
 				...state,
+				columnView: { ...state.columnView },
 				loaded: false,
 				loading: false,
 				error: null,
@@ -57,11 +83,13 @@ export default function(state = INITIAL_STATE, action) {
 		case acts.LOADING:
 			return {
 				...state,
+				columnView: { ...state.columnView },
 				loading: true,
 			};
 		case acts.LOADED:
 			return {
 				...state,
+				columnView: { ...state.columnView },
 				loaded: true,
 				loading: false,
 				error: action.payload.error,
@@ -77,9 +105,18 @@ export default function(state = INITIAL_STATE, action) {
 		case acts.ERRORED:
 			return {
 				...state,
+				columnView: { ...state.columnView },
 				loaded: false,
 				loading: false,
 				error: action.payload.error,
+			};
+		case acts.COLVIEWCHANGE:
+			return {
+				...state,
+				columnView: {
+					...state.columnView,
+					[action.payload.column]: action.payload.value,
+				},
 			};
 		default:
 			return state;

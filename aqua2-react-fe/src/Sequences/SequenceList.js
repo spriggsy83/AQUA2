@@ -8,55 +8,12 @@ import DownloadIcon from '@material-ui/icons/CloudDownload';
 import FastaIcon from '@material-ui/icons/ArrowForwardIos';
 import Tooltip from '@material-ui/core/Tooltip';
 import MuiDataTable from 'mui-datatables';
-import { renderNumber, renderLoadingBars } from '../common/renderHelpers';
+import { renderLoadingBars } from '../common/renderHelpers';
 import SeqFilterBar from './components/SeqFilterBar';
 import { createStructuredSelector } from 'reselect';
-import { requestSequences } from './sequences_actions';
+import { requestSequences, changeColumnView } from './sequences_actions';
 import * as selectors from './sequences_selectors';
-
-const columns = [
-	{ name: 'id', label: 'dbID', options: { display: 'false' } },
-	{ name: 'name', label: 'Name', options: { display: 'true', sort: true } },
-	{
-		name: 'length',
-		label: 'Length (bp)',
-		options: {
-			display: 'true',
-			sort: true,
-			customBodyRender: renderNumber,
-		},
-	},
-	{ name: 'groupId', label: 'groupId', options: { display: 'excluded' } },
-	{
-		name: 'groupName',
-		label: 'Group',
-		options: { display: 'true', sort: true },
-	},
-	{ name: 'sampleId', label: 'sampleId', options: { display: 'excluded' } },
-	{
-		name: 'sampleName',
-		label: 'Sample',
-		options: { display: 'true', sort: true },
-	},
-	{ name: 'typeId', label: 'typeId', options: { display: 'excluded' } },
-	{ name: 'typeName', label: 'Type', options: { display: 'true', sort: true } },
-	{
-		name: 'annotNote',
-		label: 'Annotation note',
-		options: { display: 'true', sort: false },
-	},
-	{
-		name: 'extLinkAhref',
-		label: 'External link',
-		options: { display: 'true', sort: false },
-	},
-	{ name: 'extLink', label: 'extLink', options: { display: 'excluded' } },
-	{
-		name: 'extLinkLabel',
-		label: 'extLinkLabel',
-		options: { display: 'excluded' },
-	},
-];
+import { getSequencesColumns } from './sequences_columns';
 
 class ListSequences extends Component {
 	state = {
@@ -144,6 +101,11 @@ class ListSequences extends Component {
 		this.getData({ newPage: 0, newOrderby: `${col} ${dir}` });
 	};
 
+	/** Table column view on/off change **/
+	onColumnViewChange = (col, value) => {
+		this.props.changeColumnView(col, value === 'add' ? 'true' : 'false');
+	};
+
 	/** Table page changed **/
 	onTableChange = (action, tableState) => {
 		const { page, rowsPerPage } = this.props;
@@ -185,13 +147,14 @@ class ListSequences extends Component {
 			serverSide: true,
 			onTableChange: this.onTableChange,
 			onColumnSortChange: this.onColumnSortChange,
+			onColumnViewChange: this.onColumnViewChange,
 			customToolbar: this.renderFilterToolbar,
 			onCellClick: this.onCellClick,
 		};
 	};
 
 	render() {
-		const { sequences, loading, hasloaded } = this.props;
+		const { sequences, columns, loading, hasloaded } = this.props;
 		return (
 			<>
 				{loading && renderLoadingBars()}
@@ -225,6 +188,7 @@ const mapStateToProps = createStructuredSelector({
 	filtersSet: selectors.getFilters,
 	dlURL: selectors.getDownloadUrl,
 	dlFastaURL: selectors.getDownloadFastaUrl,
+	columns: getSequencesColumns,
 });
 
 /**
@@ -234,6 +198,6 @@ export default compose(
 	withRouter,
 	connect(
 		mapStateToProps,
-		{ requestSequences },
+		{ requestSequences, changeColumnView },
 	),
 )(ListSequences);
