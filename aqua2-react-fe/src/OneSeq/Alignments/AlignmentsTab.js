@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Link, withRouter } from 'react-router-dom';
+import { withRouter } from 'react-router-dom';
 import { connect } from 'react-redux';
 import compose from 'recompose/compose';
 import { withStyles } from '@material-ui/core/styles';
@@ -10,9 +10,10 @@ import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import Slider from 'rc-slider';
 import 'rc-slider/assets/index.css';
-import { renderNumber, renderLoadingBars } from '../../common/renderHelpers';
-import { requestAlignments } from './alignments_actions';
+import { renderLoadingBars } from '../../common/renderHelpers';
+import { requestAlignments, changeColumnView } from './alignments_actions';
 import * as selectors from './alignments_selectors';
+import { getAlignmentsColumns } from './alignments_columns';
 
 const createSliderWithTooltip = Slider.createSliderWithTooltip;
 const Range = createSliderWithTooltip(Slider.Range);
@@ -42,135 +43,6 @@ const styles = (theme) => ({
 		flexGrow: 1,
 	},
 });
-
-const columns = [
-	{ name: 'featureType', label: 'Type', options: { sort: true } },
-	{ name: 'featureId', options: { display: 'excluded', download: false } },
-	{ name: 'featureName', label: 'Feature name', options: { sort: true } },
-	{
-		name: 'seqLength',
-		label: 'Length of aligned seq',
-		options: { display: 'false', sort: true, customBodyRender: renderNumber },
-	},
-	{
-		name: 'seqGroupName',
-		label: 'Group of aligned seq',
-		options: { display: 'false', sort: true },
-	},
-	{
-		name: 'seqSampleName',
-		label: 'Sample of aligned seq',
-		options: { display: 'false', sort: true },
-	},
-	{
-		name: 'seqTypeName',
-		label: 'Type of aligned seq',
-		options: { display: 'false', sort: true },
-	},
-	{
-		name: 'alignStart',
-		label: 'Start',
-		options: { display: 'false', sort: true, customBodyRender: renderNumber },
-	},
-	{
-		name: 'alignEnd',
-		label: 'End',
-		options: { display: 'false', sort: true, customBodyRender: renderNumber },
-	},
-	{
-		name: 'alignCoords',
-		label: 'Align Coords',
-		options: { sort: false, download: false },
-	},
-	{
-		name: 'alignStrand',
-		label: 'Strand',
-		options: { display: 'false', sort: true },
-	},
-	{
-		name: 'featureAlignStart',
-		label: 'Start on aligned seq',
-		options: { display: 'false', sort: false, customBodyRender: renderNumber },
-	},
-	{
-		name: 'featureAlignEnd',
-		label: 'End on aligned seq',
-		options: { display: 'false', sort: false, customBodyRender: renderNumber },
-	},
-	{
-		name: 'featureAlignCoords',
-		label: 'Coords on aligned seq',
-		options: { display: 'false', sort: false, download: false },
-	},
-	{
-		name: 'source',
-		label: 'Source',
-		options: { sort: false, download: false },
-	},
-	{
-		name: 'featureSpecies',
-		label: 'Species',
-		options: { display: 'false', sort: true },
-	},
-	{
-		name: 'featureSource',
-		label: 'Data source',
-		options: { display: 'false', sort: true },
-	},
-	{
-		name: 'method',
-		label: 'Method',
-		options: { display: 'false', sort: true },
-	},
-	{ name: 'score', label: 'Score', options: { display: 'false', sort: false } },
-	{
-		name: 'featureAnnot',
-		label: 'Annotation',
-		options: {
-			sort: false,
-			customBodyRender: renderAnnotsCol,
-		},
-	},
-	{
-		name: 'isCdsName',
-		label: 'CDS seq name',
-		options: { display: 'false', sort: false },
-	},
-	{
-		name: 'isProtName',
-		label: 'Protein seq name',
-		options: { display: 'false', sort: false },
-	},
-	{
-		name: 'subParts',
-		label: 'Sub-parts',
-		options: { sort: true, customBodyRender: renderNumber },
-	},
-];
-
-function renderAnnotsCol(colvalue) {
-	var valueTest = /^Has CDS: (\S+), Has Protein: (\S+)$/i.exec(colvalue);
-	if (valueTest) {
-		return (
-			<>
-				{'Has CDS: '}
-				<Link to={'/sequences/' + valueTest[1]}>{valueTest[1]}</Link>
-				{', Has Protein: '}
-				<Link to={'/sequences/' + valueTest[2]}>{valueTest[2]}</Link>
-			</>
-		);
-	}
-	valueTest = /^Has (CDS|Protein): (\S+)$/i.exec(colvalue);
-	if (valueTest) {
-		return (
-			<>
-				Has {valueTest[1]}:&nbsp;
-				<Link to={'/sequences/' + valueTest[2]}>{valueTest[2]}</Link>
-			</>
-		);
-	}
-	return <>{colvalue}</>;
-}
 
 class AlignmentsTab extends Component {
 	state = {
@@ -225,6 +97,11 @@ class AlignmentsTab extends Component {
 	onColumnSortChange = (col, direction) => {
 		var dir = direction.replace(/(asc|desc)ending/, '$1');
 		this.getData({ newPage: 0, newOrderby: `${col} ${dir}` });
+	};
+
+	/** Table column view on/off change **/
+	onColumnViewChange = (col, value) => {
+		this.props.changeColumnView(col, value === 'add' ? 'true' : 'false');
 	};
 
 	/** Table page changed **/
@@ -317,13 +194,13 @@ class AlignmentsTab extends Component {
 			serverSide: true,
 			onTableChange: this.onTableChange,
 			onColumnSortChange: this.onColumnSortChange,
-			//customToolbar: this.renderSubSeqControl,
+			onColumnViewChange: this.onColumnViewChange,
 			onCellClick: this.onCellClick,
 		};
 	};
 
 	render() {
-		const { classes, loading, hasloaded, alignments } = this.props;
+		const { classes, loading, hasloaded, alignments, columns } = this.props;
 		return (
 			<div className={classes.root}>
 				<Paper className={classes.row}>{this.renderSubSeqControl()}</Paper>
@@ -357,6 +234,7 @@ const mapStateToProps = createStructuredSelector({
 	rowsPerPage: selectors.getTableRows,
 	orderby: selectors.getTableSort,
 	filtersSet: selectors.getFilters,
+	columns: getAlignmentsColumns,
 });
 
 /**
@@ -367,6 +245,6 @@ export default compose(
 	withStyles(styles),
 	connect(
 		mapStateToProps,
-		{ requestAlignments },
+		{ requestAlignments, changeColumnView },
 	),
 )(AlignmentsTab);

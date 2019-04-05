@@ -42,11 +42,13 @@ export default function(state = INITIAL_STATE, action) {
 		case acts.LOADING:
 			return {
 				...state,
+				columnView: { ...state.columnView },
 				loading: true,
 			};
 		case acts.LOADED:
 			return {
 				...state,
+				columnView: { ...state.columnView },
 				loaded: true,
 				loading: false,
 				error: action.payload.error,
@@ -62,6 +64,7 @@ export default function(state = INITIAL_STATE, action) {
 		case acts.ERRORED:
 			return {
 				...state,
+				columnView: { ...state.columnView },
 				loaded: false,
 				loading: false,
 				error: action.payload.error,
