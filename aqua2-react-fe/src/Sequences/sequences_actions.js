@@ -78,3 +78,15 @@ export const requestSequences = ({
 		}
 	};
 };
+
+export const changeColumnView = (col, value) => {
+	return function(dispatch, getState) {
+		dispatch({
+			type: acts.COLVIEWCHANGE,
+			payload: {
+				column: col,
+				value: value,
+			},
+		});
+	};
+};
