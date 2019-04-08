@@ -15,12 +15,14 @@ function alignmentsQuery({
   sort = null,
 } = {}) {
   if (id) {
-    var first = true;
+    let first = true;
+    // Each sub-selection can be individually limited by:
+    let partlimit = limit * (offset + 1);
     const query = SQL``;
     if (!filter || filter.parentseqs) {
       first = false;
       query.append(SQL`
-SELECT 
+( SELECT 
   'parentSeq' AS featureType,
   align.id AS featureId,
   pseq.name AS featureName,
@@ -70,6 +72,10 @@ AND ( ( align.cStart BETWEEN ${qStart} AND ${qEnd} )
       query.append(SQL`
 GROUP BY align.id
 `);
+      if (sort) {
+        query.append(SQL` ORDER BY `).append(sort);
+      }
+      query.append(SQL` LIMIT ${partlimit} )`);
     }
     if (!filter || filter.childseqs) {
       if (first) {
@@ -79,7 +85,7 @@ GROUP BY align.id
 UNION ALL `);
       }
       query.append(SQL`
-SELECT 
+( SELECT 
   'childSeq' AS featureType,
   align.id AS featureId,
   cseq.name AS featureName,
@@ -129,6 +135,10 @@ AND ( ( align.pStart BETWEEN ${qStart} AND ${qEnd} )
       query.append(SQL`
 GROUP BY align.id
 `);
+      if (sort) {
+        query.append(SQL` ORDER BY `).append(sort);
+      }
+      query.append(SQL` LIMIT ${partlimit} )`);
     }
     if (!filter || filter.alignedannots) {
       if (first) {
@@ -138,7 +148,7 @@ GROUP BY align.id
 UNION ALL `);
       }
       query.append(SQL`
-SELECT 
+( SELECT 
   'alignedAnnot' AS featureType,
   align.id AS featureId,
   align.name AS featureName,
@@ -180,6 +190,10 @@ AND ( ( align.start BETWEEN ${qStart} AND ${qEnd} )
       query.append(SQL`
 GROUP BY align.id
 `);
+      if (sort) {
+        query.append(SQL` ORDER BY `).append(sort);
+      }
+      query.append(SQL` LIMIT ${partlimit} )`);
     }
     if (!filter || filter.genepreds) {
       if (first) {
@@ -189,7 +203,7 @@ GROUP BY align.id
 UNION ALL `);
       }
       query.append(SQL`
-SELECT 
+( SELECT 
   'genePrediction' AS featureType,
   genepred.id AS featureId,
   genepred.name AS featureName,
@@ -234,8 +248,13 @@ AND ( ( genepred.start BETWEEN ${qStart} AND ${qEnd} )
       }
       query.append(SQL`
 GROUP BY genepred.id
+`);
+      if (sort) {
+        query.append(SQL` ORDER BY `).append(sort);
+      }
+      query.append(SQL` LIMIT ${partlimit} )
 UNION ALL 
-SELECT 
+( SELECT 
   'isGenePrediction' AS featureType,
   genepred.id AS featureId,
   refseq.name AS featureName,
@@ -279,8 +298,13 @@ LEFT JOIN genepart as subparts
   ON genepred.id=subparts.fromGenePred
 WHERE genepred.isCdsSequence = ${id}
 GROUP BY genepred.id
+`);
+      if (sort) {
+        query.append(SQL` ORDER BY `).append(sort);
+      }
+      query.append(SQL` LIMIT ${partlimit} )
 UNION ALL 
-SELECT 
+( SELECT 
   'isGenePrediction' AS featureType,
   genepred.id AS featureId,
   refseq.name AS featureName,
@@ -325,6 +349,10 @@ LEFT JOIN genepart as subparts
 WHERE genepred.isProtSequence = ${id}
 GROUP BY genepred.id
 `);
+      if (sort) {
+        query.append(SQL` ORDER BY `).append(sort);
+      }
+      query.append(SQL` LIMIT ${partlimit} )`);
     }
     if (!filter || filter.repeats) {
       if (first) {
@@ -334,7 +362,7 @@ GROUP BY genepred.id
 UNION ALL `);
       }
       query.append(SQL`
-SELECT 
+( SELECT 
   'repeat' AS featureType,
   repannot.id AS featureId,
   NULL AS featureName,
@@ -371,8 +399,14 @@ AND ( ( repannot.start BETWEEN ${qStart} AND ${qEnd} )
   OR ( repannot.start < ${qStart} AND repannot.end > ${qEnd} ) )
 `);
       }
+      query.append(SQL` GROUP BY repannot.id
+`);
+      if (sort) {
+        query.append(SQL` ORDER BY `).append(sort);
+      }
+      query.append(SQL` LIMIT ${partlimit} )`);
     }
-
+    // Final orderby and limit is outside unioned sub-selects
     if (sort) {
       query.append(SQL` ORDER BY `).append(sort);
     }
@@ -398,7 +432,7 @@ FROM (
     if (!filter || filter.parentseqs) {
       first = false;
       countQuery.append(SQL`
-  SELECT count(id) AS counts 
+  SELECT count(*) AS counts 
   FROM seqrelation as align
   WHERE align.childSeq = ${id}
 `);
@@ -418,7 +452,7 @@ FROM (
 UNION ALL `);
       }
       countQuery.append(SQL`
-  SELECT count(id) AS counts 
+  SELECT count(*) AS counts 
   FROM seqrelation as align
   WHERE align.parentSeq = ${id}
 `);
@@ -438,7 +472,7 @@ UNION ALL `);
 UNION ALL `);
       }
       countQuery.append(SQL`
-  SELECT count(id) AS counts 
+  SELECT count(*) AS counts 
   FROM alignedannot as align
   WHERE align.onSequence = ${id}
 `);
@@ -458,7 +492,7 @@ UNION ALL `);
 UNION ALL `);
       }
       countQuery.append(SQL`
-  SELECT count(id) AS counts 
+  SELECT count(*) AS counts 
   FROM geneprediction as genepred
   WHERE genepred.onSequence = ${id}
 `);
@@ -472,11 +506,11 @@ UNION ALL `);
 
       countQuery.append(SQL`
 UNION ALL 
-  SELECT count(id) AS counts 
+  SELECT count(*) AS counts 
   FROM geneprediction as genepred
   WHERE genepred.isCdsSequence = ${id}
 UNION ALL 
-  SELECT count(id) AS counts 
+  SELECT count(*) AS counts 
   FROM geneprediction as genepred
   WHERE genepred.isProtSequence = ${id}
 `);
@@ -489,7 +523,7 @@ UNION ALL
 UNION ALL `);
       }
       countQuery.append(SQL`
-  SELECT count(id) AS counts 
+  SELECT count(*) AS counts 
   FROM repeatannot as repannot
   WHERE repannot.onSequence = ${id}
 `);

@@ -14,8 +14,10 @@ function searchQuery({
 	sort = null,
 } = {}) {
 	if (searchTerm) {
+		// Each sub-selection can be individually limited by:
+		let partlimit = limit ? limit * (offset + 1) : null;
 		const query = SQL`
-SELECT
+( SELECT
   'sequence' AS resultType,
   seq.name AS seqName,
   seq.length AS seqLength,
@@ -51,11 +53,18 @@ JOIN seqtype AS stype
 		} else if (searchType === 'annots') {
 			query.append(SQL`WHERE seq.annotNote LIKE ${searchTerm}`);
 		}
+		if (sort) {
+			query.append(SQL` ORDER BY `).append(sort);
+		}
+		if (limit) {
+			query.append(SQL` LIMIT ${partlimit}`);
+		}
+		query.append(SQL` )`);
 
 		if (searchType !== 'seqs') {
 			query.append(SQL`
 UNION ALL
-SELECT
+( SELECT
   'alignedannot' AS resultType,
   seq.name AS seqName,
   seq.length AS seqLength,
@@ -86,8 +95,15 @@ JOIN seqtype AS stype
 WHERE aln.name LIKE ${searchTerm} 
 OR aln.annotation LIKE ${searchTerm}
 `);
+			if (sort) {
+				query.append(SQL` ORDER BY `).append(sort);
+			}
+			if (limit) {
+				query.append(SQL` LIMIT ${partlimit}`);
+			}
+			query.append(SQL` )`);
 		}
-
+		// Final orderby and limit is outside unioned sub-selects
 		if (sort) {
 			query.append(SQL` ORDER BY `).append(sort);
 		}

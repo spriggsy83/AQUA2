@@ -13,8 +13,10 @@ function searchQuery({
 	sort = null,
 } = {}) {
 	if (searchTerm) {
+		// Each sub-selection can be individually limited by:
+		let partlimit = limit * (offset + 1);
 		const query = SQL`
-SELECT
+( SELECT
   'sequence' AS resultType,
   seq.id AS seqId,
   seq.name AS seqName,
@@ -55,11 +57,15 @@ JOIN seqtype AS stype
 		} else if (searchType === 'annots') {
 			query.append(SQL`WHERE seq.annotNote LIKE ${searchTerm}`);
 		}
+		if (sort) {
+			query.append(SQL` ORDER BY `).append(sort);
+		}
+		query.append(SQL` LIMIT ${partlimit} )`);
 
 		if (searchType !== 'seqs') {
 			query.append(SQL`
 UNION ALL
-SELECT
+( SELECT
   'alignedannot' AS resultType,
   seq.id AS seqId,
   seq.name AS seqName,
@@ -95,8 +101,12 @@ JOIN seqtype AS stype
 WHERE aln.name LIKE ${searchTerm} 
 OR aln.annotation LIKE ${searchTerm}
 `);
+			if (sort) {
+				query.append(SQL` ORDER BY `).append(sort);
+			}
+			query.append(SQL` LIMIT ${partlimit} )`);
 		}
-
+		// Final orderby and limit is outside unioned sub-selects
 		if (sort) {
 			query.append(SQL` ORDER BY `).append(sort);
 		}
@@ -113,7 +123,7 @@ function searchCountQuery({ searchTerm = null, searchType = null } = {}) {
 		const countQuery = SQL`
 SELECT sum(counts) AS total
 FROM (
-  SELECT count(id) AS counts 
+  SELECT count(*) AS counts 
   FROM sequence AS seq
 `;
 		if (!searchType || searchType === 'all') {
@@ -128,7 +138,7 @@ FROM (
 		if (searchType !== 'seqs') {
 			countQuery.append(SQL`
 UNION ALL
-  SELECT count(id) AS counts 
+  SELECT count(*) AS counts 
   FROM alignedannot AS aln
   WHERE aln.name LIKE ${searchTerm} 
   OR aln.annotation LIKE ${searchTerm}

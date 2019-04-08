@@ -53,7 +53,7 @@ WHERE 1 = 1
 function sequenceCountQuery({ filterSQL = null } = {}) {
 	const countQuery = SQL`
 SELECT 
-  count(id) AS total
+  count(*) AS total
 FROM sequence
 WHERE 1 = 1
 `;
