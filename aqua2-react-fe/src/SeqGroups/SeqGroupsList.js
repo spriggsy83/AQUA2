@@ -7,6 +7,7 @@ import { renderNumber, renderLoadingBars } from '../common/renderHelpers';
 import { createStructuredSelector } from 'reselect';
 import { requestSeqGroups } from './seqgroups_actions';
 import { getSeqGroupsTable, getHasLoaded } from './seqgroups_selectors';
+import { requestSequences } from '../Sequences/sequences_actions';
 
 const columns = [
 	{
@@ -80,9 +81,13 @@ class ListSeqGroups extends Component {
 	}
 
 	onRowClick = (rowData, rowMeta) => {
-		this.props.history.push(
-			this.props.location.pathname + '/' + encodeURIComponent(rowData[1]),
-		);
+		this.props.requestSequences({
+			page: 0,
+			filtersSet: {
+				seqgroup: [rowData[0]],
+			},
+		});
+		this.props.history.push('/Sequences');
 	};
 
 	render() {
@@ -128,6 +133,6 @@ export default compose(
 	withRouter,
 	connect(
 		mapStateToProps,
-		{ requestSeqGroups },
+		{ requestSeqGroups, requestSequences },
 	),
 )(ListSeqGroups);
