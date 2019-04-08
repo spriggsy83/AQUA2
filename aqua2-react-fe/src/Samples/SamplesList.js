@@ -7,6 +7,7 @@ import { renderNumber, renderLoadingBars } from '../common/renderHelpers';
 import { createStructuredSelector } from 'reselect';
 import { requestSamples } from './samples_actions';
 import { getSamplesTable, getHasLoaded } from './samples_selectors';
+import { requestSequences } from '../Sequences/sequences_actions';
 
 const columns = [
 	{
@@ -58,9 +59,13 @@ class ListSamples extends Component {
 	}
 
 	onRowClick = (rowData, rowMeta) => {
-		this.props.history.push(
-			this.props.location.pathname + '/' + encodeURIComponent(rowData[1]),
-		);
+		this.props.requestSequences({
+			page: 0,
+			filtersSet: {
+				sample: [rowData[0]],
+			},
+		});
+		this.props.history.push('/Sequences');
 	};
 
 	render() {
@@ -107,6 +112,6 @@ export default compose(
 	withRouter,
 	connect(
 		mapStateToProps,
-		{ requestSamples },
+		{ requestSamples, requestSequences },
 	),
 )(ListSamples);
