@@ -24,6 +24,7 @@ const styles = (theme) => ({
 		marginTop: theme.spacing.unit * 2,
 	},
 	rightjust: { display: 'flex', justifyContent: 'flex-end' },
+	noHover: { pointerEvents: 'none' },
 });
 
 class ListTotals extends Component {
@@ -39,21 +40,33 @@ class ListTotals extends Component {
 		return (
 			<List>
 				{totals.map(function(total, index) {
-					return (
-						<Link
-							to={total[2]}
-							style={{ textDecoration: 'none' }}
-							key={index + '-totlink'}
-						>
-							<ListItem button>
+					if (total[2]) {
+						return (
+							<Link
+								to={total[2]}
+								style={{ textDecoration: 'none' }}
+								key={index + '-totlink'}
+							>
+								<ListItem button>
+									<ListItemText primary={total[0]} />
+									<ListItemText
+										className={classes.rightjust}
+										primary={total[1]}
+									/>
+								</ListItem>
+							</Link>
+						);
+					} else {
+						return (
+							<ListItem key={index + '-totitem'} className={classes.noHover}>
 								<ListItemText primary={total[0]} />
 								<ListItemText
 									className={classes.rightjust}
 									primary={total[1]}
 								/>
 							</ListItem>
-						</Link>
-					);
+						);
+					}
 				})}
 			</List>
 		);
