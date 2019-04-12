@@ -40,6 +40,23 @@ const styles = (theme) => ({
   searchbox: {
     justifyContent: 'flex-end',
   },
+  pageContainer: {
+    position: 'relative',
+    minHeight: '85vh',
+  },
+  contentWrap: {
+    paddingBottom: '80px',
+  },
+  footer: {
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
+    height: '80px',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'flex-end',
+    alignItems: 'flex-end',
+  },
 });
 
 class SideMenu extends Component {
@@ -100,7 +117,16 @@ class SideMenu extends Component {
         </Drawer>
         <main className={classes.content}>
           <div className={classes.toolbar} />
-          {this.props.children}
+          <div className={classes.pageContainer}>
+            <div className={classes.contentWrap}>{this.props.children}</div>
+            <footer className={classes.footer}>
+              <Typography variant="caption">
+                AQUA: sequence Annotations QUery Assistant
+              </Typography>
+              <Typography variant="caption">By Andrew Spriggs, 2019</Typography>
+              <Typography variant="caption">andrew.spriggs@csiro.au</Typography>
+            </footer>
+          </div>
         </main>
       </div>
     );
