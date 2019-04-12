@@ -304,12 +304,22 @@ CREATE TABLE IF NOT EXISTS `readsonsnp` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 
+--
+-- Database project details
+--
+CREATE TABLE IF NOT EXISTS `project` (
+  integrity_keeper ENUM('') NOT NULL PRIMARY KEY,
+  `shortTitle` varchar(255) NOT NULL,
+  `longTitle` varchar(255) NOT NULL,
+  `description` varchar(255),
+  `contacts` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
 
 --
--- Totals table, not used by Sails/aqua1
--- Added for Express/aqua2
+-- Totals table
 --
-CREATE TABLE IF NOT EXISTS `totals`(
+CREATE TABLE IF NOT EXISTS `totals` (
   integrity_keeper ENUM('') NOT NULL PRIMARY KEY,
   `sample` int unsigned NOT NULL,
   `seqgroup` int unsigned NOT NULL,
@@ -319,6 +329,9 @@ CREATE TABLE IF NOT EXISTS `totals`(
   `geneprediction` int unsigned NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
+--
+-- Run to update totals table
+--
 INSERT INTO totals 
   (sample, 
   seqgroup, 
