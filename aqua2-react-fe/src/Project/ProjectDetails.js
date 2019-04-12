@@ -21,7 +21,10 @@ const styles = (theme) => ({
 		paddingLeft: theme.spacing.unit * 2,
 		paddingRight: theme.spacing.unit * 2,
 	},
-	noBorder: { borderBottom: 'none' },
+	noBorder: {
+		borderBottom: 'none',
+		verticalAlign: 'top',
+	},
 	noHover: { pointerEvents: 'none' },
 });
 

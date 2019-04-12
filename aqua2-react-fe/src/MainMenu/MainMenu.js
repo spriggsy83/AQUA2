@@ -59,7 +59,7 @@ const styles = (theme) => ({
   },
 });
 
-class SideMenu extends Component {
+class MainMenu extends Component {
   render() {
     const { classes } = this.props;
     const title = process.env.REACT_APP_TITLE || null;
@@ -133,9 +133,9 @@ class SideMenu extends Component {
   }
 }
 
-SideMenu.propTypes = {
+MainMenu.propTypes = {
   classes: PropTypes.object.isRequired,
   theme: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles, { withTheme: true })(SideMenu);
+export default withStyles(styles, { withTheme: true })(MainMenu);
