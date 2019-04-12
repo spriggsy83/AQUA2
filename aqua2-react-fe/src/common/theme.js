@@ -6,35 +6,43 @@ export const theme = createMuiTheme({
 		useNextVariants: true,
 	},
 	palette: {
-		primary: { main: green['A400'] },
-		secondary: { main: green['A100'] },
+		primary: { main: process.env.REACT_APP_PRIMARY_COLOUR || green['A400'] },
+		secondary: { main: process.env.REACT_APP_SECOND_COLOUR || green['A100'] },
 	},
 	overrides: {
 		MuiListItem: {
 			root: {
 				'&:hover': {
-					backgroundColor: green['A100'] + ' !important',
+					backgroundColor:
+						(process.env.REACT_APP_SECOND_COLOUR || green['A100']) +
+						' !important',
 				},
 			},
 		},
 		MUIDataTableBodyRow: {
 			root: {
 				'&:hover': {
-					backgroundColor: green['A100'] + ' !important',
+					backgroundColor:
+						(process.env.REACT_APP_SECOND_COLOUR || green['A100']) +
+						' !important',
 				},
 			},
 		},
 		MuiTableRow: {
 			root: {
 				'&:hover': {
-					backgroundColor: green['A100'] + ' !important',
+					backgroundColor:
+						(process.env.REACT_APP_SECOND_COLOUR || green['A100']) +
+						' !important',
 				},
 			},
 		},
 		MuiButtonBase: {
 			root: {
 				'&:hover': {
-					backgroundColor: green['A100'] + ' !important',
+					backgroundColor:
+						(process.env.REACT_APP_SECOND_COLOUR || green['A100']) +
+						' !important',
 				},
 			},
 		},

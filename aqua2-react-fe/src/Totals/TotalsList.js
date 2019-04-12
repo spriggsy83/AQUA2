@@ -1,27 +1,30 @@
-import React, { Component } from "react";
-import { renderLoadingBars } from "../common/renderHelpers";
-import List from "@material-ui/core/List";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemText from "@material-ui/core/ListItemText";
-import Paper from "@material-ui/core/Paper";
-import Typography from "@material-ui/core/Typography";
-import { Link } from "react-router-dom";
-import { connect } from "react-redux";
-import compose from "recompose/compose";
-import { withStyles } from "@material-ui/core/styles";
-import { createStructuredSelector } from "reselect";
-import { requestTotals } from "./totals_actions";
-import { getTotalsTable, getHasLoaded } from "./totals_selectors";
+import React, { Component } from 'react';
+import { renderLoadingBars } from '../common/renderHelpers';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemText from '@material-ui/core/ListItemText';
+import Paper from '@material-ui/core/Paper';
+import Typography from '@material-ui/core/Typography';
+import { Link } from 'react-router-dom';
+import { connect } from 'react-redux';
+import compose from 'recompose/compose';
+import { withStyles } from '@material-ui/core/styles';
+import { createStructuredSelector } from 'reselect';
+import { requestTotals } from './totals_actions';
+import { getTotalsTable, getHasLoaded } from './totals_selectors';
+import { ProjectDetails } from '../Project';
 
-const styles = theme => ({
+const styles = (theme) => ({
 	narrowlist: {
 		width: 500,
 		paddingTop: theme.spacing.unit * 2,
 		paddingBottom: theme.spacing.unit * 2,
 		paddingLeft: theme.spacing.unit * 2,
-		paddingRight: theme.spacing.unit * 2
+		paddingRight: theme.spacing.unit * 2,
+		marginTop: theme.spacing.unit * 2,
 	},
-	rightjust: { display: "flex", justifyContent: "flex-end" }
+	rightjust: { display: 'flex', justifyContent: 'flex-end' },
+	noHover: { pointerEvents: 'none' },
 });
 
 class ListTotals extends Component {
@@ -37,21 +40,33 @@ class ListTotals extends Component {
 		return (
 			<List>
 				{totals.map(function(total, index) {
-					return (
-						<Link
-							to={total[2]}
-							style={{ textDecoration: "none" }}
-							key={index + "-totlink"}
-						>
-							<ListItem button>
+					if (total[2]) {
+						return (
+							<Link
+								to={total[2]}
+								style={{ textDecoration: 'none' }}
+								key={index + '-totlink'}
+							>
+								<ListItem button>
+									<ListItemText primary={total[0]} />
+									<ListItemText
+										className={classes.rightjust}
+										primary={total[1]}
+									/>
+								</ListItem>
+							</Link>
+						);
+					} else {
+						return (
+							<ListItem key={index + '-totitem'} className={classes.noHover}>
 								<ListItemText primary={total[0]} />
 								<ListItemText
 									className={classes.rightjust}
 									primary={total[1]}
 								/>
 							</ListItem>
-						</Link>
-					);
+						);
+					}
 				})}
 			</List>
 		);
@@ -62,12 +77,15 @@ class ListTotals extends Component {
 
 		if (loaded) {
 			return (
-				<Paper className={classes.narrowlist} elevation={1}>
-					<Typography variant="h6">
-						Sequence/Annotation data loaded:
-					</Typography>
-					{this.renderTotalsList()}
-				</Paper>
+				<>
+					<ProjectDetails />
+					<Paper className={classes.narrowlist} elevation={1}>
+						<Typography variant="h6">
+							Sequence/Annotation data loaded:
+						</Typography>
+						{this.renderTotalsList()}
+					</Paper>
+				</>
 			);
 		} else {
 			return renderLoadingBars();
@@ -80,7 +98,7 @@ class ListTotals extends Component {
  */
 const mapStateToProps = createStructuredSelector({
 	loaded: getHasLoaded,
-	totals: getTotalsTable
+	totals: getTotalsTable,
 });
 
 /**
@@ -90,6 +108,6 @@ export default compose(
 	withStyles(styles),
 	connect(
 		mapStateToProps,
-		{ requestTotals }
-	)
+		{ requestTotals },
+	),
 )(ListTotals);

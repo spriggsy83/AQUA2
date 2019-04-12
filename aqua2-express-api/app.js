@@ -12,6 +12,7 @@ var swaggerDocument = YAML.load('./docs/swagger.yaml');
 
 var indexRouter = require('./routes/index');
 var totalsRouter = require('./routes/totals');
+var projectRouter = require('./routes/project');
 var samplesRouter = require('./routes/samples');
 var seqgroupsRouter = require('./routes/seqgroups');
 var seqtypesRouter = require('./routes/seqtypes');
@@ -37,6 +38,7 @@ app.use('/api/v2/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use('/', indexRouter);
 app.use('/api/v2/totals', totalsRouter);
+app.use('/api/v2/project', projectRouter);
 app.use('/api/v2/samples', samplesRouter);
 app.use('/api/v2/seqgroups', seqgroupsRouter);
 app.use('/api/v2/seqtypes', seqtypesRouter);
